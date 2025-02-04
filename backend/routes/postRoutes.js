@@ -1,4 +1,3 @@
-// backend/routes/postRoutes.js
 
 import express from "express";
 import {
