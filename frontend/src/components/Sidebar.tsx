@@ -9,6 +9,7 @@ const Sidebar = () => {
           <li><Link to="/subscriptions">Subscriptions</Link></li>
           <li><Link to="/settings">Settings</Link></li>
           <li><Link to="/create-post">Create Post</Link></li>
+          <li><Link to="/profile">Profile</Link></li>
         </ul>
       </nav>
     </aside>

@@ -7,6 +7,8 @@ import communityRoutes from "./routes/communityRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import cookieParser from "cookie-parser";
+import session from "express-session";
+import passport from "./config/passport.js";
 
 dotenv.config();
 
@@ -24,6 +26,16 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/communities", communityRoutes);

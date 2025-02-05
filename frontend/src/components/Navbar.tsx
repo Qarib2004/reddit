@@ -1,13 +1,18 @@
 import { Link } from "react-router-dom";
 import { useGetUserQuery, useLogoutMutation } from "../redux/apiSlice";
-
+import { useEffect } from "react";
 const Navbar = () => {
-  const { data: user } = useGetUserQuery();
+  const { data: user,refetch } = useGetUserQuery();
   const [logout] = useLogoutMutation();
 
   const handleLogout = async () => {
-    await logout();
+    await logout().unwrap();
+    window.location.reload(); 
   };
+  useEffect(() => {
+    refetch(); 
+  }, [refetch]);
+  
 
   return (
     <nav>

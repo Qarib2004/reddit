@@ -12,12 +12,18 @@
   "dependencies": {
     "@mui/icons-material": "^6.4.2",
     "@mui/material": "^6.4.2",
+    "@radix-ui/react-toast": "^1.2.5",
     "@reduxjs/toolkit": "^2.5.1",
+    "@shadcn/ui": "^0.0.4",
     "axios": "^1.7.9",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.474.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.5.1",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.1.5"
+    "react-router-dom": "^7.1.5",
+    "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

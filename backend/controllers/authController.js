@@ -43,7 +43,8 @@ export const register = async (req, res) => {
     });
 
     await user.save();
-    await sendVerificationEmail(user);
+    const emailToken = jwt.sign({ id: user._id }, process.env.EMAIL_SECRET, { expiresIn: "1d" });
+    await sendVerificationEmail(user,emailToken);
     
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Strict" });
@@ -73,7 +74,7 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Strict" });
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "Strict" });
     res.json({ message: "Login completed", user });
   } catch (error) {
     res.status(500).json({ message: "Error server", error });

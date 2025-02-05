@@ -8,7 +8,7 @@ const DashboardLayout = () => {
       <div style={{ display: 'flex' }}>
         <Sidebar />
         <main style={{ flex: 1, padding: '20px' }}>
-          <Outlet /> {/* Вместо <Routes>, чтобы рендерить вложенные маршруты */}
+          <Outlet />
         </main>
       </div>
     </PrivateRoute>

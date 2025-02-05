@@ -45,12 +45,20 @@ router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
+
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    successRedirect: process.env.CLIENT_URL,
-    failureRedirect: "/login",
-  })
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    if (!req.user) {
+      return res.redirect("/login");
+    }
+
+   
+    res.cookie("token", req.user.token, { httpOnly: true, secure: false, sameSite: "Strict" });
+
+    res.redirect("http://localhost:5173");
+  }
 );
 
 router.get(

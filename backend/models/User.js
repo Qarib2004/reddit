@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const UserSchema = new mongoose.Schema(
   {
     username: {
@@ -16,8 +17,12 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.googleId && !this.facebookId; 
+      },
     },
+    googleId: { type: String, unique: true, sparse: true }, 
+    facebookId: { type: String, unique: true, sparse: true }, 
     karma: {
       type: Number,
       default: 0,
@@ -36,5 +41,4 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-export default mongoose.model("User",UserSchema)
+export default mongoose.model("User", UserSchema);
