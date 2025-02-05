@@ -126,3 +126,24 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ message: "Error updating profile", error });
   }
 };
+
+export const sendForgotPasswordSMS = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString(); 
+    user.resetCode = resetCode;
+    user.resetCodeExpires = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    await sendSMSCode(phoneNumber, resetCode);
+    res.json({ message: "Reset code sent to your phone" });
+  } catch (error) {
+    res.status(500).json({ message: "Error sending SMS", error });
+  }
+};

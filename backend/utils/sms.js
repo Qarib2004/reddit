@@ -15,9 +15,9 @@ export const sendSMSCode = async (phoneNumber, code) => {
       from: process.env.TWILIO_PHONE_NUMBER,
       to: phoneNumber,
     });
-    console.log(`SMS with code ${code} sent to ${phoneNumber}`);
+    console.log(`📩 SMS with code ${code} sent to ${phoneNumber}`);
   } catch (error) {
-    console.error("Error sending SMS:", error);
+    console.error("❌ Error sending SMS:", error);
     throw new Error("Error sending SMS");
   }
 };

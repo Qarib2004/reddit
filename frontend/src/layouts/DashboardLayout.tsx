@@ -1,13 +1,13 @@
-import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import PrivateRoute from '../components/PrivateRoute';
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import PrivateRoute from "../components/PrivateRoute";
 
 const DashboardLayout = () => {
   return (
     <PrivateRoute>
-      <div style={{ display: 'flex' }}>
+      <div className="flex min-h-screen">
         <Sidebar />
-        <main style={{ flex: 1, padding: '20px' }}>
+        <main className="flex-1 p-6 bg-gray-100">
           <Outlet />
         </main>
       </div>

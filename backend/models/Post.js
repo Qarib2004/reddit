@@ -9,16 +9,24 @@ const PostSchema = new mongoose.Schema(
     },
     content: {
       type: String,
+      required: function () {
+        return this.postType === "text"; 
+      },
+      default: "",
+    },
+    postType: {
+      type: String,
+      enum: ["text", "image", "link"],
       required: true,
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     community: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Community',
+      ref: "Community",
       required: true,
     },
     upvotes: {
@@ -29,16 +37,16 @@ const PostSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    comments: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Comment',
-    }],
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
   },
   { timestamps: true }
 );
+
+
 
 export default mongoose.model('Post', PostSchema);

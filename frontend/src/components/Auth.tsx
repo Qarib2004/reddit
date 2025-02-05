@@ -1,58 +1,70 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   useLoginMutation,
   useRegisterMutation,
   useGetUserQuery,
 } from "../redux/apiSlice";
-import { Mail, Lock, User, Loader2 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { Mail, Lock, User } from "lucide-react";
+import { useFormik } from "formik";
+import * as yup from "yup";
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [login] = useLoginMutation();
   const [register] = useRegisterMutation();
   const { refetch } = useGetUserQuery();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        const result = await login({
-          email: formData.email,
-          password: formData.password,
-        }).unwrap();
-        if (result) {
-          toast.success("Login successful!");
-          await refetch();
-          navigate("/");
+  const validationSchema = yup.object({
+    username: yup
+      .string()
+      .when("isLogin", {
+        is: false,
+        then: (schema) => schema.required("Username is required"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup
+      .string()
+      .min(6, "Password must be at least 6 characters long")
+      .required("Password is required"),
+  });
+  
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      password: "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      try {
+        if (isLogin) {
+          const result = await login({
+            email: values.email,
+            password: values.password,
+          }).unwrap();
+          if (result) {
+            toast.success("Login successful!");
+            await refetch();
+            navigate("/");
+          }
+        } else {
+          const result = await register(values).unwrap();
+          if (result) {
+            toast.success("Registration successful! Check your email to confirm.");
+          }
         }
-      } else {
-        const result = await register(formData).unwrap();
-        if (result) {
-          toast.success("Registration successful! Check your email to confirm.");
-        }
+      } catch (error:any) {
+        toast.error(error.data?.message || "An error occurred");
       }
-    } catch (error: any) {
-      toast.error(error.data?.message || "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -75,7 +87,7 @@ const Auth = () => {
         <div className="relative my-3 text-center">
           <span className="text-gray-500 text-sm bg-white px-2">or</span>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={formik.handleSubmit} className="space-y-3">
           {!isLogin && (
             <div className="relative">
               <User className="absolute left-3 top-3 text-gray-500" size={20} />
@@ -83,11 +95,11 @@ const Auth = () => {
                 type="text"
                 name="username"
                 placeholder="Username"
-                value={formData.username}
-                onChange={handleChange}
-                required
+                value={formik.values.username}
+                onChange={formik.handleChange}
                 className="border rounded-md px-10 py-2 w-full"
               />
+              {formik.errors.username && <p className="text-red-500 text-sm">{formik.errors.username}</p>}
             </div>
           )}
           <div className="relative">
@@ -96,11 +108,11 @@ const Auth = () => {
               type="email"
               name="email"
               placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
+              value={formik.values.email}
+              onChange={formik.handleChange}
               className="border rounded-md px-10 py-2 w-full"
             />
+            {formik.errors.email && <p className="text-red-500 text-sm">{formik.errors.email}</p>}
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-3 text-gray-500" size={20} />
@@ -108,24 +120,20 @@ const Auth = () => {
               type="password"
               name="password"
               placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
+              value={formik.values.password}
+              onChange={formik.handleChange}
               className="border rounded-md px-10 py-2 w-full"
             />
+            {formik.errors.password && <p className="text-red-500 text-sm">{formik.errors.password}</p>}
           </div>
+          <Link to="/forgot-password" className="text-blue-600 text-sm hover:underline block text-right">
+            Forgot password?
+          </Link>
           <button
             type="submit"
             className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            disabled={loading}
           >
-            {loading ? (
-              <Loader2 className="animate-spin" size={18} />
-            ) : isLogin ? (
-              "Login"
-            ) : (
-              "Sign Up"
-            )}
+            {isLogin ? "Login" : "Sign Up"}
           </button>
         </form>
         <p className="text-sm text-center mt-4">

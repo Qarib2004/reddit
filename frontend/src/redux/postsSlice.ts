@@ -8,19 +8,24 @@ export const postsApi = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
-    getPosts: builder.query<Post[], void>({
-      query: () => "/posts",
+    getPosts: builder.query<Post[], string | void>({ 
+      query: (sort = "hot") => `/posts?sort=${sort}`, 
     }),
     getPostById: builder.query<Post, string>({
       query: (id) => `/posts/${id}`,
     }),
-    createPost: builder.mutation<Post, { title: string; content: string; communityId: string }>({
+    createPost: builder.mutation<Post, { title: string; content?: string; community: string }>({
       query: (postData) => ({
         url: "/posts",
         method: "POST",
         body: postData,
+        headers: {
+          "Content-Type": "application/json",
+        },
       }),
     }),
+    
+    
     updatePost: builder.mutation<Post, { id: string; title: string; content: string }>({
       query: ({ id, ...postData }) => ({
         url: `/posts/${id}`,

@@ -1,28 +1,51 @@
 import Post from "../models/Post.js";
 import { validationResult } from "express-validator";
+import mongoose from "mongoose";
+
+
 
 export const createPost = async (req, res) => {
+ 
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { title, content, community } = req.body;
+  const { title, content, community, postType } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(community)) {
+   
+    return res.status(400).json({ message: "Invalid community ID" });
+  }
 
   try {
-    const post = new Post({
+    const newPost = {
       title,
-      content,
-      community,
+      postType,
+      community: new mongoose.Types.ObjectId(community),
       author: req.user.id,
-    });
+    };
 
+    if (postType === "text") {
+      newPost.content = content || "";
+    }
+
+    const post = new Post(newPost);
     await post.save();
+
+    console.log("✅ Пост создан:", post);
     res.status(201).json({ message: "Post created", post });
   } catch (error) {
+    console.error("❌ Ошибка сервера:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+
+
 
 export const getPosts = async (req, res) => {
   try {

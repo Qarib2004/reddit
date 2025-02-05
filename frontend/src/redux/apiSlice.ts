@@ -34,7 +34,10 @@ export const apiSlice = createApi({
         body: userData,
       }),
     }),
+    getAdminStats: builder.query<{ stats: { totalUsers: number; totalPosts: number; totalComments: number; totalCommunities: number } }, void>({
+      query: () => "/auth/admin",
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetUserQuery, useUpdateUserMutation } = apiSlice;
+export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetUserQuery, useUpdateUserMutation, useGetAdminStatsQuery} = apiSlice;

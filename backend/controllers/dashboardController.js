@@ -31,3 +31,23 @@ export const getUserDashboard = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+export const getAdminDashboard = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalPosts = await Post.countDocuments();
+    const totalComments = await Comment.countDocuments();
+    const totalCommunities = await Community.countDocuments();
+
+    res.json({
+      stats: {
+        totalUsers,
+        totalPosts,
+        totalComments,
+        totalCommunities,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
