@@ -10,6 +10,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import CreatePost from "./pages/CreatePost";
 import Settings from "./pages/Settings";
 import Subscriptions from "./pages/Subscriptions";
+import CreateCommunity from "./pages/CreateCommunity";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
+        
       </Route>
 
       <Route path="/" element={<DashboardLayout />}>
@@ -29,6 +31,7 @@ const App = () => {
         <Route path="subscriptions" element={<Subscriptions />}/>
         <Route path="settings" element={<Settings />}/>
         <Route path="create-post" element={<CreatePost />} />
+        <Route path="create-community" element={<CreateCommunity />} />
       </Route>
     </Routes>
   );

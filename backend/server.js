@@ -3,6 +3,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import feedRoutes from "./routes/feedRoutes.js";
+import interestsRoutes from "./routes/interestsRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+import voteRoutes from "./routes/voteRoutes.js";
 import communityRoutes from "./routes/communityRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
@@ -42,6 +48,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/communities", communityRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/categories",categoryRoutes );
+app.use("/api/dashboards",dashboardRoutes );
+app.use("/api/feeds",feedRoutes );
+app.use("/api/interests",interestsRoutes );
+app.use("/api/subscriptions",subscriptionRoutes );
+app.use("/api/votes",voteRoutes );
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -39,6 +39,13 @@ const Sidebar = () => {
 
       <div className="mt-6 space-y-4 border-t pt-4">
         <h3 className="text-sm font-bold text-gray-500 uppercase">Communities</h3>
+        <Link
+          to="/create-community"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100"
+        >
+          <Plus size={20} />
+          Create Community
+        </Link>
         {isLoading ? (
           <p className="text-sm text-gray-600">Loading...</p>
         ) : (
