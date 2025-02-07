@@ -36,7 +36,7 @@ function Topics({
     <div className="divide-y divide-gray-200">
       {categories.map((category: Category) => (
         <CategorySection
-          key={category.id}
+          key={category._id}
           categories={category}
           selectedTopics={selectedTopics}
           onTopicSelect={onTopicSelect}

@@ -42,6 +42,12 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    selectedTopics: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Topic", 
+      }
+    ],
   },
   { timestamps: true }
 );

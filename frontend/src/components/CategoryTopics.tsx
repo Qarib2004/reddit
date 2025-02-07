@@ -1,15 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
 
 export interface Category {
-  id: string;
+  _id: string;
   title: string;
   icon?: string;
   topics: Topic[];
 }
 
 export interface Topic {
-  id: string;
+  _id: string;
   name: string;
+ 
 }
 
 export function CategorySection({
@@ -21,9 +22,6 @@ export function CategorySection({
   onTopicSelect: (topic: Topic) => void;
   selectedTopics: Topic[];
 }) {
-  const isSelected = (topicId: string) =>
-    selectedTopics.some((topic) => topic.id === topicId);
-
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
@@ -33,23 +31,20 @@ export function CategorySection({
         </h2>
       </div>
       <div className="flex flex-wrap gap-2">
-        {categories.topics.length > 0 ? (
-          categories.topics.map((topic) => (
-            <button
-              key={topic.id ?? uuidv4()} 
-              onClick={() => onTopicSelect(topic)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                isSelected(topic.id)
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              {topic.name}
-            </button>
-          ))
-        ) : (
-          <p className="text-sm text-gray-500">No topics available</p>
-        )}
+        {categories.topics.map((topic) => (
+        
+          <button
+            key={topic._id ?? uuidv4()}
+            onClick={() => onTopicSelect(topic)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+              selectedTopics.some((t) => t._id === topic._id)
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+            }`}
+          >
+            {topic.name}
+          </button>
+        ))}
       </div>
     </div>
   );

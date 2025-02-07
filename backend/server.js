@@ -12,6 +12,7 @@ import voteRoutes from "./routes/voteRoutes.js";
 import communityRoutes from "./routes/communityRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
+import userRoutes from "./routes/userRoutes.js"
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "./config/passport.js";
@@ -54,6 +55,7 @@ app.use("/api/feeds",feedRoutes );
 app.use("/api/interests",interestsRoutes );
 app.use("/api/subscriptions",subscriptionRoutes );
 app.use("/api/votes",voteRoutes );
+app.use("/api/users",userRoutes );
 
 
 const PORT = process.env.PORT || 5000;

@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import { sendVerificationEmail } from "../utils/email.js";
 import { sendSMSCode } from "../utils/sms.js";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 export const getMe = async (req, res) => {
@@ -43,10 +44,21 @@ export const register = async (req, res) => {
     });
 
     await user.save();
-    const emailToken = jwt.sign({ id: user._id }, process.env.EMAIL_SECRET, { expiresIn: "1d" });
-    await sendVerificationEmail(user,emailToken);
-    
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    const emailToken = jwt.sign(
+      { id: user._id },
+      process.env.EMAIL_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    await sendVerificationEmail(user, emailToken);
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "Strict" });
     res.status(201).json({ message: "User registered. Check your email to confirm email.", user });
   } catch (error) {
@@ -73,59 +85,74 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Incorrect credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "Strict" });
     res.json({ message: "Login completed", user });
   } catch (error) {
-    res.status(500).json({ message: "Error server", error });
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
 export const logout = (req, res) => {
   res.clearCookie("token");
-  res.json({ message: "The exit is complete" });
+  res.json({ message: "Logout successful" });
 };
 
 export const verifyEmail = async (req, res) => {
   try {
+   
+
     const { token } = req.query;
     if (!token) {
+      console.log("No token provided.");
       return res.status(400).json({ message: "Missing verification token" });
     }
 
     const decoded = jwt.verify(token, process.env.EMAIL_SECRET);
+   
+
     const user = await User.findById(decoded.id);
     if (!user) {
+     
       return res.status(404).json({ message: "User not found" });
     }
 
     user.isVerified = true;
     await user.save();
 
+   
     res.json({ message: "Email successfully verified" });
   } catch (error) {
+    console.error("Error verifying email:", error);
     res.status(500).json({ message: "Error confirming email", error });
   }
 };
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email } = req.body;
+    const { username, email, selectedTopics } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.username = username || user.username;
-    user.email = email || user.email;
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (selectedTopics) user.selectedTopics = selectedTopics; 
 
     await user.save();
-    res.json({ message: "Profile updated successfully" });
+    res.json({ message: "Profile updated successfully", user });
   } catch (error) {
     res.status(500).json({ message: "Error updating profile", error });
   }
 };
+
 
 export const sendForgotPasswordSMS = async (req, res) => {
   try {
@@ -136,7 +163,7 @@ export const sendForgotPasswordSMS = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString(); 
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetCode = resetCode;
     user.resetCodeExpires = Date.now() + 10 * 60 * 1000;
     await user.save();

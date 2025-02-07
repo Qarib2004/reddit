@@ -42,7 +42,7 @@ const CreatePost = () => {
       toast.success("Post created successfully!");
       navigate("/");
     } catch (error: any) {
-      console.error("❌ Ошибка при создании поста:", error);
+      console.error("Error:", error);
       toast.error(error.data?.message || "Failed to create post");
     }
   };

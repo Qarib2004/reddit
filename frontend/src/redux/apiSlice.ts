@@ -1,43 +1,60 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const apiSlice = createApi({
-  reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl:  "http://localhost:5000/api", credentials: 'include' }),
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api", credentials: "include" }),
   endpoints: (builder) => ({
     login: builder.mutation<{ token: string }, { email: string; password: string }>({
       query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
+        url: "/auth/login",
+        method: "POST",
         body: credentials,
       }),
     }),
     register: builder.mutation<{ message: string }, { username: string; email: string; password: string }>({
       query: (userData) => ({
-        url: '/auth/register',
-        method: 'POST',
+        url: "/auth/register",
+        method: "POST",
         body: userData,
       }),
     }),
     logout: builder.mutation<{ message: string }, void>({
       query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
+        url: "/auth/logout",
+        method: "POST",
       }),
     }),
-    getUser: builder.query<{ id: string; username: string; email: string; karma: number }, void>({
-      query: () => '/auth/me',
+    getUser: builder.query<{ id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[];  }, void>({
+      query: () => "/auth/me",
+      
     }),
-    updateUser: builder.mutation<{ message: string }, { username: string; email: string }>({
+    updateUser: builder.mutation<{ message: string }, { username?: string; email?: string;selectedTopics?: string[]}>({
       query: (userData) => ({
-        url: '/auth/update',
-        method: 'PUT',
+        url: "/auth/update",
+        method: "PUT",
         body: userData,
+        
       }),
     }),
     getAdminStats: builder.query<{ stats: { totalUsers: number; totalPosts: number; totalComments: number; totalCommunities: number } }, void>({
       query: () => "/auth/admin",
     }),
+    selectTopics: builder.mutation<{ message: string }, { topics: string[] }>({
+      query: (data) => ({
+        url: "/users/select-topics",
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetUserQuery, useUpdateUserMutation, useGetAdminStatsQuery} = apiSlice;
+export const { 
+  useLoginMutation, 
+  useRegisterMutation, 
+  useLogoutMutation, 
+  useGetUserQuery, 
+  useUpdateUserMutation, 
+  useGetAdminStatsQuery,
+  useSelectTopicsMutation 
+} = apiSlice;

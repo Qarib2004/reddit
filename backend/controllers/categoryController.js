@@ -1,16 +1,30 @@
 import Category from "../models/Category.js";
+import Topic from "../models/Topic.js";
 
 export const createCategories = async (req, res) => {
-  const { categories } = req.body; 
+  const { categories } = req.body;
 
   try {
     for (const category of categories) {
+      const topicIds = [];
+
+      for (const topicName of category.topics) {
+        let topic = await Topic.findOne({ name: topicName });
+
+        if (!topic) {
+          topic = await Topic.create({ name: topicName });
+        }
+
+        topicIds.push(topic._id);
+      }
+
       await Category.create({
         title: category.title,
         icon: category.icon,
-        topics: category.topics.map((topic) => ({ name: topic })),
+        topics: topicIds, 
       });
     }
+
     res.status(201).json({ message: "Categories added successfully!" });
   } catch (error) {
     console.error("Error adding categories:", error);
@@ -20,15 +34,15 @@ export const createCategories = async (req, res) => {
 
 
 export const getCategories = async (req, res) => {
-    try {
-      const categories = await Category.find().populate("topics");
-      res.status(200).json(categories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      res.status(500).json({ message: "Failed to fetch categories", error });
-    }
-  };
-  
+  try {
+    const categories = await Category.find().populate("topics", "name");
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ message: "Failed to fetch categories", error });
+  }
+};
+
 
 
 export const getCategoryById = async (req, res) => {

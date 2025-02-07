@@ -11,9 +11,12 @@ import CreatePost from "./pages/CreatePost";
 import Settings from "./pages/Settings";
 import Subscriptions from "./pages/Subscriptions";
 import CreateCommunity from "./pages/CreateCommunity";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
+   <>
+   <ToastContainer />
     <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Home />} />
@@ -34,6 +37,7 @@ const App = () => {
         <Route path="create-community" element={<CreateCommunity />} />
       </Route>
     </Routes>
+   </>
   );
 };
 

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useGetCategoriesQuery } from "../redux/categoriesSlice";
-import { useCreateCommunityMutation } from "../redux/communitiesSlice";
+import {
+  useCreateCommunityMutation,
+  useGetCommunitiesQuery,
+} from "../redux/communitiesSlice";
 import { Category, Topic } from "../components/CategoryTopics";
 
 const CreateCommunity = () => {
@@ -16,44 +19,31 @@ const CreateCommunity = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const { refetch } = useGetCommunitiesQuery();
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
+  const handleNext = () => setStep((prev) => Math.min(prev + 1, 4));
+  const handleBack = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const handleTopicSelect = (topic: Topic) => {
     setSelectedTopics((prevTopics) => {
-      
-      const isSelected = prevTopics.some((t) => t.id === topic.id);
-  
+      const isSelected = prevTopics.some((t) => t._id === topic._id);
       if (isSelected) {
-       
-        return prevTopics.filter((t) => t.id !== topic.id);
-      } else {
-       
-        if (prevTopics.length < 3) {
-          return [...prevTopics, topic];
-        }
-        return prevTopics;
+        return prevTopics.filter((t) => t._id !== topic._id);
       }
+      return prevTopics.length < 3 ? [...prevTopics, topic] : prevTopics;
     });
   };
-  
-  
 
   const onSubmit = async (data: any) => {
     if (step === 4) {
       const finalData = {
         ...data,
-        topics: selectedTopics.map((t) => t.id),
+        topics: selectedTopics.map((topic) => topic._id),
       };
       try {
         await createCommunity(finalData).unwrap();
         toast.success("Community created successfully!");
+        refetch();
       } catch (error: any) {
         toast.error(`Failed to create community: ${error.message}`);
       }
@@ -66,10 +56,14 @@ const CreateCommunity = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-bold text-center mb-4">
-          {step === 1 && "Tell us about your community"}
-          {step === 2 && "What kind of community is this?"}
-          {step === 3 && "Style your community"}
-          {step === 4 && "Add topics"}
+          {
+            [
+              "Tell us about your community",
+              "What kind of community is this?",
+              "Style your community",
+              "Add topics",
+            ][step - 1]
+          }
         </h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {step === 1 && (
@@ -78,8 +72,9 @@ const CreateCommunity = () => {
                 Community Name *
               </label>
               <input
-                type="text"
-                {...register("name", { required: "Community name is required" })}
+                {...register("name", {
+                  required: "Community name is required",
+                })}
                 className="w-full border rounded-md px-4 py-2"
                 placeholder="Enter community name"
               />
@@ -112,23 +107,21 @@ const CreateCommunity = () => {
               <label className="block text-sm font-bold mb-2">
                 Community Type *
               </label>
-              <div className="space-y-2">
-                {["Public", "Restricted", "Private", "Mature (18+)"].map(
-                  (type) => (
-                    <label key={type} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value={type}
-                        {...register("type", {
-                          required: "Community type is required",
-                        })}
-                        className="form-radio"
-                      />
-                      <span>{type}</span>
-                    </label>
-                  )
-                )}
-              </div>
+              {["Public", "Restricted", "Private", "Mature (18+)"].map(
+                (type) => (
+                  <label key={type} className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      value={type}
+                      {...register("type", {
+                        required: "Community type is required",
+                      })}
+                      className="form-radio"
+                    />
+                    <span>{type}</span>
+                  </label>
+                )
+              )}
               {errors.type && (
                 <p className="text-red-500 text-sm">
                   {String(errors.type.message)}
@@ -162,26 +155,33 @@ const CreateCommunity = () => {
 
           {step === 4 && (
             <div>
-              <label className="block text-sm font-bold mb-2">Add topics *</label>
+              <label className="block text-sm font-bold mb-2">
+                Add topics *
+              </label>
               {isLoading ? (
                 <p>Loading topics...</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category: Category) => (
-                    <div key={category.id} className="mb-4">
-                      <h3 className="text-gray-700 font-bold">
-                        {category.title}
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
+                    <div key={category._id} className="mb-4">
+                      <div className="flex items-center gap-2">
+                      
+                        <span className="text-lg">{category.icon}</span>
+                        <h3 className="text-gray-700 font-bold">
+                          {category.title}
+                        </h3>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {category.topics.map((topic: Topic) => (
                           <button
-                            key={topic.id}
+                            key={topic._id}
                             type="button"
                             onClick={() => handleTopicSelect(topic)}
-                            className={`px-4 py-2 rounded-full ${
-                              selectedTopics.some((t) => t.id === topic.id)
+                            className={`px-4 py-2 rounded-full transition-colors ${
+                              selectedTopics.some((t) => t._id === topic._id)
                                 ? "bg-blue-500 text-white"
-                                : "bg-gray-100 text-gray-600"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                           >
                             {topic.name}
@@ -192,11 +192,18 @@ const CreateCommunity = () => {
                   ))}
                 </div>
               )}
+
+              
               {selectedTopics.length === 0 && (
                 <p className="text-red-500 text-sm mt-2">
                   Select at least one topic
                 </p>
               )}
+
+              
+              <p className="text-gray-600 text-sm mt-2">
+                Selected topics: {selectedTopics.length}/3
+              </p>
             </div>
           )}
 
@@ -212,12 +219,18 @@ const CreateCommunity = () => {
             )}
             <button
               type="submit"
-              className={`${
+              className={`text-white px-4 py-2 rounded-md ${
                 isCreating ? "bg-gray-400" : "bg-blue-500"
-              } text-white px-4 py-2 rounded-md`}
-              disabled={isCreating}
+              }`}
+              disabled={
+                isCreating || (step === 4 && selectedTopics.length === 0)
+              }
             >
-              {step === 4 ? (isCreating ? "Creating..." : "Create Community") : "Next"}
+              {step === 4
+                ? isCreating
+                  ? "Creating..."
+                  : "Create Community"
+                : "Next"}
             </button>
           </div>
         </form>
