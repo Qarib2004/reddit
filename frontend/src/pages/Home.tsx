@@ -3,6 +3,7 @@ import { useGetPostsQuery } from "../redux/postsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import { Link } from "react-router-dom";
 import SelectTopicModal from "../components/SelectTopicModal";
+import PostItem from "../components/PostItem"; 
 
 const Home = () => {
   const [sort, setSort] = useState("hot");
@@ -41,21 +42,7 @@ const Home = () => {
           </div>
 
           {Array.isArray(posts) && posts.length > 0 ? (
-            posts.map((post: any) => (
-              <div key={post._id} className="bg-white shadow-md p-4 mb-4 rounded-md">
-                <Link to={`/community/${post.community?._id}`} className="text-blue-500 text-sm font-bold">
-                  r/{post.community?.name || "Unknown"}
-                </Link>
-
-                <h3 className="text-lg font-semibold mt-1">{post.title}</h3>
-                <p className="text-gray-600 text-sm">{post.content.slice(0, 150)}...</p>
-
-                <div className="flex justify-between items-center mt-2 text-gray-500 text-sm">
-                  <span>👍 {post.upvotes || 0} Upvotes</span>
-                  <span>💬 {post.comments?.length || 0} Comments</span>
-                </div>
-              </div>
-            ))
+            posts.map((post: any) => <PostItem key={post._id} post={post} />) 
           ) : (
             <p className="text-center">No posts found.</p>
           )}

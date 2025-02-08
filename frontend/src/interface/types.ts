@@ -1,5 +1,5 @@
 export interface Post {
-    id: string;
+    _id: string;
     title: string;
     content: string;
     author: string;
@@ -18,7 +18,7 @@ export interface Post {
   }
   
   export interface Community {
-    id: string;
+    _id: string;
     name: string;
     description: string;
     createdAt: string;
