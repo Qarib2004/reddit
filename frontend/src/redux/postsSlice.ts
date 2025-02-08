@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Post } from "../interface/types";
-
 export const postsApi = createApi({
   reducerPath: "postsApi",
   baseQuery: fetchBaseQuery({
@@ -8,8 +7,8 @@ export const postsApi = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
-    getPosts: builder.query<Post[], string | void>({ 
-      query: (sort = "hot") => `/posts?sort=${sort}`, 
+    getPosts: builder.query<Post[], string | void>({
+      query: (sort = "hot") => `/posts?sort=${sort}`,
     }),
     getPostById: builder.query<Post, string>({
       query: (id) => `/posts/${id}`,
@@ -24,8 +23,6 @@ export const postsApi = createApi({
         },
       }),
     }),
-    
-    
     updatePost: builder.mutation<Post, { id: string; title: string; content: string }>({
       query: ({ id, ...postData }) => ({
         url: `/posts/${id}`,
@@ -39,9 +36,15 @@ export const postsApi = createApi({
         method: "DELETE",
       }),
     }),
-    likePost: builder.mutation<{ message: string }, string>({
+    likePost: builder.mutation<{ message: string; upvotes: number }, string>({
       query: (id) => ({
         url: `/posts/${id}/like`,
+        method: "POST",
+      }),
+    }),
+    dislikePost: builder.mutation<{ message: string; downvotes: number }, string>({
+      query: (id) => ({
+        url: `/posts/${id}/dislike`,
         method: "POST",
       }),
     }),
@@ -55,4 +58,5 @@ export const {
   useUpdatePostMutation,
   useDeletePostMutation,
   useLikePostMutation,
+  useDislikePostMutation,
 } = postsApi;

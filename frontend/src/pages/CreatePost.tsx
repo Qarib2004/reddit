@@ -9,25 +9,25 @@ import { stripHtml } from "../utils/cutTagHtml";
 import { clodudinaryLink } from "../utils/cloudinaryLink";
 
 const CreatePost = () => {
+
+ 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [postType, setPostType] = useState("text");
   const [file, setFile] = useState<File | null>(null);
   const [community, setCommunity] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [createPost, { isLoading }] = useCreatePostMutation();
   const { data: communities = [] } = useGetCommunitiesQuery();
   const navigate = useNavigate();
 
- 
   const handleFileUpload = async () => {
     if (!file) return null;
 
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "cloudinary-animals-app");
+    formData.append("upload_preset",  "cloudinary-animals-app");
 
     try {
       const res = await fetch(clodudinaryLink, {
@@ -36,32 +36,19 @@ const CreatePost = () => {
       });
       const data = await res.json();
       setUploading(false);
-
-      if (data.secure_url) {
-        setPreviewUrl(data.secure_url); 
-        return data.secure_url;
-      } else {
-        throw new Error("Ошибка загрузки файла в Cloudinary");
-      }
+      return data.secure_url;
     } catch (error) {
-      console.error("Ошибка загрузки файла:", error);
-      toast.error("Ошибка загрузки файла");
+      toast.error("Image loading error");
       setUploading(false);
       return null;
     }
   };
 
- 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) {
-      toast.error("Title is required");
-      return;
-    }
-
-    if (!community.trim()) {
-      toast.error("Please select a community");
+    if (!title.trim() || !community.trim()) {
+      toast.error("Title and community are required");
       return;
     }
 
@@ -71,37 +58,24 @@ const CreatePost = () => {
       if (!mediaUrl) return;
     }
 
-    const postData: {
-      title: string;
-      content?: string;
-      community: string;
-      postType: string;
-      mediaUrl?: string;
-    } = {
+    const postData = {
       title,
       community,
       postType,
+      content: postType === "text" ? stripHtml(content.trim()) : "",
+      mediaUrl, 
     };
 
-    if (postType === "text") {
-      postData.content = stripHtml(content.trim()) || " ";
-    }
-
-    if (mediaUrl) {
-      postData.mediaUrl = mediaUrl;
-    }
-
-    console.log("Post Data:", postData);
     try {
       await createPost(postData).unwrap();
       toast.success("Post created successfully!");
       navigate("/");
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error(error.data?.message || "Failed to create post");
     }
   };
 
+ 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-bold mb-4">Create Post</h2>

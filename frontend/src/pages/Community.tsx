@@ -23,7 +23,7 @@ const Community = () => {
       ) : (
         <ul>
           {posts.map((post) => (
-            <li key={post.id} className="border-b py-2">
+            <li key={post._id} className="border-b py-2">
               <h4 className="font-bold">{post.title}</h4>
               <p className="text-gray-600">{post.content}</p>
             </li>

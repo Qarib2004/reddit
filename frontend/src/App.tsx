@@ -12,6 +12,8 @@ import Settings from "./pages/Settings";
 import Subscriptions from "./pages/Subscriptions";
 import CreateCommunity from "./pages/CreateCommunity";
 import { ToastContainer } from "react-toastify";
+import PostPage from "./pages/PostPage";
+import Community from "./pages/Community";
 
 const App = () => {
   return (
@@ -21,8 +23,8 @@ const App = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Home />} />
         <Route path="auth" element={<Auth />} />
-        <Route path="community/:id" />
-        <Route path="post/:id" />
+        <Route path="community/:id" element={<Community/>}/>
+       
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
@@ -35,6 +37,8 @@ const App = () => {
         <Route path="settings" element={<Settings />}/>
         <Route path="create-post" element={<CreatePost />} />
         <Route path="create-community" element={<CreateCommunity />} />
+        <Route path="/post/:id" element={<PostPage />} />
+
       </Route>
     </Routes>
    </>
