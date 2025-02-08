@@ -19,6 +19,10 @@ const PostSchema = new mongoose.Schema(
       enum: ["text", "image", "link"],
       required: true,
     },
+    mediaUrl: {
+      type: String, 
+      default: "", 
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -46,7 +50,5 @@ const PostSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-
 
 export default mongoose.model('Post', PostSchema);
