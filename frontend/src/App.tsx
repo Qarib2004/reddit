@@ -14,6 +14,7 @@ import CreateCommunity from "./pages/CreateCommunity";
 import { ToastContainer } from "react-toastify";
 import PostPage from "./pages/PostPage";
 import Community from "./pages/Community";
+import Saved from "./pages/Saved";
 
 const App = () => {
   return (
@@ -38,7 +39,7 @@ const App = () => {
         <Route path="create-post" element={<CreatePost />} />
         <Route path="create-community" element={<CreateCommunity />} />
         <Route path="/post/:id" element={<PostPage />} />
-
+        <Route path="/saved" element={<Saved />} />
       </Route>
     </Routes>
    </>

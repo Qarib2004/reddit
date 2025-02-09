@@ -19,15 +19,29 @@ import {
   Facebook,
   Send,
   Users,
+  Bookmark
 } from "lucide-react";
-import { useGetUserQuery, useUpdateUserMutation } from "../redux/apiSlice";
+import { useGetUserQuery, useSavePostMutation, useUpdateUserMutation } from "../redux/apiSlice";
 
 const PostItem = ({ post }: { post: any }) => {
   const [likePost] = useLikePostMutation();
   const [dislikePost] = useDislikePostMutation();
   const [joinCommunity] = useJoinCommunityMutation();
   const { data: comments } = useGetCommentsQuery(post._id);
-  const { data: user } = useGetUserQuery();
+  const { data: user ,refetch} = useGetUserQuery();
+  const [savePost] = useSavePostMutation();
+  if (!user) return null;
+
+  const isSaved = user.savedPosts?.includes(post._id);
+
+  const handleSavePost = async () => {
+    try {
+      await savePost(post._id).unwrap();
+      refetch(); 
+    } catch (error) {
+      console.error("Error saving post:", error);
+    }
+  };
   const userId = user?._id;
 
   const initialLikes = Array.isArray(post.upvotes) ? post.upvotes.length : 0;
@@ -229,6 +243,10 @@ const PostItem = ({ post }: { post: any }) => {
             <button className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md">
               <MoreHorizontal size={18} />
             </button>
+            <button onClick={handleSavePost} className="text-gray-500 hover:text-blue-500 flex items-center space-x-1 px-2 py-1 rounded-md">
+  <Bookmark size={18} className={isSaved ? "text-blue-500" : "text-gray-400"} />
+  <span className="text-xs">{isSaved ? "Saved" : "Save"}</span>
+</button>
           </div>
         </div>
       </div>

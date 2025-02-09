@@ -46,3 +46,34 @@ export const selectTopics = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+export const savePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const alreadySaved = user.savedPosts.includes(postId);
+
+    if (alreadySaved) {
+    
+      user.savedPosts = user.savedPosts.filter(id => id.toString() !== postId);
+    } else {
+     
+      user.savedPosts.push(postId);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: alreadySaved ? "Post removed from saved" : "Post saved",
+      savedPosts: user.savedPosts,
+    });
+  } catch (error) {
+    console.error("Error saving post:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};

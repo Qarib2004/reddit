@@ -24,7 +24,7 @@ export const apiSlice = createApi({
         method: "POST",
       }),
     }),
-    getUser: builder.query<{ _id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[]; subscriptions?:string[] }, void>({
+    getUser: builder.query<{ _id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[]; subscriptions?:string[],savedPosts?: string[] }, void>({
       query: () => "/auth/me",
       
     }),
@@ -46,6 +46,12 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    savePost: builder.mutation<{ message: string; savedPosts: string[] }, string>({
+      query: (postId) => ({
+        url: `/users/save/${postId}`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -56,5 +62,6 @@ export const {
   useGetUserQuery, 
   useUpdateUserMutation, 
   useGetAdminStatsQuery,
-  useSelectTopicsMutation 
+  useSelectTopicsMutation,
+  useSavePostMutation
 } = apiSlice;

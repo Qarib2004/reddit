@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["user", "moderator", "admin"],
-      default: "user", 
+      default: "user",
     },
     email: {
       type: String,
@@ -23,11 +23,11 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return !this.googleId && !this.facebookId; 
+        return !this.googleId && !this.facebookId;
       },
     },
-    googleId: { type: String, unique: true, sparse: true }, 
-    facebookId: { type: String, unique: true, sparse: true }, 
+    googleId: { type: String, unique: true, sparse: true },
+    facebookId: { type: String, unique: true, sparse: true },
     karma: {
       type: Number,
       default: 0,
@@ -45,9 +45,10 @@ const UserSchema = new mongoose.Schema(
     selectedTopics: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Topic", 
-      }
+        ref: "Topic",
+      },
     ],
+    savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
   },
   { timestamps: true }
 );
