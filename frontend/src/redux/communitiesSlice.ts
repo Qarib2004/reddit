@@ -11,7 +11,7 @@ export const communitiesApi = createApi({
       query: () => "/communities",
     }),
     getCommunityById: builder.query<Community, string>({
-      query: (id) => `/communities/${id}`,
+      query: (_id) => `/communities/${_id}`,
     }),
     createCommunity: builder.mutation<Community, { name: string; description: string }>({
       query: (communityData) => ({
@@ -20,9 +20,9 @@ export const communitiesApi = createApi({
         body: communityData,
       }),
     }),
-    joinCommunity: builder.mutation<{ message: string }, string>({
-      query: (communityId) => ({
-        url: `/communities/${communityId}/join`,
+    joinCommunity: builder.mutation<{ message: string; community: string; subscriptions: string[] }, string>({
+      query: (id) => ({
+        url: `/communities/${id}/join`,
         method: "POST",
       }),
     }),

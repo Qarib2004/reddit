@@ -24,11 +24,11 @@ export const apiSlice = createApi({
         method: "POST",
       }),
     }),
-    getUser: builder.query<{ _id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[];  }, void>({
+    getUser: builder.query<{ _id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[]; subscriptions?:string[] }, void>({
       query: () => "/auth/me",
       
     }),
-    updateUser: builder.mutation<{ message: string }, { username?: string; email?: string;selectedTopics?: string[]}>({
+    updateUser: builder.mutation<{ message: string }, { username?: string; email?: string;selectedTopics?: string[];subscriptions?:string[]}>({
       query: (userData) => ({
         url: "/auth/update",
         method: "PUT",

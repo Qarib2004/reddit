@@ -1,4 +1,5 @@
 import Community from "../models/Community.js";
+import User from "../models/User.js";
 import Category from "../models/Category.js";
 import Topic from "../models/Topic.js";
 import { validationResult } from "express-validator";
@@ -82,18 +83,53 @@ export const getCommunity = async (req, res) => {
   }
 };
 
+
 export const joinCommunity = async (req, res) => {
   try {
-    const community = await Community.findById(req.params.id);
+   
+    const { id } = req.params; 
+    const userId = req.user.id;
+    console.log(`Community ID: ${id}, User ID: ${userId}`);
+
+   
+    const community = await Community.findById(id);
     if (!community) {
+      console.warn(`Community with ID ${id} not found`);
       return res.status(404).json({ message: "Community not found" });
     }
-    if (!community.members.includes(req.user.id)) {
-      community.members.push(req.user.id);
-      await community.save();
+
+  
+    const user = await User.findById(userId);
+    if (!user) {
+      console.warn(`User with ID ${userId} not found`);
+      return res.status(404).json({ message: "User not found" });
     }
-    res.json({ message: "You have joined the community", community });
+
+    
+    const isMember = community.members.includes(userId);
+    console.log(`User is already a member: ${isMember}`);
+    if (isMember) {
+      console.warn(`User ${userId} is already a member of community ${id}`);
+      return res.status(400).json({ message: "Already a member" });
+    }
+
+   
+    community.members.push(userId);
+    await community.save();
+
+    
+    user.subscriptions.push(community._id);
+    await user.save();
+
+    console.log(`User ${userId} successfully joined community ${id}`);
+    res.status(200).json({ 
+      message: "Joined community successfully", 
+      community: community._id,
+      subscriptions: user.subscriptions
+    });
+
   } catch (error) {
-    res.status(500).json(error.message);
+    console.error("Error joining community:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 };

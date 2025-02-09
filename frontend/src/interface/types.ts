@@ -32,8 +32,8 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   
-  upvotes: string[]; // ✅ Массив ID пользователей, которые лайкнули
-  downvotes: string[]; // ✅ Массив ID пользователей, которые дизлайкнули
+  upvotes: string[]; 
+  downvotes: string[]; 
   
   comments: Comment[]; 
 }
@@ -53,4 +53,5 @@ export interface Post {
     createdAt: string;
     membersCount: number;
   }
+  
   
