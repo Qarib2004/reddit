@@ -33,14 +33,8 @@ const PostSchema = new mongoose.Schema(
       ref: "Community",
       required: true,
     },
-    upvotes: {
-      type: Number,
-      default: 0,
-    },
-    downvotes: {
-      type: Number,
-      default: 0,
-    },
+    upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -5,7 +5,8 @@ import {
   getPost,
   deletePost,
   likePost,
-  dislikePost
+  dislikePost,
+  searchPosts
 } from "../controllers/postController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -31,11 +32,12 @@ router.post(
 );
 
 router.get("/", getPosts);
+router.get("/search/:query", searchPosts);
 router.get("/:id", getPost);
 router.delete("/:id", authMiddleware, deletePost);
 
-router.post("/:id/like", authMiddleware, likePost); 
-router.post("/:id/dislike", authMiddleware, dislikePost); 
+router.post("/:id/upvotes", authMiddleware, likePost); 
+router.post("/:id/downvotes", authMiddleware, dislikePost); 
 
 
 router.post(

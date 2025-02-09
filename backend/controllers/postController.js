@@ -3,12 +3,7 @@ import { validationResult } from "express-validator";
 import mongoose from "mongoose";
 import cloudinary from "../utils/cloudinary.js";
 
-
-
-
-
 export const createPost = async (req, res) => {
- 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -24,14 +19,12 @@ export const createPost = async (req, res) => {
     let uploadedMediaUrl = mediaUrl || null;
 
     if (req.file) {
-     
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "posts",
         resource_type: "auto",
       });
 
       uploadedMediaUrl = result.secure_url;
-     
     }
 
     const newPost = new Post({
@@ -53,18 +46,72 @@ export const createPost = async (req, res) => {
   }
 };
 
-
-
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
+    let { sort = "hot", search = "", community } = req.query;
+    let query = {};
+
+    
+    if (community) {
+      query.community = community;
+    }
+
+   
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    
+    let sortOption = {};
+    switch (sort) {
+      case "new":
+        sortOption = { createdAt: -1 }; 
+        break;
+      case "top":
+        sortOption = { upvotes: -1, downvotes: 1 }; 
+        break;
+      case "best":
+        sortOption = { upvotes: -downvotes };
+        break;
+      default:
+        sortOption = { createdAt: -1 }; 
+    }
+
+    
+    const posts = await Post.find(query)
       .populate("author", "username")
-      .populate("community", "name");
+      .populate("community", "name")
+      .sort(sortOption);
+
     res.json(posts);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+export const searchPosts = async (req, res) => {
+  try {
+    const { query } = req.params;
+    const searchResults = await Post.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { content: { $regex: query, $options: "i" } },
+      ],
+    })
+      .populate("author", "username")
+      .populate("community", "name")
+      .sort({ createdAt: -1 });
+
+    res.json(searchResults);
+  } catch (error) {
+    res.status(500).json({ message: "Error searching posts", error });
+  }
+};
+
 
 export const getPost = async (req, res) => {
   try {
@@ -98,29 +145,39 @@ export const deletePost = async (req, res) => {
   }
 };
 
-
 export const likePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    console.log("Received request to like a post");
 
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    if (!post.upvotes.includes(req.user.id)) {
-      post.upvotes.push(req.user.id);
-      post.downvotes = post.downvotes.filter(
-        (userId) => userId.toString() !== req.user.id
-      );
-      await post.save();
-      return res.json({ message: "Post liked", upvotes: post.upvotes.length });
+    const hasLiked = post.upvotes.includes(userId);
+    const hasDisliked = post.downvotes.includes(userId);
+
+    if (hasLiked) {
+      post.upvotes = post.upvotes.filter((uid) => uid.toString() !== userId);
     } else {
-      post.upvotes = post.upvotes.filter(
-        (userId) => userId.toString() !== req.user.id
-      );
-      await post.save();
-      return res.json({ message: "Like removed", upvotes: post.upvotes.length });
+      post.upvotes.push(userId);
+      if (hasDisliked) {
+        post.downvotes = post.downvotes.filter(
+          (uid) => uid.toString() !== userId
+        );
+      }
     }
+
+    await post.save();
+
+    res.status(200).json({
+      message: "Like updated",
+      upvotes: post.upvotes,
+      downvotes: post.downvotes,
+    });
   } catch (error) {
     console.error("Error liking post:", error);
     res.status(500).json({ message: "Server error", error });
@@ -129,32 +186,35 @@ export const likePost = async (req, res) => {
 
 export const dislikePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const { id } = req.params;
+    const userId = req.user.id;
 
+    const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    if (!post.downvotes.includes(req.user.id)) {
-      post.downvotes.push(req.user.id);
-      post.upvotes = post.upvotes.filter(
-        (userId) => userId.toString() !== req.user.id
-      );
-      await post.save();
-      return res.json({
-        message: "Post disliked",
-        downvotes: post.downvotes.length,
-      });
-    } else {
+    const hasLiked = post.upvotes.includes(userId);
+    const hasDisliked = post.downvotes.includes(userId);
+
+    if (hasDisliked) {
       post.downvotes = post.downvotes.filter(
-        (userId) => userId.toString() !== req.user.id
+        (uid) => uid.toString() !== userId
       );
-      await post.save();
-      return res.json({
-        message: "Dislike removed",
-        downvotes: post.downvotes.length,
-      });
+    } else {
+      post.downvotes.push(userId);
+      if (hasLiked) {
+        post.upvotes = post.upvotes.filter((uid) => uid.toString() !== userId);
+      }
     }
+
+    await post.save();
+
+    res.status(200).json({
+      message: "Dislike updated",
+      upvotes: post.upvotes,
+      downvotes: post.downvotes,
+    });
   } catch (error) {
     console.error("Error disliking post:", error);
     res.status(500).json({ message: "Server error", error });
