@@ -24,7 +24,7 @@ export const apiSlice = createApi({
         method: "POST",
       }),
     }),
-    getUser: builder.query<{ id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[];  }, void>({
+    getUser: builder.query<{ _id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[];  }, void>({
       query: () => "/auth/me",
       
     }),

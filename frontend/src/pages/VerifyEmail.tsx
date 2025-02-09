@@ -14,7 +14,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     if (token) {
       axios
-        .get(`http://localhost:5000/api/auth/verify-email?token=${token}`, { withCredentials: true }) // ✅ Загружаем куки с токеном
+        .get(`http://localhost:5000/api/auth/verify-email?token=${token}`, { withCredentials: true }) 
         .then(async (response) => {
           toast.success("Email verified! Redirecting...");
           setLoading(false);

@@ -7,13 +7,23 @@ export const postsApi = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
-    getPosts: builder.query<Post[], string | void>({
-      query: (sort = "hot") => `/posts?sort=${sort}`,
+    getPosts: builder.query<
+      Post[],
+      { sort?: string; search?: string; community?: string }
+    >({
+      query: ({ sort = "hot", search = "", community = "" }) =>
+        `/posts?sort=${sort}&search=${search}&community=${community}`,
     }),
     getPostById: builder.query<Post, string>({
       query: (id) => `/posts/${id}`,
     }),
-    createPost: builder.mutation<Post, { title: string; content?: string; community: string }>({
+    searchPosts: builder.query<Post[], string>({
+      query: (query) => `/posts/search/${query}`,
+    }),
+    createPost: builder.mutation<
+      Post,
+      { title: string; content?: string; community: string }
+    >({
       query: (postData) => ({
         url: "/posts",
         method: "POST",
@@ -23,7 +33,10 @@ export const postsApi = createApi({
         },
       }),
     }),
-    updatePost: builder.mutation<Post, { id: string; title: string; content: string }>({
+    updatePost: builder.mutation<
+      Post,
+      { id: string; title: string; content: string }
+    >({
       query: ({ id, ...postData }) => ({
         url: `/posts/${id}`,
         method: "PUT",
@@ -36,15 +49,21 @@ export const postsApi = createApi({
         method: "DELETE",
       }),
     }),
-    likePost: builder.mutation<{ message: string; upvotes: number }, string>({
+    likePost: builder.mutation<
+      { message: string; upvotes: string[]; downvotes: string[] },
+      string
+    >({
       query: (id) => ({
-        url: `/posts/${id}/like`,
+        url: `/posts/${id}/upvotes`,
         method: "POST",
       }),
     }),
-    dislikePost: builder.mutation<{ message: string; downvotes: number }, string>({
+    dislikePost: builder.mutation<
+      { message: string; downvotes: string[]; upvotes: string[] },
+      string
+    >({
       query: (id) => ({
-        url: `/posts/${id}/dislike`,
+        url: `/posts/${id}/downvotes`,
         method: "POST",
       }),
     }),
@@ -54,6 +73,7 @@ export const postsApi = createApi({
 export const {
   useGetPostsQuery,
   useGetPostByIdQuery,
+  useSearchPostsQuery,
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,

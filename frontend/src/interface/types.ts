@@ -14,7 +14,8 @@ export interface Post {
   title: string;
   content: string;
   postType: "text" | "image" | "link"; 
-  mediaUrl?: string; 
+  mediaUrl?: string;
+  
   community: {
     _id: string;
     name: string;
@@ -22,16 +23,21 @@ export interface Post {
     createdAt: string;
     membersCount: number;
   }; 
+
   author: {
     _id: string;
     username: string;
   };
+
   createdAt: string;
   updatedAt: string;
-  upvotes: number;
-  downvotes: number;
+  
+  upvotes: string[]; // ✅ Массив ID пользователей, которые лайкнули
+  downvotes: string[]; // ✅ Массив ID пользователей, которые дизлайкнули
+  
   comments: Comment[]; 
 }
+
   export interface Comment {
     _id: string;
     postId: string;
