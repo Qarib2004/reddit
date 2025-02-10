@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCommunity, getCommunities, getCommunity, joinCommunity } from '../controllers/communityController.js';
+import { createCommunity, getCommunities, getCommunity, joinCommunity, leaveCommunity } from '../controllers/communityController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
 
@@ -10,8 +10,8 @@ router.post(
   '/',
   authMiddleware,
   [
-    body('name').notEmpty().withMessage('Название сообщества обязательно'),
-    body('description').notEmpty().withMessage('Описание обязательно')
+    body('name').notEmpty().withMessage('The name of the community is mandatory'),
+    body('description').notEmpty().withMessage('The description is mandatory')
   ],
   createCommunity
 );
@@ -24,5 +24,7 @@ router.get('/:id', getCommunity);
 
 
 router.post('/:id/join', authMiddleware, joinCommunity);
+router.post("/:id/leave", authMiddleware, leaveCommunity);
+
 
 export default router;

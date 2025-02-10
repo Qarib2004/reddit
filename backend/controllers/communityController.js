@@ -133,3 +133,48 @@ export const joinCommunity = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+
+export const leaveCommunity = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const userId = req.user.id; 
+   
+
+    const community = await Community.findById(id);
+    if (!community) {
+      console.warn(` Community ${id} not found`);
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      console.warn(` User ${userId} not found`);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMember = community.members.includes(userId);
+    if (!isMember) {
+      console.warn(` User ${userId} is not a member of Community ${id}`);
+      return res.status(400).json({ message: "You are not a member of this community" });
+    }
+
+    community.members = community.members.filter((member) => member.toString() !== userId);
+    await community.save();
+
+   
+    user.subscriptions = user.subscriptions.filter((sub) => sub.toString() !== id);
+    await user.save();
+
+   
+    res.status(200).json({
+      message: "Left community successfully",
+      community: community._id,
+      subscriptions: user.subscriptions,
+    });
+  } catch (error) {
+    console.error(" Error leaving community:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};

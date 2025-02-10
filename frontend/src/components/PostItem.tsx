@@ -6,7 +6,7 @@ import {
 import {
   useGetCommentsQuery,
 } from "../redux/commentsSlice";
-import { useJoinCommunityMutation } from "../redux/communitiesSlice";
+import { useJoinCommunityMutation, useLeaveCommunityMutation } from "../redux/communitiesSlice";
 import { useState, useEffect } from "react";
 import {
   ArrowBigUp,
@@ -26,6 +26,7 @@ const PostItem = ({ post }: { post: any }) => {
   const [likePost] = useLikePostMutation();
   const [dislikePost] = useDislikePostMutation();
   const [joinCommunity] = useJoinCommunityMutation();
+  const [leaveCommunity] = useLeaveCommunityMutation();
   const { data: comments } = useGetCommentsQuery(post._id);
   const { data: user ,refetch} = useGetUserQuery();
   const [savePost] = useSavePostMutation();
@@ -65,28 +66,31 @@ const PostItem = ({ post }: { post: any }) => {
   const isSubscribed = user?.subscriptions?.includes(post.community._id);
 
 
-  const handleJoinCommunity = async () => {
-    try {
-      const response = await joinCommunity(post.community._id).unwrap();
-      
-     
-      await updateUser({ subscriptions: response.subscriptions }).unwrap();
-      setIsSubscribed(true);
-    } catch (error) {
-      console.error("Error joining community:", error);
-    }
-  };
-
+  
 
   useEffect(() => {
     if (userId && post.community) {
+      setIsSubscribed(user?.subscriptions?.includes(post.community._id) || false);
       setIsLiked(Array.isArray(post.upvotes) && post.upvotes.includes(userId));
       setIsDisliked(Array.isArray(post.downvotes) && post.downvotes.includes(userId));
-  
     
       
     }
   }, [post.upvotes, post.downvotes, userId, user]);
+  const handleToggleSubscription = async () => {
+    try {
+      if (isSubscribed) {
+        await leaveCommunity(post.community._id).unwrap();
+        setIsSubscribed(false);
+      } else {
+        await joinCommunity(post.community._id).unwrap();
+        setIsSubscribed(true);
+      }
+      refetch();
+    } catch (error) {
+      console.error("Error toggling subscription:", error);
+    }
+  };
   
 
   const handleLike = async () => {
@@ -123,7 +127,7 @@ const PostItem = ({ post }: { post: any }) => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(postUrl);
-    alert("🔗 Link copied to clipboard!");
+    alert(" Link copied to clipboard!");
   };
 
   return (
@@ -171,15 +175,15 @@ const PostItem = ({ post }: { post: any }) => {
             </div>
 
 
-            {!isSubscribed ? (
-        <button 
-          onClick={handleJoinCommunity} 
-          className="bg-blue-500 text-white px-3 py-1 rounded-md">
-          Join
-        </button>
-      ) : (
-        <span className="bg-blue-500 text-white px-3 py-1 rounded-md">Member</span>
-      )}
+            <button 
+              onClick={handleToggleSubscription} 
+              className={`px-3 py-1 rounded-md font-medium cursor-pointer ${
+                isSubscribed ? "bg-gray-300 text-black" : "bg-blue-500 text-white"
+              }`}
+            >
+              {isSubscribed ? "Leave" : "Join"}
+            </button>
+      
           </div>
 
           <Link to={`/post/${post._id}`} className="hover:underline">

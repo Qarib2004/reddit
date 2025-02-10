@@ -26,6 +26,13 @@ export const communitiesApi = createApi({
         method: "POST",
       }),
     }),
+    leaveCommunity: builder.mutation<{ message: string; community: string; subscriptions: string[] }, string>({
+      query: (id) => ({
+        url: `/communities/${id}/leave`,
+        method: "POST",
+      }),
+    }),
+    
   }),
 });
 
@@ -34,4 +41,5 @@ export const {
   useGetCommunityByIdQuery,
   useCreateCommunityMutation,
   useJoinCommunityMutation,
+  useLeaveCommunityMutation
 } = communitiesApi;
