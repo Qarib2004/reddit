@@ -13,17 +13,28 @@ export const commentsApi = createApi({
       query: (postId) => `/posts/${postId}/comments`,
     }),
 
-   
     addComment: builder.mutation<Comment, { postId: string; content: string }>({
       query: ({ postId, content }) => ({
         url: `/posts/${postId}/comments`,
         method: "POST",
-        body: { content, post: postId }, 
+        body: { content, post: postId },
       }),
     }),
-    
 
-    
+    likeComment: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[] }, string>({
+      query: (id) => ({
+        url: `/comments/${id}/upvotes`,
+        method: "POST",
+      }),
+    }),
+
+    dislikeComment: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[] }, string>({
+      query: (id) => ({
+        url: `/comments/${id}/downvotes`,
+        method: "POST",
+      }),
+    }),
+
     deleteComment: builder.mutation<{ message: string }, string>({
       query: (commentId) => ({
         url: `/comments/${commentId}`,
@@ -37,4 +48,6 @@ export const {
   useGetCommentsQuery,
   useAddCommentMutation,
   useDeleteCommentMutation,
+  useLikeCommentMutation,
+  useDislikeCommentMutation, 
 } = commentsApi;

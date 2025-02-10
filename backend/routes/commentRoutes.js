@@ -3,6 +3,8 @@ import {
   createComment,
   getCommentsByPost,
   deleteComment,
+  dislikeComment,
+  likeComment
 } from "../controllers/commentController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -21,5 +23,10 @@ router.post(
 router.get("/post/:postId", getCommentsByPost);
 
 router.delete("/:id", authMiddleware, deleteComment);
+
+router.post("/:id/upvotes", authMiddleware, likeComment);
+
+
+router.post("/:id/downvotes", authMiddleware, dislikeComment);
 
 export default router;
