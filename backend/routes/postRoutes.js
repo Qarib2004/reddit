@@ -41,11 +41,10 @@ router.post("/:id/downvotes", authMiddleware, dislikePost);
 
 
 router.post(
-  "/",
+  "/:postId/comments",
   authMiddleware,
   [
     body("content").notEmpty().withMessage("Comment cannot be empty"),
-    body("post").notEmpty().withMessage("Post ID is required"),
   ],
   createComment
 );

@@ -8,16 +8,22 @@ export const commentsApi = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
+   
     getComments: builder.query<Comment[], string>({
       query: (postId) => `/posts/${postId}/comments`,
     }),
+
+   
     addComment: builder.mutation<Comment, { postId: string; content: string }>({
       query: ({ postId, content }) => ({
         url: `/posts/${postId}/comments`,
         method: "POST",
-        body: { content },
+        body: { content, post: postId }, 
       }),
     }),
+    
+
+    
     deleteComment: builder.mutation<{ message: string }, string>({
       query: (commentId) => ({
         url: `/comments/${commentId}`,

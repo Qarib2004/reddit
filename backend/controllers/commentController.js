@@ -1,28 +1,38 @@
 import Comment from "../models/Comment.js";
 import { validationResult } from "express-validator";
+import Post from "../models/Post.js";
 
-export const createComment = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
 
-  const { content, post, parentComment } = req.body;
-
-  try {
-    const comment = new Comment({
-      content,
-      author: req.user.id,
-      post,
-      parentComment: parentComment || null,
-    });
-
-    await comment.save();
-    res.status(201).json({ message: "Comment created", comment });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+  export const createComment = async (req, res) => {
+    
+  
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+  
+    const { content, parentComment } = req.body;
+    const { postId } = req.params;
+  
+    
+  
+    try {
+      const comment = new Comment({
+        content,
+        author: req.user.id,
+        post: postId, 
+        parentComment: parentComment || null,
+      });
+  
+      await comment.save();
+    
+      res.status(201).json({ message: "Comment created", comment });
+    } catch (error) {
+      console.error(" Server error:", error);
+      res.status(500).json({ message: "Server error", error });
+    }
+  };
+  
 
 export const getCommentsByPost = async (req, res) => {
   try {
