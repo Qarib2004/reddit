@@ -7,6 +7,7 @@ import {
   updateUser,
   getMe,
   sendForgotPasswordSMS,
+  updateUserAvatar,
 } from "../controllers/authController.js";
 import { makeModerator } from "../controllers/userController.js";
 import passport from "passport";
@@ -15,6 +16,7 @@ import checkRole from "../middlewares/checkRole.js";
 import { body } from "express-validator";
 import { deletePost } from "../controllers/postController.js";
 import { getAdminDashboard } from "../controllers/dashboardController.js";
+import upload from "../middlewares/uploadMiddleware.js"
 
 const router = express.Router();
 
@@ -46,7 +48,7 @@ router.get("/verify-email", verifyEmail);
 
 router.get("/me", authMiddleware, getMe);
 router.put("/update", authMiddleware, updateUser);
-
+router.put("/update-avatar", authMiddleware, upload.single("avatar"), updateUserAvatar);
 
 router.get(
   "/google",

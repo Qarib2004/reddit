@@ -1,17 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useGetUserQuery, useLogoutMutation } from "../redux/apiSlice";
 import { useState } from "react";
-import { Bell, Plus, Search,  ChevronDown, LogOut } from "lucide-react";
+import { Bell, Plus, Search,  ChevronDown, LogOut,User } from "lucide-react";
 
 const Navbar = () => {
   const { data: user } = useGetUserQuery();
   const [logout] = useLogoutMutation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const location = useLocation();
+  
+ 
+
   const handleLogout = async () => {
     await logout().unwrap();
     window.location.reload(); 
   };
+
+
 
   return (
     <nav className="flex items-center justify-between bg-white px-6 py-3 shadow-md">
@@ -58,11 +64,21 @@ const Navbar = () => {
               <ChevronDown size={16} className="text-gray-500" />
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                 <div className="px-4 py-2">
                   <p className="text-sm font-medium text-gray-700">Hello, {user.username}!</p>
                 </div>
                 <div className="border-t border-gray-100"></div>
+                <Link
+              to={`/profile/${user._id}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-white ${
+                location.pathname === `/profile/${user._id}` && "bg-gray-200"
+              }`}
+            >
+              <User size={20} />
+              My Profile
+            </Link>
+
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-2 w-full text-sm text-red-600 hover:bg-red-50"

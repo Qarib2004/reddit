@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { User } from "../interface/types";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api", credentials: "include" }),
@@ -24,16 +24,19 @@ export const apiSlice = createApi({
         method: "POST",
       }),
     }),
-    getUser: builder.query<{ _id: string; username: string; email: string; karma: number; selectedTopics?: string[], topics?: string[]; subscriptions?:string[],savedPosts?: string[] }, void>({
+    getUser: builder.query<User, void>({
       query: () => "/auth/me",
-      
     }),
-    updateUser: builder.mutation<{ message: string }, { username?: string; email?: string;selectedTopics?: string[];subscriptions?:string[]}>({
+    updateUser: builder.mutation<{ message: string }, { 
+      username?: string; 
+      email?: string;
+      selectedTopics?: string[]; 
+      subscriptions?: string[];
+    }>({
       query: (userData) => ({
         url: "/auth/update",
         method: "PUT",
         body: userData,
-        
       }),
     }),
     getAdminStats: builder.query<{ stats: { totalUsers: number; totalPosts: number; totalComments: number; totalCommunities: number } }, void>({

@@ -15,6 +15,7 @@ import { ToastContainer } from "react-toastify";
 import PostPage from "./pages/PostPage";
 import Community from "./pages/Community";
 import Saved from "./pages/Saved";
+import UserDetails from "./pages/UserDetails";
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="create-community" element={<CreateCommunity />} />
         <Route path="/post/:id" element={<PostPage />} />
         <Route path="/saved" element={<Saved />} />
+        <Route path="/profile/:id" element={<UserDetails />} />
       </Route>
     </Routes>
    </>

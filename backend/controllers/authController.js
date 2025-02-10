@@ -5,7 +5,7 @@ import User from "../models/User.js";
 import { sendVerificationEmail } from "../utils/email.js";
 import { sendSMSCode } from "../utils/sms.js";
 import dotenv from "dotenv";
-
+import cloudinary from "../utils/cloudinary.js";
 dotenv.config();
 
 export const getMe = async (req, res) => {
@@ -135,7 +135,7 @@ export const verifyEmail = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email, selectedTopics } = req.body;
+    const { username, email, selectedTopics,avatar } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -144,12 +144,35 @@ export const updateUser = async (req, res) => {
 
     if (username) user.username = username;
     if (email) user.email = email;
-    if (selectedTopics) user.selectedTopics = selectedTopics; 
-
+    if (selectedTopics) user.selectedTopics = selectedTopics;
+    if (avatar) user.avatar = avatar;
     await user.save();
     res.json({ message: "Profile updated successfully", user });
   } catch (error) {
     res.status(500).json({ message: "Error updating profile", error });
+  }
+};
+
+
+export const updateUserAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+    
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "avatars",
+      transformation: [{ width: 200, height: 200, crop: "fill" }],
+    });
+
+    user.avatar = result.secure_url;
+    await user.save();
+
+    res.json({ message: "Avatar updated", avatar: user.avatar });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating avatar", error });
   }
 };
 

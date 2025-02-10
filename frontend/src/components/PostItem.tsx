@@ -18,7 +18,6 @@ import {
   Twitter,
   Facebook,
   Send,
-  Users,
   Bookmark
 } from "lucide-react";
 import { useGetUserQuery, useSavePostMutation, useUpdateUserMutation } from "../redux/apiSlice";

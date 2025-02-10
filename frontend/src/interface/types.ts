@@ -55,3 +55,20 @@ export interface Post {
   }
   
   
+  export interface User {
+    _id: string;
+    username: string;
+    role: "user" | "moderator" | "admin";
+    email: string;
+    password?: string;
+    googleId?: string;
+    facebookId?: string;
+    karma: number;
+    subscriptions: string[]; 
+    createdAt: string;
+    selectedTopics?: string[]; 
+    savedPosts?: string[]; 
+    avatar: string;
+    topics?: string[];
+  }
+  
