@@ -34,16 +34,21 @@ import Post from "../models/Post.js";
   };
   
 
-export const getCommentsByPost = async (req, res) => {
-  try {
-    const comments = await Comment.find({ post: req.params.postId })
-      .populate("author", "username")
-      .populate("parentComment");
-    res.json(comments);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+  export const getCommentsByPost = async (req, res) => {
+    try {
+      const comments = await Comment.find({ post: req.params.postId, parentComment: null })
+        .populate({
+          path: "replies",
+          populate: { path: "author", select: "username" },
+        })
+        .populate("author", "username");
+  
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching comments", error });
+    }
+  };
+  
 
 export const deleteComment = async (req, res) => {
   try {
@@ -121,6 +126,115 @@ export const dislikeComment = async (req, res) => {
     res.status(200).json({ message: "Dislike updated", upvotes: comment.upvotes, downvotes: comment.downvotes });
   } catch (error) {
     console.error("Error disliking comment:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const replyToComment = async (req, res) => {
+  try {
+    const { content, postId } = req.body;
+    const { parentId } = req.params;
+    const userId = req.user.id;
+
+    if (!content.trim()) {
+      return res.status(400).json({ message: "Reply cannot be empty" });
+    }
+
+    
+    const parentComment = await Comment.findById(parentId);
+    if (!parentComment) {
+      return res.status(404).json({ message: "Parent comment not found" });
+    }
+
+   
+    const newReply = new Comment({
+      content,
+      author: userId,
+      post: postId,
+      parentComment: parentId,
+    });
+
+    await newReply.save();
+
+    
+    parentComment.replies.push(newReply._id);
+    await parentComment.save();
+
+    res.status(201).json({ message: "Reply added successfully", comment: newReply });
+  } catch (error) {
+    console.error("Error adding reply:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const likeReply = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const userId = req.user.id;
+
+    const reply = await Comment.findById(id);
+    if (!reply) {
+      return res.status(404).json({ message: "Reply not found" });
+    }
+
+    const hasLiked = reply.upvotes.includes(userId);
+    const hasDisliked = reply.downvotes.includes(userId);
+
+    if (hasLiked) {
+      reply.upvotes = reply.upvotes.filter(uid => uid.toString() !== userId);
+    } else {
+      reply.upvotes.push(userId);
+      if (hasDisliked) {
+        reply.downvotes = reply.downvotes.filter(uid => uid.toString() !== userId);
+      }
+    }
+
+    await reply.save();
+
+    res.status(200).json({ 
+      message: "Reply like updated", 
+      upvotes: reply.upvotes,
+      downvotes: reply.downvotes 
+    });
+  } catch (error) {
+    console.error("Error liking reply:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const dislikeReply = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const reply = await Comment.findById(id);
+    if (!reply) {
+      return res.status(404).json({ message: "Reply not found" });
+    }
+
+    const hasLiked = reply.upvotes.includes(userId);
+    const hasDisliked = reply.downvotes.includes(userId);
+
+    if (hasDisliked) {
+      reply.downvotes = reply.downvotes.filter(uid => uid.toString() !== userId);
+    } else {
+      reply.downvotes.push(userId);
+      if (hasLiked) {
+        reply.upvotes = reply.upvotes.filter(uid => uid.toString() !== userId);
+      }
+    }
+
+    await reply.save();
+
+    res.status(200).json({ 
+      message: "Reply dislike updated", 
+      upvotes: reply.upvotes,
+      downvotes: reply.downvotes 
+    });
+  } catch (error) {
+    console.error("Error disliking reply:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };

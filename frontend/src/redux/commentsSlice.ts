@@ -41,6 +41,31 @@ export const commentsApi = createApi({
         method: "DELETE",
       }),
     }),
+    replyToComment: builder.mutation<Comment, { postId: string; parentId: string; content: string }>(
+      {
+        query: ({ postId, parentId, content }) => ({
+          url: `/comments/${parentId}/reply`,
+          method: "POST",
+          body: { content, postId, parentComment: parentId },
+        }),
+      }
+    ),
+    
+
+    likeReply: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[] }, string>({
+      query: (id) => ({
+        url: `/comments/${id}/reply/upvotes`,
+        method: "POST",
+      }),
+    }),
+
+    dislikeReply: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[] }, string>({
+      query: (id) => ({
+        url: `/comments/${id}/reply/downvotes`,
+        method: "POST",
+      }),
+    }),
+    
   }),
 });
 
@@ -50,4 +75,7 @@ export const {
   useDeleteCommentMutation,
   useLikeCommentMutation,
   useDislikeCommentMutation, 
+  useReplyToCommentMutation,
+  useLikeReplyMutation,
+  useDislikeReplyMutation
 } = commentsApi;

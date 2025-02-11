@@ -4,7 +4,10 @@ import {
   getCommentsByPost,
   deleteComment,
   dislikeComment,
-  likeComment
+  likeComment,
+  replyToComment,
+  likeReply,
+  dislikeReply
 } from "../controllers/commentController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -20,6 +23,14 @@ router.post(
   createComment
 );
 
+router.post(
+  "/:parentId/reply",
+  authMiddleware,
+  [body("content").notEmpty().withMessage("Comment cannot be empty")],
+  replyToComment
+);
+
+
 router.get("/post/:postId", getCommentsByPost);
 
 router.delete("/:id", authMiddleware, deleteComment);
@@ -28,5 +39,8 @@ router.post("/:id/upvotes", authMiddleware, likeComment);
 
 
 router.post("/:id/downvotes", authMiddleware, dislikeComment);
+
+router.post("/:id/reply/upvotes", authMiddleware, likeReply);
+router.post("/:id/reply/downvotes", authMiddleware, dislikeReply);
 
 export default router;

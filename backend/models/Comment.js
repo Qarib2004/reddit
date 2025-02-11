@@ -27,6 +27,12 @@ const CommentSchema = new mongoose.Schema(
     },
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], 
     downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    replies: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
   },
   { timestamps: true }
 );

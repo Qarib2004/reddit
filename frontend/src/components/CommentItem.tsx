@@ -1,28 +1,41 @@
 import { useState, useEffect } from "react";
-import { useLikeCommentMutation, useDislikeCommentMutation } from "../redux/commentsSlice";
-import { ArrowBigUp, ArrowBigDown, MessageSquare, Award, Share2, MoreHorizontal } from "lucide-react";
-import CommentList from "./CommentList";
+import {
+  useLikeCommentMutation,
+  useDislikeCommentMutation,
+  useReplyToCommentMutation,
+} from "../redux/commentsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
+import {
+  ArrowBigUp,
+  ArrowBigDown,
+  MessageSquare,
+  Award,
+  Share2,
+  MoreHorizontal
+} from "lucide-react";
+import ReplyItem from "./ReplyItem";
+import { Comment } from "../interface/types";
 
-const CommentItem = ({ comment }: { comment: any }) => {
+const CommentItem = ({ comment }: { comment: Comment }) => {
   const [likeComment] = useLikeCommentMutation();
   const [dislikeComment] = useDislikeCommentMutation();
-  const { data: user } = useGetUserQuery();
-  
- 
-  const [likes, setLikes] = useState(comment.upvotes.length);
-  const [dislikes, setDislikes] = useState(comment.downvotes.length);
+  const [replyToComment] = useReplyToCommentMutation();
+  const { data: user ,refetch} = useGetUserQuery();
+
+  const [likes, setLikes] = useState(comment.upvotes?.length || 0);
+  const [dislikes, setDislikes] = useState(comment.downvotes?.length || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  
- 
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(false); 
+
   useEffect(() => {
     if (user) {
-      setIsLiked(comment.upvotes.includes(user._id));
-      setIsDisliked(comment.downvotes.includes(user._id));
+      setIsLiked(comment.upvotes?.includes(user._id) || false);
+      setIsDisliked(comment.downvotes?.includes(user._id) || false);
     }
   }, [comment.upvotes, comment.downvotes, user]);
-
 
   const handleLike = async () => {
     try {
@@ -36,7 +49,6 @@ const CommentItem = ({ comment }: { comment: any }) => {
     }
   };
 
-
   const handleDislike = async () => {
     try {
       const response = await dislikeComment(comment._id).unwrap();
@@ -49,78 +61,129 @@ const CommentItem = ({ comment }: { comment: any }) => {
     }
   };
 
+  const handleReplyToggle = () => {
+    setIsReplying(!isReplying);
+    setReplyContent("");
+  };
+
+  const handleSubmitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyContent.trim()) return;
+  
+    try {
+      await replyToComment({
+        postId: comment.post,
+        parentId: comment._id,
+        content: replyContent,
+      }).unwrap();
+  
+      setIsReplying(false);
+      setReplyContent("");
+      
+      refetch();
+    } catch (error) {
+      console.error("Error replying to comment:", error);
+    }
+  };
+  
+
   return (
-    <div className="group">
-      <div className="flex gap-2">
+    <div className="group relative">
+    
+      <div className="flex gap-3">
        
         <div className="flex flex-col items-center">
           <button
             onClick={handleLike}
-            className={`p-1 hover:bg-gray-50 rounded ${
+            className={`p-1 hover:bg-gray-100 rounded ${
               isLiked ? "text-orange-500" : "text-gray-400 hover:text-orange-500"
             }`}
-            aria-label="Upvote"
           >
             <ArrowBigUp size={16} />
           </button>
-          <span className="text-xs font-medium text-gray-900 my-1">
-            {likes - dislikes}
-          </span>
+          <span className="text-xs font-medium text-gray-900">{likes - dislikes}</span>
           <button
             onClick={handleDislike}
-            className={`p-1 hover:bg-gray-50 rounded ${
+            className={`p-1 hover:bg-gray-100 rounded ${
               isDisliked ? "text-blue-500" : "text-gray-400 hover:text-blue-500"
             }`}
-            aria-label="Downvote"
           >
             <ArrowBigDown size={16} />
           </button>
         </div>
 
        
-        <div className="flex-1 min-w-0">
-          
-          <div className="flex items-center gap-1 text-xs">
-            <span className="font-medium text-gray-900 hover:underline cursor-pointer">
-              u/{comment.author?.username || "anonymous"}
-            </span>
-            <span className="text-gray-400 mx-1">•</span>
+        <div className="flex-1">
+         
+          <div className="flex items-center gap-2 text-xs">
+            <img
+              src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${comment.author?.username || 'anonymous'}`}
+              alt="avatar"
+              className="w-6 h-6 rounded-full"
+            />
+            <span className="font-medium text-gray-900">u/{comment.author?.username || "anonymous"}</span>
+            <span className="text-gray-400">•</span>
             <span className="text-gray-500">
               {new Date(comment.createdAt).toLocaleString()}
             </span>
           </div>
 
-        
-          <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap break-words">
-            {comment.content}
-          </div>
+          
+          <div className="mt-1 text-sm text-gray-900">{comment.content}</div>
 
-          <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded">
+          
+          <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+            <button onClick={handleReplyToggle} className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <MessageSquare size={14} />
               <span>Reply</span>
             </button>
-            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded">
+            <button className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <Award size={14} />
-              <span>Give Award</span>
+              <span>Award</span>
             </button>
-            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded">
+            <button className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <Share2 size={14} />
               <span>Share</span>
             </button>
-            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded">
+            <button className="p-1 hover:bg-gray-100 rounded-md">
               <MoreHorizontal size={14} />
             </button>
           </div>
+
+         
+          {isReplying && (
+            <form onSubmit={handleSubmitReply} className="mt-3">
+              <textarea
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                className="w-full p-3 text-sm border border-gray-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-h-[100px] resize-y"
+                placeholder="Reply to this comment..."
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <button onClick={handleReplyToggle} className="px-4 py-1.5 text-sm font-medium text-gray-500 bg-gray-50 rounded-full hover:bg-gray-100">
+                  Cancel
+                </button>
+                <button type="submit" disabled={!replyContent.trim()} className="px-4 py-1.5 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Reply
+                </button>
+              </div>
+            </form>
+          )}
+
+          
+          {comment.replies && comment.replies.length > 0 && (
+            <>
+              <button onClick={() => setIsRepliesCollapsed(!isRepliesCollapsed)} className="mt-2 text-xs text-gray-500 hover:underline">
+                {isRepliesCollapsed ? "Show replies" : "Hide replies"}
+              </button>
+              {!isRepliesCollapsed &&
+                comment.replies.map((reply: Comment) => (
+                  <ReplyItem key={reply._id} reply={reply} />
+                ))}
+            </>
+          )}
         </div>
       </div>
-
-    
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-2 pl-4 border-l border-gray-200">
-          <CommentList comments={comment.replies} />
-        </div>
-      )}
     </div>
   );
 };

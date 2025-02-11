@@ -38,13 +38,21 @@ export interface Post {
   comments: Comment[]; 
 }
 
-  export interface Comment {
+export interface Comment {
+  _id: string;
+  post: string;
+  author: {
     _id: string;
-    postId: string;
-    author: string;
-    content: string;
-    createdAt: string;
-  }
+    username: string;
+    avatar?: string;
+  };
+  content: string;
+  createdAt: string;
+  parentComment?: string; 
+  replies?: Comment[]; 
+  upvotes: string[]; 
+  downvotes: string[]; 
+}
   
   export interface Community {
     _id: string;
