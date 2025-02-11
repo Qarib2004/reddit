@@ -36,6 +36,7 @@ export interface Post {
   downvotes: string[]; 
   
   comments: Comment[]; 
+ 
 }
 
 export interface Comment {
@@ -78,5 +79,7 @@ export interface Comment {
     savedPosts?: string[]; 
     avatar: string;
     topics?: string[];
+    friends?: string[];
+    friendRequests?: string[];
   }
   

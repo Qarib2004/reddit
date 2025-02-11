@@ -55,6 +55,23 @@ export const apiSlice = createApi({
         method: "POST",
       }),
     }),
+    sendFriendRequest: builder.mutation<{ message: string }, { userId: string }>({
+      query: ({ userId }) => ({
+        url: `/users/friend-request/${userId}`,
+        method: "POST",
+      }),
+    }),
+
+    
+    acceptFriendRequest: builder.mutation<{ message: string }, { userId: string }>({
+      query: ({ userId }) => ({
+        url: `/users/friend-accept/${userId}`,
+        method: "POST",
+      }),
+    }),
+    getUserById: builder.query<User, string>({
+      query: (userId) => `/users/${userId}`,
+    }),
   }),
 });
 
@@ -66,5 +83,8 @@ export const {
   useUpdateUserMutation, 
   useGetAdminStatsQuery,
   useSelectTopicsMutation,
-  useSavePostMutation
+  useSavePostMutation,
+  useSendFriendRequestMutation,
+  useAcceptFriendRequestMutation,
+  useGetUserByIdQuery,
 } = apiSlice;

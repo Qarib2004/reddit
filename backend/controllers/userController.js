@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Topic from "../models/Topic.js";
+import Message from "../models/Message.js";
 
 export const makeModerator = async (req, res) => {
   try {
@@ -74,6 +75,81 @@ export const savePost = async (req, res) => {
     });
   } catch (error) {
     console.error("Error saving post:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const sendFriendRequest = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const sender = await User.findById(req.user.id);
+    const receiver = await User.findById(userId);
+
+    if (!receiver) return res.status(404).json({ message: "User not found" });
+
+    if (receiver.friendRequests.includes(sender._id))
+      return res.status(400).json({ message: "Request already sent" });
+
+    receiver.friendRequests.push(sender._id);
+    await receiver.save();
+
+    res.json({ message: "Friend request sent" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const acceptFriendRequest = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const sender = await User.findById(userId);
+    const receiver = await User.findById(req.user.id);
+
+    if (!sender || !receiver) return res.status(404).json({ message: "User not found" });
+
+    receiver.friends.push(sender._id);
+    sender.friends.push(receiver._id);
+
+    receiver.friendRequests = receiver.friendRequests.filter(id => id.toString() !== sender._id.toString());
+
+    await receiver.save();
+    await sender.save();
+
+    res.json({ message: "Friend request accepted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password"); 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const getUserNotifications = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const friendRequests = user.friendRequests.length;
+    const unreadMessages = await Message.countDocuments({
+      recipientId: user._id,
+      read: false, 
+    });
+
+    res.json({ friendRequests, unreadMessages });
+  } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };

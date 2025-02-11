@@ -1,23 +1,50 @@
 import { Link, useLocation } from "react-router-dom";
 import { useGetUserQuery, useLogoutMutation } from "../redux/apiSlice";
-import { useState } from "react";
-import { Bell, Plus, Search,  ChevronDown, LogOut,User } from "lucide-react";
+import { useGetNotificationsQuery } from "../redux/notificationsSlice"; 
+import { useEffect, useState } from "react";
+import { Bell, Plus, Search, ChevronDown, LogOut, User, MessageCircle } from "lucide-react";
+import socket from "../utils/socket"; 
 
 const Navbar = () => {
   const { data: user } = useGetUserQuery();
+  const { data: notifications, refetch } = useGetNotificationsQuery(); 
   const [logout] = useLogoutMutation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const location = useLocation();
-  
- 
+
+  const [friendRequests, setFriendRequests] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    if (notifications) {
+      setFriendRequests(notifications.friendRequests);
+      setUnreadMessages(notifications.unreadMessages);
+    }
+  }, [notifications]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    socket.emit("user-online", user._id);
+
+    socket.on("newFriendRequest", () => {
+      setFriendRequests((prev) => prev + 1);
+    });
+
+    socket.on("newMessage", () => {
+      setUnreadMessages((prev) => prev + 1);
+    });
+
+    return () => {
+      socket.off("newFriendRequest");
+      socket.off("newMessage");
+    };
+  }, [user]);
 
   const handleLogout = async () => {
     await logout().unwrap();
-    window.location.reload(); 
+    window.location.reload();
   };
-
-
 
   return (
     <nav className="flex items-center justify-between bg-white px-6 py-3 shadow-md">
@@ -33,8 +60,8 @@ const Navbar = () => {
         </Link>
       </div>
 
-     
-      <div className="relative flex-1 mx-6  justify-center">
+      
+      <div className="relative flex-1 mx-6 justify-center">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
           <Search size={20} className="text-gray-400" />
         </div>
@@ -47,8 +74,30 @@ const Navbar = () => {
 
       
       <div className="flex items-center gap-4">
-        <Bell size={24} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+       
+        <div className="relative">
+          <Bell size={24} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+          {friendRequests > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              {friendRequests}
+            </span>
+          )}
+        </div>
+
+       
+        <div className="relative">
+          <MessageCircle size={24} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+          {unreadMessages > 0 && (
+            <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+              {unreadMessages}
+            </span>
+          )}
+        </div>
+
+        
         <Plus size={24} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+
+        
         {user ? (
           <div className="relative">
             <button
@@ -56,28 +105,29 @@ const Navbar = () => {
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
               <img
-                src="https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png"
+                src={user.avatar || "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full"
-                style={{objectFit:"cover"}}
               />
               <ChevronDown size={16} className="text-gray-500" />
             </button>
+
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                 <div className="px-4 py-2">
                   <p className="text-sm font-medium text-gray-700">Hello, {user.username}!</p>
                 </div>
                 <div className="border-t border-gray-100"></div>
+
                 <Link
-              to={`/profile/${user._id}`}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-white ${
-                location.pathname === `/profile/${user._id}` && "bg-gray-200"
-              }`}
-            >
-              <User size={20} />
-              My Profile
-            </Link>
+                  to={`/profile/${user._id}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-white ${
+                    location.pathname === `/profile/${user._id}` && "bg-gray-200"
+                  }`}
+                >
+                  <User size={20} />
+                  My Profile
+                </Link>
 
                 <button
                   onClick={handleLogout}
