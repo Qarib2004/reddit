@@ -79,7 +79,17 @@ export interface Comment {
     savedPosts?: string[]; 
     avatar: string;
     topics?: string[];
-    friends?: string[];
+    friends: { _id: string; username: string; avatar?: string }[]; 
     friendRequests?: string[];
+  }
+  
+
+  export interface Message {
+    _id: string;
+    senderId: string; 
+    recipientId: string; 
+    message: string;
+    createdAt: string;
+    updatedAt: string;
   }
   

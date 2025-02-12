@@ -1,19 +1,24 @@
 import { Link, useLocation } from "react-router-dom";
 import { useGetUserQuery, useLogoutMutation } from "../redux/apiSlice";
-import { useGetNotificationsQuery } from "../redux/notificationsSlice"; 
+import { useGetNotificationsQuery } from "../redux/notificationsSlice";
 import { useEffect, useState } from "react";
 import { Bell, Plus, Search, ChevronDown, LogOut, User, MessageCircle } from "lucide-react";
-import socket from "../utils/socket"; 
+import socket from "../utils/socket";
+import FriendRequests from "./FriendRequets";
+import MessageModal from "./MessageModal";
 
 const Navbar = () => {
   const { data: user } = useGetUserQuery();
-  const { data: notifications, refetch } = useGetNotificationsQuery(); 
+  const { data: notifications, refetch } = useGetNotificationsQuery();
   const [logout] = useLogoutMutation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
 
   const [friendRequests, setFriendRequests] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  
 
   useEffect(() => {
     if (notifications) {
@@ -76,17 +81,26 @@ const Navbar = () => {
       <div className="flex items-center gap-4">
        
         <div className="relative">
-          <Bell size={24} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+          <Bell 
+            size={24} 
+            className="text-gray-500 cursor-pointer hover:text-gray-700" 
+            onClick={() => setShowFriendRequests(!showFriendRequests)}
+          />
           {friendRequests > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+            <span className="absolute -top-1 -right-[10%] bg-red-500 text-white text-[7px] px-[5px] py-[2px] rounded-full">
               {friendRequests}
             </span>
           )}
+          {showFriendRequests && <FriendRequests />}
         </div>
 
        
         <div className="relative">
-          <MessageCircle size={24} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+        <MessageCircle
+            size={24}
+            className="text-gray-500 cursor-pointer hover:text-gray-700"
+            onClick={() => setMessageModalOpen(true)}
+          />
           {unreadMessages > 0 && (
             <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
               {unreadMessages}
@@ -148,6 +162,7 @@ const Navbar = () => {
           </Link>
         )}
       </div>
+      {messageModalOpen && <MessageModal onClose={() => setMessageModalOpen(false)} />}
     </nav>
   );
 };

@@ -20,6 +20,7 @@ import communityRoutes from "./routes/communityRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js"
 
 import Message from "./models/Message.js";
 import User from "./models/User.js";
@@ -131,7 +132,7 @@ io.on("connection", (socket) => {
   socket.on("joinChat", ({ userId }) => {
     if (userId) {
       activeUsers.set(userId, socket.id);
-      console.log(`✅ ${userId} joined chat (socket: ${socket.id})`);
+      console.log(` ${userId} joined chat (socket: ${socket.id})`);
       io.emit("update-users", Array.from(activeUsers.keys()));
     }
   });
@@ -164,6 +165,7 @@ app.use("/api/interests", interestsRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/votes", voteRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
