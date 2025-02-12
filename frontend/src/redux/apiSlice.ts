@@ -72,6 +72,10 @@ export const apiSlice = createApi({
     getUserById: builder.query<User, string>({
       query: (userId) => `/users/${userId}`,
     }),
+    getUsers: builder.query<User, void>({
+      query: () => "/",
+   
+  }),
   }),
 });
 
@@ -87,4 +91,5 @@ export const {
   useSendFriendRequestMutation,
   useAcceptFriendRequestMutation,
   useGetUserByIdQuery,
+  useGetUsersQuery
 } = apiSlice;

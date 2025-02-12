@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send } from "lucide-react";
+import { X, Send, Loader2 } from "lucide-react";
 import { useGetUserByIdQuery, useGetUserQuery } from "../redux/apiSlice";
 import socket from "../utils/socket";
 
@@ -18,36 +18,31 @@ const ChatModal = ({ recipientId, onClose }: { recipientId: string; onClose: () 
   const [newMessage, setNewMessage] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const chatBoxRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!recipientId || !currentUser?._id) return;
 
-    
     if (!socket.connected) {
       socket.connect();
     }
 
     const handleConnect = () => {
       setIsConnected(true);
-     
       socket.emit("joinChat", { userId: currentUser._id, recipientId });
       socket.emit("requestChatHistory", { userId: currentUser._id, recipientId });
     };
 
     const handleDisconnect = () => {
       setIsConnected(false);
-     
     };
 
     const handleChatHistory = (chatHistory: Message[]) => {
-      
       setMessages(chatHistory);
     };
 
     const handleReceiveMessage = (message: Message) => {
-     
       setMessages(prev => {
-        
         const messageExists = prev.some(msg => 
           msg._id === message._id || 
           (msg.senderId === message.senderId && 
@@ -79,6 +74,13 @@ const ChatModal = ({ recipientId, onClose }: { recipientId: string; onClose: () 
     }
   }, [messages]);
 
+  const handleClickOutside = (e: React.MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+      
+      e.stopPropagation();
+    }
+  };
+
   const sendMessage = () => {
     if (!newMessage.trim() || !currentUser?._id || !recipientId || !isConnected) return;
 
@@ -88,10 +90,7 @@ const ChatModal = ({ recipientId, onClose }: { recipientId: string; onClose: () 
       message: newMessage.trim(),
     };
 
-   
     socket.emit("sendMessage", messageData);
-    
-    
     setMessages(prev => [...prev, { ...messageData, createdAt: new Date().toISOString() }]);
     setNewMessage("");
   };
@@ -105,55 +104,81 @@ const ChatModal = ({ recipientId, onClose }: { recipientId: string; onClose: () 
 
   if (recipientLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-        <div className="bg-white p-4 rounded-lg">Loading chat...</div>
+      <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+        <div className="bg-white p-6 rounded-lg shadow-xl flex items-center gap-3">
+          <Loader2 className="animate-spin" size={24} />
+          <span className="text-lg">Loading chat...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-sm w-full overflow-hidden relative">
-        <button 
-          onClick={onClose} 
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="p-4 border-b flex items-center gap-3">
-          <img
-            src={recipient?.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${recipient?.username}`}
-            alt="Avatar"
-            className="w-10 h-10 rounded-full"
-          />
-          <div>
-            <h2 className="font-semibold text-lg">{recipient?.username || "Unknown User"}</h2>
-            <span className={`text-sm ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
-              {isConnected ? 'Connected' : 'Disconnected'}
+    <div 
+      className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 animate-fadeIn"
+      onClick={handleClickOutside}
+    >
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 overflow-hidden relative animate-slideUp"
+        style={{ maxHeight: '90vh' }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-500" />
+        
+        <div className="p-4 border-b bg-gray-50 flex items-center gap-3">
+          <div className="relative">
+            <img
+              src={recipient?.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${recipient?.username}`}
+              alt="Avatar"
+              className="w-10 h-10 rounded-full border-2 border-white shadow-md"
+            />
+            <div 
+              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                isConnected ? 'bg-green-500' : 'bg-gray-400'
+              }`}
+            />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-bold text-lg text-gray-900">{recipient?.username || "Unknown User"}</h2>
+            <span className={`text-sm ${isConnected ? 'text-green-600' : 'text-gray-500'}`}>
+              {isConnected ? 'Online' : 'Offline'}
             </span>
           </div>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            aria-label="Close chat"
+          >
+            <X size={20} className="text-gray-500" />
+          </button>
         </div>
 
-        <div ref={chatBoxRef} className="p-4 h-64 overflow-y-auto space-y-2">
+        <div 
+          ref={chatBoxRef} 
+          className="p-4 overflow-y-auto space-y-3"
+          style={{ height: '400px' }}
+        >
           {messages.map((msg, index) => (
             <div 
               key={msg._id || index} 
               className={`flex ${msg.senderId === currentUser?._id ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`px-3 py-2 rounded-lg max-w-[80%] break-words ${
+                className={`px-4 py-2 rounded-2xl max-w-[80%] shadow-sm ${
                   msg.senderId === currentUser?._id 
-                    ? "bg-blue-500 text-white" 
-                    : "bg-gray-200"
+                    ? "bg-orange-500 text-white" 
+                    : "bg-gray-100 text-gray-900"
                 }`}
               >
-                {msg.message}
+                <p className="whitespace-pre-wrap break-words">{msg.message}</p>
                 {msg.createdAt && (
                   <div className={`text-xs mt-1 ${
-                    msg.senderId === currentUser?._id ? "text-blue-100" : "text-gray-500"
+                    msg.senderId === currentUser?._id ? "text-orange-100" : "text-gray-500"
                   }`}>
-                    {new Date(msg.createdAt).toLocaleTimeString()}
+                    {new Date(msg.createdAt).toLocaleTimeString([], { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
                   </div>
                 )}
               </div>
@@ -161,23 +186,26 @@ const ChatModal = ({ recipientId, onClose }: { recipientId: string; onClose: () 
           ))}
         </div>
 
-        <div className="border-t p-4 flex items-center gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a message..."
-            disabled={!isConnected}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
-          <button 
-            onClick={sendMessage}
-            disabled={!isConnected || !newMessage.trim()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            <Send size={18} />
-          </button>
+        <div className="border-t p-4 bg-gray-50">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={isConnected ? "Type a message..." : "Connecting..."}
+              disabled={!isConnected}
+              className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+            />
+            <button 
+              onClick={sendMessage}
+              disabled={!isConnected || !newMessage.trim()}
+              className="bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              aria-label="Send message"
+            >
+              <Send size={20} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

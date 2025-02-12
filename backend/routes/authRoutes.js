@@ -9,7 +9,7 @@ import {
   sendForgotPasswordSMS,
   updateUserAvatar,
 } from "../controllers/authController.js";
-import { makeModerator } from "../controllers/userController.js";
+import {  makeModerator } from "../controllers/userController.js";
 import passport from "passport";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import checkRole from "../middlewares/checkRole.js";
@@ -90,6 +90,8 @@ router.get(
 router.put("/make-moderator/:userId", authMiddleware, checkRole("admin"), makeModerator); 
 router.delete("/posts/:id", authMiddleware, checkRole("moderator"), deletePost); 
 router.get("/admin", authMiddleware, checkRole("admin"), getAdminDashboard);
+
+
 
 router.post("/forgot-password", sendForgotPasswordSMS);
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   useGetUserByIdQuery,
+  
   useSendFriendRequestMutation,
 } from "../redux/apiSlice";
 import { 
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import ChatModal from "./ChatModal";
 
+
 const UserModal = ({
   userId,
   onClose,
@@ -23,6 +25,7 @@ const UserModal = ({
   userId: string;
   onClose: () => void;
 }) => {
+ 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const {
     data: user,
@@ -176,7 +179,7 @@ const UserModal = ({
                 Send Message
               </button>
               <a
-                href={`/user/${user.username}`}
+                href={`/profile/${user._id}`}
                 className="w-full bg-gray-100 text-gray-800 py-2.5 px-4 rounded-full font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
               >
                 <Link2 size={18} />

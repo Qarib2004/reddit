@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Topic from "../models/Topic.js";
 import Message from "../models/Message.js";
+import mongoose from "mongoose";
 
 export const makeModerator = async (req, res) => {
   try {
@@ -137,19 +138,38 @@ export const getUserById = async (req, res) => {
 
 export const getUserNotifications = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const friendRequests = user.friendRequests.length;
     const unreadMessages = await Message.countDocuments({
-      recipientId: user._id,
+      recipientId: userId,
       read: false, 
     });
 
+    
+
     res.json({ friendRequests, unreadMessages });
   } catch (error) {
+    console.error("An error of receipt of notifications:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const getUsers = async (req, res) => {
+  try {
+   
+
+    const users = await User.find({}, "username avatar karma createdAt");
+
+   
+    res.json(users);
+  } catch (error) {
+    console.error("Error when receiving users:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };
