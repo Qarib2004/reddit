@@ -9,7 +9,7 @@ import { useEffect } from "react";
 const AdminLayout = () => {
     const navigate = useNavigate();
     const user = useSelector((state: any) => state.auth?.user);
-  
+   
   
     useEffect(() => {
       if (!user) {

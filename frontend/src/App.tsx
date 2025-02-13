@@ -23,6 +23,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useGetUserQuery } from "./redux/apiSlice";
 import { setUser } from "./redux/authSlice";
+import AdminContent from "./pages/admin/AdminContent";
+import AdminCommunity from "./pages/admin/AdminCommunity";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -66,6 +68,8 @@ const App = () => {
          <Route index element={<AdminPanel />} />
           <Route path="users" element={<UsersManagement />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="content" element={<AdminContent />} />
+         <Route path="community" element={<AdminCommunity />} />
         </Route>
       )}
       </Routes>

@@ -38,7 +38,7 @@ const AdminPanel = () => {
         <Link to="/admin/users" className="p-4 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">
           Manage Users
         </Link>
-        <Link to="/admin/communities" className="p-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition">
+        <Link to="/admin/community" className="p-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition">
           Manage Communities
         </Link>
         <Link to="/admin/content" className="p-4 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition">

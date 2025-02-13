@@ -102,4 +102,9 @@ export interface Comment {
     posts: number;
     comments: number;
     communities: number;
+    totalUsers: number;
+    totalPosts: number;
+    totalComments: number;
+    totalCommunities: number;
   }
+
