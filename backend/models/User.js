@@ -54,7 +54,11 @@ const UserSchema = new mongoose.Schema(
       default: "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png",
     },
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], 
-    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    banned: {
+      type: Boolean,
+      default: false, 
+    },
   },
   { timestamps: true }
 );

@@ -6,10 +6,13 @@ import { communitiesApi } from "./communitiesSlice";
 import { categoriesApi } from "./categoriesSlice";
 import {notificationsApi} from "./notificationsSlice";
 import { messagesApi } from "./messagesSlice";
+import { adminApi } from "./adminSlice";
+import authReducer from "./authSlice";
 
 import {friendsApi} from "./friendsSlice"
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
     [postsApi.reducerPath]: postsApi.reducer,
     [commentsApi.reducerPath]: commentsApi.reducer,
@@ -17,7 +20,9 @@ export const store = configureStore({
     [categoriesApi.reducerPath]: categoriesApi.reducer, 
     [notificationsApi.reducerPath]: notificationsApi.reducer, 
     [friendsApi.reducerPath]: friendsApi.reducer,
-    [messagesApi.reducerPath]: messagesApi.reducer, 
+    [messagesApi.reducerPath]: messagesApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer, 
+     
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -28,7 +33,8 @@ export const store = configureStore({
       .concat(categoriesApi.middleware)
       .concat(notificationsApi.middleware)
       .concat(friendsApi.middleware)
-      .concat(messagesApi.middleware), 
+      .concat(messagesApi.middleware)
+      .concat(adminApi.middleware), 
 });
 
 export type RootState = ReturnType<typeof store.getState>;

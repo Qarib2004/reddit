@@ -21,6 +21,7 @@ import postRoutes from "./routes/postRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js"
 
 import Message from "./models/Message.js";
 import User from "./models/User.js";
@@ -166,6 +167,7 @@ app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/votes", voteRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/admin",adminRoutes)
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

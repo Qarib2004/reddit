@@ -81,6 +81,7 @@ export interface Comment {
     topics?: string[];
     friends: { _id: string; username: string; avatar?: string }[]; 
     friendRequests?: string[];
+    banned: boolean;
   }
   
 
@@ -93,3 +94,12 @@ export interface Comment {
     updatedAt: string;
   }
   
+
+  export interface AdminStats {
+    users: number;
+    moderators: number;
+    admins: number;
+    posts: number;
+    comments: number;
+    communities: number;
+  }
