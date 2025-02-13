@@ -13,6 +13,7 @@ const Navbar = () => {
   const [logout] = useLogoutMutation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
+  
 
   const [friendRequests, setFriendRequests] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -24,6 +25,7 @@ const Navbar = () => {
     if (notifications) {
       setFriendRequests(notifications.friendRequests);
       setUnreadMessages(notifications.unreadMessages);
+      refetch()
     }
   }, [notifications]);
 

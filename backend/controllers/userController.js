@@ -199,14 +199,55 @@ export const getUserNotifications = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-   
+    const { excludeSelf, sortBy } = req.query; 
 
-    const users = await User.find({}, "username avatar karma createdAt");
+    let query = {};
+
+    
+    if (excludeSelf && req.user) {
+      query._id = { $ne: req.user.id };
+    }
+
+    
+    let sortOptions = {};
+    if (sortBy === "karma") {
+      sortOptions.karma = -1; 
+    } else if (sortBy === "createdAt") {
+      sortOptions.createdAt = -1; 
+    }
 
    
+    const users = await User.find(query, "username avatar karma createdAt")
+      .sort(sortOptions)
+      .lean(); 
+
     res.json(users);
   } catch (error) {
     console.error("Error when receiving users:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const getFriends = async (req, res) => {
+  try {
+    const { sortBy } = req.query;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId)
+      .populate({
+        path: "friends",
+        select: "username avatar karma createdAt",
+        options: { sort: sortBy === "username" ? { username: 1 } : { createdAt: -1 } }, 
+      })
+      .lean(); 
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.friends);
+  } catch (error) {
+    console.error("Error when receiving friends:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };

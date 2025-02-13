@@ -1,5 +1,5 @@
 import express from "express";
-import { acceptFriendRequest, getUserById, savePost, selectTopics, sendFriendRequest,getUserNotifications, getUsers, rejectFriendRequest, getFriendRequests } from "../controllers/userController.js";
+import { acceptFriendRequest, getUserById, savePost, selectTopics, sendFriendRequest,getUserNotifications, getUsers, rejectFriendRequest, getFriendRequests, getFriends } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 
@@ -12,7 +12,8 @@ router.post("/:requestId/accept", authMiddleware, acceptFriendRequest);
 router.post("/:requestId/reject", authMiddleware, rejectFriendRequest);
 router.get("/friend-requests", authMiddleware, getFriendRequests)
 router.get("/notifications", authMiddleware, getUserNotifications); 
-router.get("/", authMiddleware, getUsers);                        
+router.get("/", authMiddleware, getUsers);   
+router.get("/friends", authMiddleware, getFriends);                     
 router.get("/:id", getUserById); 
 
 

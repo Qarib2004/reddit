@@ -20,11 +20,15 @@ export const friendsApi = createApi({
         method: "POST",
       }),
     }),
+    getFriends: builder.query<User[], void>({  
+      query: () => "/users/friends",
+    }),
   }),
 });
 
 export const { 
   useGetFriendRequestsQuery, 
   useAcceptFriendRequestMutation, 
-  useRejectFriendRequestMutation 
+  useRejectFriendRequestMutation,
+  useGetFriendsQuery
 } = friendsApi;
