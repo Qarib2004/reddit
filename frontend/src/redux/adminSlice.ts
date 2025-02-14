@@ -49,6 +49,16 @@ export const adminApi = createApi({
         getAdminStats: builder.query<AdminStats, void>({
             query: () => "/stats",
           }),
+          getModeratorRequests: builder.query<User[], void>({
+            query: () => "/moderator-requests",
+          }),
+          updateModeratorRequest: builder.mutation<{ message: string }, { id: string; status: "approved" | "rejected" }>({
+            query: ({ id, status }) => ({
+              url: `/moderator-requests/${id}`,
+              method: "PUT",
+              body: { status },
+            }),
+          }),
     }),
 });
 
@@ -60,5 +70,7 @@ export const {
     useDeleteCommunityMutation,
     useGetAllPostsQuery,
     useDeletePostMutation,
-    useGetAdminStatsQuery
+    useGetAdminStatsQuery,
+    useGetModeratorRequestsQuery,
+     useUpdateModeratorRequestMutation
 } = adminApi;

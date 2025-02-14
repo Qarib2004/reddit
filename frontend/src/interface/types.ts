@@ -86,6 +86,10 @@ export interface Comment {
     country?: string;  
     timezone?: string; 
     phoneNumber?:string;
+    theme?: "light" | "dark" | "custom";
+    fontSize?: number;
+    showTrending?: boolean;
+    moderatorRequests?: "pending" | "approved" | "rejected" | "none"; 
   }
   
 

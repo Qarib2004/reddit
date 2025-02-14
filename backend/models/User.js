@@ -82,6 +82,14 @@ const UserSchema = new mongoose.Schema(
     phoneNumber: { type: String, unique: true, sparse: true },
     resetCode: { type: String, default: null },
   resetCodeExpires: { type: Date, default: null },
+  theme: { type: String, enum: ["light", "dark", "custom"], default: "light" },
+  fontSize: { type: Number, default: 16 },
+  showTrending: { type: Boolean, default: true },
+  moderatorRequests: {
+    type: String,
+    enum: ["pending", "approved", "rejected", "none"],
+    default: "none",
+  }
   },
   { timestamps: true }
 );

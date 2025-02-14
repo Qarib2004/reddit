@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { User } from "../interface/types";
+import { Community, User } from "../interface/types";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api", credentials: "include" }),
@@ -91,6 +91,31 @@ export const apiSlice = createApi({
       body: data,
     }),
   }),
+
+  updatePersonalization: builder.mutation<{ message: string }, { theme: string; fontSize: number; showTrending: boolean }>({
+    query: (data) => ({
+      url: "/users/update-personalization",
+      method: "PUT",
+      body: data,
+    }),
+  }),
+  
+  getUserSubscriptions: builder.query<Community[], void>({
+    query: () => "/users/subscriptions",
+  }),
+  deleteAccount: builder.mutation<{ message: string }, void>({
+    query: () => ({
+      url: "/users/delete-account",
+      method: "DELETE",
+    }),
+  }),
+
+  requestModerator: builder.mutation<{ message: string }, void>({
+    query: () => ({
+      url: "/users/request-moderator",
+      method: "POST",
+    }),
+  }),
   
   }),
 });
@@ -109,5 +134,9 @@ export const {
   useGetUserByIdQuery,
   useGetUsersQuery,
   useRequestPasswordChangeMutation,
-  useChangePasswordMutation
+  useChangePasswordMutation,
+  useUpdatePersonalizationMutation,
+  useGetUserSubscriptionsQuery,
+  useDeleteAccountMutation,
+  useRequestModeratorMutation
 } = apiSlice;

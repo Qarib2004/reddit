@@ -12,10 +12,35 @@ const AdminNavbar = () => {
         {menuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
       <ul className={`lg:flex space-x-4 ${menuOpen ? "block" : "hidden"}`}>
-        <li><Link to="/admin/users" className="hover:text-gray-300">Users</Link></li>
-        <li><Link to="/admin/community" className="hover:text-gray-300">Communities</Link></li>
-        <li><Link to="/admin/content" className="hover:text-gray-300">Content</Link></li>
-        <li><Link to="/admin/settings" className="hover:text-gray-300">Settings</Link></li>
+        <li>
+          <Link to="/admin/users" className="hover:text-gray-300">
+            Users
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/community" className="hover:text-gray-300">
+            Communities
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/content" className="hover:text-gray-300">
+            Content
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/settings" className="hover:text-gray-300">
+            Settings
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/admin/moderator-requests
+"
+            className="hover:text-gray-300"
+          >
+            Requests
+          </Link>
+        </li>
       </ul>
     </nav>
   );

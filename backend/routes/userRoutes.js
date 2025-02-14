@@ -1,5 +1,5 @@
 import express from "express";
-import { acceptFriendRequest, getUserById, savePost, selectTopics, sendFriendRequest,getUserNotifications, getUsers, rejectFriendRequest, getFriendRequests, getFriends, requestPasswordChange, changePassword } from "../controllers/userController.js";
+import { acceptFriendRequest, getUserById, savePost, selectTopics, sendFriendRequest,getUserNotifications, getUsers, rejectFriendRequest, getFriendRequests, getFriends, requestPasswordChange, changePassword, updatePersonalization, getUserSubscriptions, deleteAccount, updateModeratorRequest, requestModeratorRole } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 
@@ -15,7 +15,13 @@ router.get("/notifications", authMiddleware, getUserNotifications);
 router.get("/", authMiddleware, getUsers);   
 router.get("/friends", authMiddleware, getFriends);   
 router.post("/request-password-change", requestPasswordChange);
-router.post("/change-password", changePassword);                  
+router.post("/change-password", changePassword);  
+router.get("/subscriptions", authMiddleware, getUserSubscriptions);
+router.put("/update-personalization", authMiddleware, updatePersonalization);    
+router.delete("/delete-account", authMiddleware, deleteAccount);
+router.post("/request-moderator", authMiddleware, requestModeratorRole);
+
+
 router.get("/:id", getUserById); 
 
 

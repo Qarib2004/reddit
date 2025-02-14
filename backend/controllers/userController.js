@@ -313,3 +313,98 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ message: "Error changing password", error });
   }
 };
+
+
+
+export const updatePersonalization = async (req, res) => {
+  try {
+    const { theme, fontSize, showTrending } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.theme = theme || user.theme;
+    user.fontSize = fontSize || user.fontSize;
+    user.showTrending = showTrending !== undefined ? showTrending : user.showTrending;
+
+    await user.save();
+    res.json({ message: "Personalization updated", user });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating personalization", error });
+  }
+};
+
+
+
+
+export const getUserSubscriptions = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate("subscriptions");
+    res.json(user.subscriptions);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching subscriptions", error });
+  }
+};
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.user.id);
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting account", error });
+  }
+};
+
+
+export const requestModeratorRole = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.moderatorRequests === "pending") {
+      return res.status(400).json({ message: "You already have a pending request" });
+    }
+
+    user.moderatorRequests = "pending";
+    await user.save();
+
+    res.json({ message: "Request sent successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const getModeratorRequests = async (req, res) => {
+  try {
+    const requests = await User.find({ moderatorRequests: "pending" }).select("username email");
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const updateModeratorRequest = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (status === "approved") {
+      user.role = "moderator";
+      user.moderatorRequests = "approved";
+    } else {
+      user.moderatorRequests = "rejected";
+    }
+
+    await user.save();
+    res.json({ message: `Request ${status}` });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
