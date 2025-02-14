@@ -117,3 +117,52 @@ export interface Comment {
     topUsers: { _id: string; username: string; karma: number }[];
   }
 
+
+  export interface ModeratorStats {
+    totalReports: number;
+    resolvedReports: number;
+    pendingReports: number;
+    bannedUsers: number;
+    deletedPosts: number;
+    deletedComments: number;
+    handledReports: number;
+    dismissedReports: number; 
+  }
+  
+  
+
+  export interface ModeratorHistoryRecord {
+    _id: string;
+    moderatorId: string;
+    actionType: "ban_user" | "delete_post" | "delete_comment" | "warn_user";
+    targetId: string;
+    targetType: "user" | "post" | "comment";
+    reason: string;
+    timestamp: string;
+  }
+  
+  
+
+
+  export interface ModeratorChatMessage {
+    _id: string;
+    senderId: string;
+    senderUsername: string;
+    message: string; 
+    timestamp: string;
+  }
+  
+
+  export interface UserWarnings {
+    _id: string;
+    userId: string;
+    username: string;
+    warnings: {
+      reason: string;
+      issuedBy: string;
+      timestamp: string;
+    }[];
+  }
+  
+  
+  

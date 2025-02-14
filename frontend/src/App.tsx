@@ -27,6 +27,14 @@ import AdminContent from "./pages/admin/AdminContent";
 import AdminCommunity from "./pages/admin/AdminCommunity";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminModeratorRequests from "./pages/admin/AdminModeratorRequets";
+import ModeratorLayout from "./layouts/ModeraotrLayout";
+import ModeratorDashboard from "./pages/moderator/ModeratorDashboard";
+import ModeratorReportedPosts from "./pages/moderator/ModeratorReportedPosts";
+import ModeratorReportedComments from "./pages/moderator/ModeratorReportedComments";
+import ModeratorWarnings from "./pages/moderator/ModeratorWarning";
+import ModeratorStats from "./pages/moderator/ModeratorStats";
+import ModeratorHistory from "./pages/moderator/ModeraotHistoty";
+import ModeratorChat from "./pages/moderator/ModeratorChat";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -77,6 +85,22 @@ const App = () => {
 
         </Route>
       )}
+
+{authUser && authUser.role === "moderator" && (
+  <Route path="/moderator" element={<ModeratorLayout />}>
+    <Route path="dashboard" element={<ModeratorDashboard />} />
+    <Route path="reported-posts" element={<ModeratorReportedPosts />} />
+    <Route path="reported-comments" element={<ModeratorReportedComments />} />
+    <Route path="warnings" element={<ModeratorWarnings />} />
+    <Route path="stats" element={<ModeratorStats />} />
+    <Route path="history" element={<ModeratorHistory />} />
+    <Route path="chat" element={<ModeratorChat />} />
+  </Route>
+)}
+
+
+
+
       </Routes>
     </>
   );
