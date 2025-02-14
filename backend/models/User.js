@@ -59,6 +59,29 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false, 
     },
+    bio: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 300,
+      required:false
+    },
+    country: {
+      type: String,
+      default: "",
+      trim: true,
+      required:false
+
+    },
+    timezone: {
+      type: String,
+      default: "UTC",
+      required:false
+
+    },
+    phoneNumber: { type: String, unique: true, sparse: true },
+    resetCode: { type: String, default: null },
+  resetCodeExpires: { type: Date, default: null },
   },
   { timestamps: true }
 );

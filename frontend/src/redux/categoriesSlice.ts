@@ -78,7 +78,6 @@ export const categoriesApi = createApi({
     }),
   }),
 });
-console.log("Вызов API: /api/categories");
 
 export const {
   useGetCategoriesQuery,

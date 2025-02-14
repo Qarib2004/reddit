@@ -8,16 +8,19 @@ const client = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
-export const sendSMSCode = async (phoneNumber, code) => {
+export const sendSMSCode = async (phoneNumber, resetCode) => {
   try {
-    await client.messages.create({
-      body: `Your password reset code: ${code}`,
-      from: process.env.TWILIO_PHONE_NUMBER,
+    
+
+    const message = await client.messages.create({
+      body: `Your password reset code is: ${resetCode}`,
+      from: process.env.TWILIO_PHONE_NUMBER, 
       to: phoneNumber,
     });
-    console.log(`📩 SMS with code ${code} sent to ${phoneNumber}`);
+
+    console.log("SMS sent! Message SID:", message.sid);
   } catch (error) {
-    console.error("❌ Error sending SMS:", error);
-    throw new Error("Error sending SMS");
+    console.error(" Error Twilio:", error);
+    throw error;
   }
 };

@@ -2,6 +2,10 @@ import User from "../models/User.js";
 import Topic from "../models/Topic.js";
 import Message from "../models/Message.js";
 import mongoose from "mongoose";
+import { sendSMSCode } from "../utils/sms.js"; 
+import bcrypt from "bcrypt";
+
+
 
 export const makeModerator = async (req, res) => {
   try {
@@ -249,5 +253,63 @@ export const getFriends = async (req, res) => {
   } catch (error) {
     console.error("Error when receiving friends:", error);
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const requestPasswordChange = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    const user = await User.findOne({ phoneNumber });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetCode = resetCode;
+    user.resetCodeExpires = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    await sendSMSCode(phoneNumber, resetCode);
+    res.json({ message: "Reset code sent to your phone" });
+  } catch (error) {
+    res.status(500).json({ message: "Error sending SMS", error });
+  }
+};
+
+
+export const changePassword = async (req, res) => {
+  
+
+  try {
+    const { phoneNumber, resetCode, newPassword } = req.body;
+
+    if (!phoneNumber || !resetCode || !newPassword) {
+      console.error("Error: Not all fields are filled!");
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await User.findOne({ phoneNumber });
+
+    if (!user) {
+      console.error("Error: The user is not found!");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.resetCode !== resetCode || user.resetCodeExpires < Date.now()) {
+      console.error("Error: incorrect or expired code!");
+      return res.status(400).json({ message: "Invalid or expired reset code" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetCode = null;
+    user.resetCodeExpires = null;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.status(500).json({ message: "Error changing password", error });
   }
 };

@@ -25,6 +25,7 @@ import { useGetUserQuery } from "./redux/apiSlice";
 import { setUser } from "./redux/authSlice";
 import AdminContent from "./pages/admin/AdminContent";
 import AdminCommunity from "./pages/admin/AdminCommunity";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -70,6 +71,7 @@ const App = () => {
           <Route path="settings" element={<AdminSettings />} />
           <Route path="content" element={<AdminContent />} />
          <Route path="community" element={<AdminCommunity />} />
+         <Route path="dashboard" element={<AdminDashboard />} />
         </Route>
       )}
       </Routes>

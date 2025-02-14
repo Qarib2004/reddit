@@ -125,7 +125,7 @@ const Navbar = () => {
                   <img
                     src={user.avatar || "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"}
                     alt="User Avatar"
-                    className="w-8 h-8 rounded-full"
+                    className="w-8 h-8 rounded-full object-cover"
                   />
                   <ChevronDown size={16} className="text-gray-500" />
                 </button>

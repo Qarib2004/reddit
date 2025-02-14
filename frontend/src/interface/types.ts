@@ -82,6 +82,10 @@ export interface Comment {
     friends: { _id: string; username: string; avatar?: string }[]; 
     friendRequests?: string[];
     banned: boolean;
+    bio?: string;  
+    country?: string;  
+    timezone?: string; 
+    phoneNumber?:string;
   }
   
 
@@ -106,5 +110,6 @@ export interface Comment {
     totalPosts: number;
     totalComments: number;
     totalCommunities: number;
+    topUsers: { _id: string; username: string; karma: number }[];
   }
 

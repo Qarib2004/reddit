@@ -76,6 +76,22 @@ export const apiSlice = createApi({
       query: () => "/",
    
   }),
+  requestPasswordChange: builder.mutation<{ message: string }, { phoneNumber: string }>({
+    query: (data) => ({
+      url: "/users/request-password-change",
+      method: "POST",
+      body: data,
+    }),
+  }),
+  
+  changePassword: builder.mutation<{ message: string }, { phoneNumber: string; resetCode: string; newPassword: string }>({
+    query: (data) => ({
+      url: "/users/change-password",
+      method: "POST",
+      body: data,
+    }),
+  }),
+  
   }),
 });
 
@@ -91,5 +107,7 @@ export const {
   useSendFriendRequestMutation,
   useAcceptFriendRequestMutation,
   useGetUserByIdQuery,
-  useGetUsersQuery
+  useGetUsersQuery,
+  useRequestPasswordChangeMutation,
+  useChangePasswordMutation
 } = apiSlice;

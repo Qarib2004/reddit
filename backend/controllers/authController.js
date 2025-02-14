@@ -135,7 +135,7 @@ export const verifyEmail = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email, selectedTopics,avatar } = req.body;
+    const { username, email, selectedTopics,avatar,bio, country, timezone,phoneNumber } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -146,6 +146,10 @@ export const updateUser = async (req, res) => {
     if (email) user.email = email;
     if (selectedTopics) user.selectedTopics = selectedTopics;
     if (avatar) user.avatar = avatar;
+    if (bio) user.bio = bio;
+    if (country) user.country = country;
+    if (timezone) user.timezone = timezone;
+    if(phoneNumber) user.phoneNumber = phoneNumber;
     await user.save();
     res.json({ message: "Profile updated successfully", user });
   } catch (error) {
