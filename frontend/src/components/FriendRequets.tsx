@@ -4,7 +4,7 @@ import {
   useAcceptFriendRequestMutation,
   useRejectFriendRequestMutation,
 } from "../redux/friendsSlice";
-import { Check, X, UserPlus2 } from "lucide-react";
+import { Check, X, UserPlus2, Loader } from "lucide-react";
 
 const FriendRequests = () => {
   const { data: friendRequests, refetch, isLoading, error } = useGetFriendRequestsQuery();
@@ -44,8 +44,8 @@ const FriendRequests = () => {
     }
   };
 
-  if (isLoading) return <div>Loading requests for friends ...</div>;
-  if (error) return <div>Error when receiving requests for friends</div>;
+  if (isLoading)  return <Loader />;
+  if (error)  return <Loader />;
 
   return (
     <div className="fixed right-4 top-16 w-full max-w-sm transform rounded-lg bg-white shadow-xl transition-all sm:right-8 md:max-w-md">

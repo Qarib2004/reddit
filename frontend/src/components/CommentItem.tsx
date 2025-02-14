@@ -108,7 +108,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
     modalTimeoutRef.current = setTimeout(() => {
       setHoveredUserId(comment.author._id);
       setIsUserModalOpen(true);
-    }, 300); // 300ms delay before showing the modal
+    }, 300); 
   };
 
   const handleMouseLeave = () => {
@@ -127,7 +127,6 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   return (
     <div className="group relative">
       <div className="flex gap-3">
-        {/* Upvote & Downvote */}
         <div className="flex flex-col items-center">
           <button
             onClick={handleLike}
@@ -148,9 +147,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
           </button>
         </div>
 
-        {/* Comment Content */}
         <div className="flex-1">
-          {/* User Info with Hover Modal */}
           <div
             className="flex items-center gap-2 text-xs cursor-pointer relative"
             ref={userInfoRef}
@@ -181,10 +178,8 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             )}
           </div>
 
-          {/* Comment Text */}
           <div className="mt-1 text-sm text-gray-900">{comment.content}</div>
 
-          {/* Actions */}
           <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
             <button onClick={handleReplyToggle} className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <MessageSquare size={14} />
@@ -203,7 +198,6 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             </button>
           </div>
 
-          {/* Reply Form */}
           {isReplying && (
             <form onSubmit={handleSubmitReply} className="mt-3">
               <textarea
@@ -223,7 +217,6 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             </form>
           )}
 
-          {/* Replies */}
           {comment.replies && comment.replies.length > 0 && (
             <>
               <button onClick={() => setIsRepliesCollapsed(!isRepliesCollapsed)} className="mt-2 text-xs text-gray-500 hover:underline">

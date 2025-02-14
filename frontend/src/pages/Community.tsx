@@ -9,6 +9,7 @@ import { useGetPostsQuery } from "../redux/postsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import { Users, Flag, Loader2, LogOut } from "lucide-react";
 import PostItem from "../components/PostItem";
+import Loader from "../assets/loader-ui/Loader";
 
 const Community = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,8 +52,9 @@ const Community = () => {
       console.error("Error toggling subscription:", error);
     }
   };
+  
   if (communityLoading)
-    return <p className="text-center p-4 animate-pulse">Loading community...</p>;
+    return <Loader />;
   if (!community)
     return <p className="text-center p-4"> Community not found</p>;
 

@@ -21,6 +21,7 @@ import {
   Bookmark
 } from "lucide-react";
 import { useGetUserQuery, useSavePostMutation, useUpdateUserMutation } from "../redux/apiSlice";
+import Loader from "../assets/loader-ui/Loader";
 
 const PostItem = ({ post }: { post: any }) => {
   const [likePost] = useLikePostMutation();
@@ -59,8 +60,14 @@ const PostItem = ({ post }: { post: any }) => {
   
   const [updateUser] = useUpdateUserMutation();
 
-  if (!post || !post.community) {
-    return <div>Loading post...</div>;
+  if (!post) {
+    return <Loader />;
+
+  }
+
+  if(!post.community) {
+    return <Loader />;
+
   }
 
   const isSubscribed = user?.subscriptions?.includes(post.community._id);

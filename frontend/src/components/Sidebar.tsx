@@ -30,7 +30,7 @@ const Sidebar = () => {
   };
 
   const sidebarContent = (
-    <div className="w-64 bg-white h-full shadow-lg p-4">
+    <div className="w-64 h-full bg-white shadow-lg p-4">
       <div className="flex justify-between items-center md:hidden mb-4">
         <h2 className="font-bold">Menu</h2>
         <button onClick={toggleSidebar} className="p-2 hover:bg-gray-100 rounded-lg">

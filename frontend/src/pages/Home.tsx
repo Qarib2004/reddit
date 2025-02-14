@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import SelectTopicModal from "../components/SelectTopicModal";
 import PostItem from "../components/PostItem";
 import { Rocket, Flame, Clock, TrendingUp, Award, Search } from "lucide-react";
+import Loader from "../assets/loader-ui/Loader";
 
 const Home = () => {
   const [sort, setSort] = useState("hot");
@@ -12,8 +13,8 @@ const Home = () => {
   const { data: posts, isLoading, error } = useGetPostsQuery({ sort, search });
   const { data: user } = useGetUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
 
-  
   useEffect(() => {
     const hasSeenModal = localStorage.getItem("hasSeenTopicModal");
     if (!hasSeenModal && user && (!user.topics || user.topics.length === 0)) {
@@ -22,7 +23,18 @@ const Home = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (isLoading) {
+      setShowLoader(true);
+    } else {
+      const timer = setTimeout(() => {
+        setShowLoader(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
   
+
   const sortOptions = [
     { value: "best", label: "Best", icon: Award },
     { value: "hot", label: "Hot", icon: Flame },
@@ -31,12 +43,7 @@ const Home = () => {
     { value: "rising", label: "Rising", icon: TrendingUp },
   ];
 
-  if (isLoading)
-    return (
-      <div className="flex justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
+  if (isLoading) return <Loader />;
 
   if (error)
     return (
