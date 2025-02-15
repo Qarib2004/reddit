@@ -4,7 +4,6 @@ import {
   useDislikeCommentMutation,
   useReplyToCommentMutation,
   useReportCommentMutation,
-  
 } from "../redux/commentsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import {
@@ -14,7 +13,7 @@ import {
   Award,
   Share2,
   MoreHorizontal,
-  Flag
+  Flag,
 } from "lucide-react";
 import ReplyItem from "./ReplyItem";
 import UserModal from "./UserModal";
@@ -41,8 +40,8 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(false);
-   const [reportReason, setReportReason] = useState("");
-   const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -99,7 +98,6 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
     }
   };
 
-
   useEffect(() => {
     return () => {
       if (modalTimeoutRef.current) {
@@ -115,7 +113,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
     modalTimeoutRef.current = setTimeout(() => {
       setHoveredUserId(comment.author._id);
       setIsUserModalOpen(true);
-    }, 300); 
+    }, 300);
   };
 
   const handleMouseLeave = () => {
@@ -135,9 +133,12 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
       toast.error("Please provide a reason for the report.");
       return;
     }
-  
+
     try {
-      const response = await reportComment({ commentId: comment._id, reason: reportReason }).unwrap();
+      const response = await reportComment({
+        commentId: comment._id,
+        reason: reportReason,
+      }).unwrap();
       console.log("Report successful:", response);
       toast.success("Comment reported successfully!");
       setShowReportModal(false);
@@ -147,8 +148,6 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
       toast.error("Failed to report comment.");
     }
   };
-  
-
 
   return (
     <div className="group relative">
@@ -157,12 +156,16 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
           <button
             onClick={handleLike}
             className={`p-1 hover:bg-gray-100 rounded ${
-              isLiked ? "text-orange-500" : "text-gray-400 hover:text-orange-500"
+              isLiked
+                ? "text-orange-500"
+                : "text-gray-400 hover:text-orange-500"
             }`}
           >
             <ArrowBigUp size={16} />
           </button>
-          <span className="text-xs font-medium text-gray-900">{likes - dislikes}</span>
+          <span className="text-xs font-medium text-gray-900">
+            {likes - dislikes}
+          </span>
           <button
             onClick={handleDislike}
             className={`p-1 hover:bg-gray-100 rounded ${
@@ -178,20 +181,24 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             className="flex items-center gap-2 text-xs cursor-pointer relative"
             ref={userInfoRef}
             onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+            onMouseLeave={handleMouseLeave}
           >
             <img
-            
-              src={comment.author.avatar || "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"}
+              src={
+                comment.author.avatar ||
+                "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"
+              }
               alt="avatar"
               className="w-6 h-6 rounded-full"
-            
             />
-            <span className="font-medium text-gray-900">u/{comment.author?.username || "anonymous"}</span>
+            <span className="font-medium text-gray-900">
+              u/{comment.author?.username || "anonymous"}
+            </span>
             <span className="text-gray-400">•</span>
-            <span className="text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
+            <span className="text-gray-500">
+              {new Date(comment.createdAt).toLocaleString()}
+            </span>
 
-            
             {isUserModalOpen && hoveredUserId === comment.author._id && (
               <div
                 ref={modalRef}
@@ -199,7 +206,10 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
                 onMouseEnter={() => setIsUserModalOpen(true)}
                 onMouseLeave={handleMouseLeave}
               >
-                <UserModal userId={comment.author._id} onClose={() => setIsUserModalOpen(false)} />
+                <UserModal
+                  userId={comment.author._id}
+                  onClose={() => setIsUserModalOpen(false)}
+                />
               </div>
             )}
           </div>
@@ -207,7 +217,10 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
           <div className="mt-1 text-sm text-gray-900">{comment.content}</div>
 
           <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-            <button onClick={handleReplyToggle} className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
+            <button
+              onClick={handleReplyToggle}
+              className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
+            >
               <MessageSquare size={14} />
               <span>Reply</span>
             </button>
@@ -221,47 +234,61 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             </button>
             <button className="p-1 hover:bg-gray-100 rounded-md">
               <MoreHorizontal size={14} />
-              
             </button>
 
-           
-                <button
-                  onClick={() => setShowReportModal(true)}
-                  className="flex items-center gap-2 px-3 py-2  text-left hover:bg-gray-100 text-red-500"
-                >
-                  <Flag size={14} />
-                  Report
-                </button>
-              
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="flex items-center gap-2 px-3 py-2  text-left hover:bg-gray-100 text-red-500"
+            >
+              <Flag size={14} />
+              Report
+            </button>
           </div>
 
           {showReportModal && (
-        <div className="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Report Comment</h3>
-            <textarea
-              className="w-full p-2 border rounded-md"
-              placeholder="Enter reason..."
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-            />
-            <div className="flex justify-end mt-4 gap-2">
-              <button
-                onClick={() => setShowReportModal(false)}
-                className="px-4 py-1.5 bg-gray-300 rounded-md"
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 animate-fadeIn">
+              <div
+                className="bg-[#1A1A1B] rounded-lg w-full max-w-md shadow-xl transform transition-all scale-95 animate-fadeIn border border-[#343536]"
+                onClick={(e) => e.stopPropagation()}
               >
-                Cancel
-              </button>
-              <button
-                onClick={handleReportComment}
-                className="px-4 py-1.5 bg-red-500 text-white rounded-md"
-              >
-                Submit
-              </button>
+                <div className="p-4 border-b border-[#343536]">
+                  <h3 className="text-lg font-medium text-[#D7DADC]">
+                    Report Comment
+                  </h3>
+                </div>
+
+                <div className="p-4">
+                  <textarea
+                    className="w-full p-3 bg-[#272729] border border-[#343536] rounded-md text-[#D7DADC] placeholder-[#818384] 
+                     focus:ring-2 focus:ring-[#24A0ED] focus:border-[#24A0ED] transition outline-none resize-none
+                     hover:border-[#D7DADC]"
+                    placeholder="Why are you reporting this comment?"
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 p-4 border-t border-[#343536]">
+                  <button
+                    onClick={() => setShowReportModal(false)}
+                    className="px-4 py-2 text-[#D7DADC] bg-transparent rounded-full hover:bg-[#272729] transition-colors
+                     text-sm font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleReportComment}
+                    className="px-4 py-2 bg-[#FF4500] text-white rounded-full hover:bg-[#FF4500]/90 transition-colors
+                     text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!reportReason.trim()}
+                  >
+                    Report
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
           {isReplying && (
             <form onSubmit={handleSubmitReply} className="mt-3">
@@ -272,10 +299,17 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
                 placeholder="Reply to this comment..."
               />
               <div className="flex justify-end gap-2 mt-2">
-                <button onClick={handleReplyToggle} className="px-4 py-1.5 text-sm font-medium text-gray-500 bg-gray-50 rounded-full hover:bg-gray-100">
+                <button
+                  onClick={handleReplyToggle}
+                  className="px-4 py-1.5 text-sm font-medium text-gray-500 bg-gray-50 rounded-full hover:bg-gray-100"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={!replyContent.trim()} className="px-4 py-1.5 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button
+                  type="submit"
+                  disabled={!replyContent.trim()}
+                  className="px-4 py-1.5 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Reply
                 </button>
               </div>
@@ -284,7 +318,10 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
 
           {comment.replies && comment.replies.length > 0 && (
             <>
-              <button onClick={() => setIsRepliesCollapsed(!isRepliesCollapsed)} className="mt-2 text-xs text-gray-500 hover:underline">
+              <button
+                onClick={() => setIsRepliesCollapsed(!isRepliesCollapsed)}
+                className="mt-2 text-xs text-gray-500 hover:underline"
+              >
                 {isRepliesCollapsed ? "Show replies" : "Hide replies"}
               </button>
               {!isRepliesCollapsed &&
