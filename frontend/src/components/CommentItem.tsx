@@ -3,6 +3,8 @@ import {
   useLikeCommentMutation,
   useDislikeCommentMutation,
   useReplyToCommentMutation,
+  useReportCommentMutation,
+  
 } from "../redux/commentsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import {
@@ -12,10 +14,12 @@ import {
   Award,
   Share2,
   MoreHorizontal,
+  Flag
 } from "lucide-react";
 import ReplyItem from "./ReplyItem";
 import UserModal from "./UserModal";
 import { Comment } from "../interface/types";
+import toast from "react-hot-toast";
 
 const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -28,6 +32,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   const [dislikeComment] = useDislikeCommentMutation();
   const [replyToComment] = useReplyToCommentMutation();
   const { data: user, refetch } = useGetUserQuery();
+  const [reportComment] = useReportCommentMutation();
 
   const [likes, setLikes] = useState(comment.upvotes?.length || 0);
   const [dislikes, setDislikes] = useState(comment.downvotes?.length || 0);
@@ -36,6 +41,8 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(false);
+   const [reportReason, setReportReason] = useState("");
+   const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -123,6 +130,25 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
     }, 200);
   };
 
+  const handleReportComment = async () => {
+    if (!reportReason.trim()) {
+      toast.error("Please provide a reason for the report.");
+      return;
+    }
+  
+    try {
+      const response = await reportComment({ commentId: comment._id, reason: reportReason }).unwrap();
+      console.log("Report successful:", response);
+      toast.success("Comment reported successfully!");
+      setShowReportModal(false);
+      setReportReason("");
+    } catch (error) {
+      console.error(" Error reporting comment:", error);
+      toast.error("Failed to report comment.");
+    }
+  };
+  
+
 
   return (
     <div className="group relative">
@@ -195,8 +221,47 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             </button>
             <button className="p-1 hover:bg-gray-100 rounded-md">
               <MoreHorizontal size={14} />
+              
             </button>
+
+           
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="flex items-center gap-2 px-3 py-2  text-left hover:bg-gray-100 text-red-500"
+                >
+                  <Flag size={14} />
+                  Report
+                </button>
+              
           </div>
+
+          {showReportModal && (
+        <div className="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Report Comment</h3>
+            <textarea
+              className="w-full p-2 border rounded-md"
+              placeholder="Enter reason..."
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+            />
+            <div className="flex justify-end mt-4 gap-2">
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="px-4 py-1.5 bg-gray-300 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReportComment}
+                className="px-4 py-1.5 bg-red-500 text-white rounded-md"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
           {isReplying && (
             <form onSubmit={handleSubmitReply} className="mt-3">

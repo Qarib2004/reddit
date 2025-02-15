@@ -66,6 +66,11 @@ export interface Comment {
   replies?: Comment[]; 
   upvotes: string[]; 
   downvotes: string[]; 
+  reports?: {
+    userId: string; 
+    reason: string; 
+    timestamp: string;
+  }[];
 }
   
   export interface Community {

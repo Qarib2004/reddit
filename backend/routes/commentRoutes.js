@@ -7,7 +7,8 @@ import {
   likeComment,
   replyToComment,
   likeReply,
-  dislikeReply
+  dislikeReply,
+  reportComment
 } from "../controllers/commentController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -42,5 +43,7 @@ router.post("/:id/downvotes", authMiddleware, dislikeComment);
 
 router.post("/:id/reply/upvotes", authMiddleware, likeReply);
 router.post("/:id/reply/downvotes", authMiddleware, dislikeReply);
+
+router.post("/report/:id", authMiddleware, reportComment);
 
 export default router;

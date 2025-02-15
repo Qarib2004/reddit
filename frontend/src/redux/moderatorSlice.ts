@@ -16,7 +16,7 @@ export const moderatorApi = createApi({
       }),
     }),
     getReportedComments: builder.query<Comment[], void>({
-      query: () => "/reported-comments",
+      query: () => "/reported",
     }),
     takeActionOnComment: builder.mutation<{ message: string }, { id: string; action: "delete" | "dismiss" }>({
       query: ({ id, action }) => ({

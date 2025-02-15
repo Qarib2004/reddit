@@ -33,6 +33,13 @@ const CommentSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    reports: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        reason: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now }
+      }
+    ]
   },
   { timestamps: true }
 );

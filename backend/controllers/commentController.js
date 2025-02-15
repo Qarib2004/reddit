@@ -238,3 +238,41 @@ export const dislikeReply = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+export const reportComment = async (req, res) => {
+  try {
+   
+    
+    const { id } = req.params;
+    const { reason } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+     
+      return res.status(401).json({ message: "Unauthorized: No user ID found" });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ message: "Report reason is required" });
+    }
+
+    const comment = await Comment.findById(id);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    if (!comment.reports) {
+      comment.reports = [];
+    }
+
+
+    comment.reports.push({ userId, reason, timestamp: new Date() });
+    await comment.save();
+
+    res.status(200).json({ message: "Comment reported successfully" });
+  } catch (error) {
+    console.error("Error in reportComment:", error);
+    res.status(500).json({ message: "Internal Server Error", error });
+  }
+};

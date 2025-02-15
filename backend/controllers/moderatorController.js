@@ -48,12 +48,19 @@ export const takeActionOnPost = async (req, res) => {
 
   export const getReportedComments = async (req, res) => {
     try {
-      const reportedComments = await Comment.find({ reported: true }).populate("author", "username");
+  
+      const reportedComments = await Comment.find({ reports: { $exists: true, $not: { $size: 0 } } })
+        .populate("author", "username avatar")
+        .populate("post", "title");
+  
+      
       res.json(reportedComments);
     } catch (error) {
+      console.error("Error fetching reported comments:", error);
       res.status(500).json({ message: "Error fetching reported comments", error });
     }
   };
+  
 
   
 

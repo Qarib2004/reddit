@@ -65,6 +65,14 @@ export const commentsApi = createApi({
         method: "POST",
       }),
     }),
+
+    reportComment: builder.mutation<{ message: string }, { commentId: string; reason: string }>({
+      query: ({ commentId, reason }) => ({
+        url: `comments/report/${commentId}`,
+        method: "POST",
+        body: { reason },
+      }),
+    }),
     
   }),
 });
@@ -77,5 +85,6 @@ export const {
   useDislikeCommentMutation, 
   useReplyToCommentMutation,
   useLikeReplyMutation,
-  useDislikeReplyMutation
+  useDislikeReplyMutation,
+  useReportCommentMutation
 } = commentsApi;

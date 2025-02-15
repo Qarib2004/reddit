@@ -8,9 +8,9 @@ router.get("/reported-posts", moderatorMiddleware, getReportedPosts);
 
 router.put("/reported-posts/:id", moderatorMiddleware, takeActionOnPost);
 
-router.get("/reported-comments", moderatorMiddleware, getReportedComments);
+router.get("/reported", moderatorMiddleware, getReportedComments);
 
-router.put("/reported-comments/:id", moderatorMiddleware, takeActionOnComment);
+router.put("/reported/:id", moderatorMiddleware, takeActionOnComment);
 
 router.get("/stats", moderatorMiddleware, getModeratorStats);
 
