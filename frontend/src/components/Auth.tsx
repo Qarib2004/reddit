@@ -5,7 +5,7 @@ import {
   useRegisterMutation,
   useGetUserQuery,
 } from "../redux/apiSlice";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, LogIn } from "lucide-react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { toast } from "react-toastify";
@@ -55,9 +55,7 @@ const Auth = () => {
         } else {
           const result = await register(values).unwrap();
           if (result) {
-            toast.success(
-              "Registration successful! Check your email to confirm."
-            );
+            toast.success("Registration successful! Check your email to confirm.");
           }
         }
       } catch (error: any) {
@@ -67,95 +65,138 @@ const Auth = () => {
   });
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-center text-xl font-bold">
-          {isLogin ? "Log in to Reddit" : "Sign up for Reddit"}
-        </h2>
-        <button
-          className="w-full flex items-center gap-2 border px-4 py-2 rounded-md mb-3"
-          onClick={() =>
-            (window.location.href = "http://localhost:5000/api/auth/google")
-          }
-        >
+    <div className="min-h-screen bg-[#DAE0E6] flex flex-col md:flex-row items-stretch md:items-center justify-center p-4">
+      <div className="hidden md:flex md:w-1/2 bg-[#0045AC] text-white p-8 rounded-l-lg items-center justify-center">
+        <div className="max-w-md">
+          <div className="flex items-center gap-2 mb-6">
+            <LogIn size={32} />
+            <h1 className="text-3xl font-bold">reddit</h1>
+          </div>
+          <h2 className="text-2xl font-bold mb-4">Welcome to Reddit</h2>
+          <p className="text-lg opacity-90 mb-6">
+            Join the world's largest online community and explore endless conversations.
+          </p>
           <img
-            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAA4CAMAAABuU5ChAAAA+VBMVEX////pQjU0qFNChfT6uwU0f/O4zvs6gfSJr/j6twDoOisjePPoNSXpPjDrWU/oLRr+9vZ7pff/vAAUoUAkpEn0ran619b82pT7wgD+68j947H/+e7//PafvPm/0vuBw5Df7+P63tz3xcPxl5HnJQ7qUEXxj4n4z83zoJzqSz/vgXrucWrsY1r1tbHrSBPoOjbvcSr0kx74rRH80XntZC3xhSPmGRr86+r4sk/936EJcfPS3/yowvnbwVKjsTjx9f5urEjkuBu9tC+ErkJyvoRRpj2az6hWs23j6/0emX2z2btAiuI8k8AyqkE5nZU1pGxCiOxVmtHJ5M+PSt3WAAACGElEQVRIieWSa3fSQBCGk20CJRcW2AWKxgJtqCmieNdatV5SUtFq5f//GJeE7CXJJOT4TZ+PO+c58+7MaNr/SWd60mecTDs1pMFp28dODPZnZw/369TXseXqHNfCblDdte84krTDwUFFwnMnJyXm+bSsmZ/vlcb1+6A2x5C1xYeyPgIyJlhtYDjzjOYyZA3oFighLYxni8UMY6dCG/jy9KzTQfI8DXSnTNN0kcl1lNE9dlxYC8TnnEVmAJ02qHlPllyb58vgmQ2Np0tYgzGMo2ex6IKRihi1mPhcZyYuO8McL4yYl0vrrI6mJZpx9Or1mzqa10rFt8p7o5ArXh+lXutC8d6ZBdiXvH6PeyPFsw8KMBu8fsG9+3t473l9yD1vD+/BX3v1cgqv3lzE/8A9NCUK5sn33vugeN1DQTcVTbG/9M56H+lEAzg2d54t7iW5657xCdEx5PF+B9Lj9oO9z4hBgIZX6YyaXfmZaV9QQkU781h+Hra+7jQaFv6Or8RW3r1rhErES641D9XKigox8jJaQxyAfZOpIQm6kiuT6BvfujqVuEpkkY43u+d1RBBF35v55aVJidKSEBRFiJAk/+0PM3NjgjFFMLc/WVYzlzImLBPprzvzrlBjHUmZSH8DmqatS0QSZtcjTxUBWSlZw1bckhaYlISTcm1rIqKolJJxtRWnXUVscTFsjWFFwoy7WTM2+zX69/gDaLcy7SET9nsAAAAASUVORK5CYII="
-            alt="Google"
-            className="w-5 h-5"
+            src="https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&q=80&w=500"
+            alt="Community"
+            className="rounded-lg shadow-xl w-full max-w-sm mx-auto"
           />
-          Continue with Google
-        </button>
-
-        <div className="relative my-3 text-center">
-          <span className="text-gray-500 text-sm bg-white px-2">or</span>
         </div>
-        <form onSubmit={formik.handleSubmit} className="space-y-3">
-          {!isLogin && (
-            <div className="relative">
-              <User className="absolute left-3 top-3 text-gray-500" size={20} />
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={formik.values.username}
-                onChange={formik.handleChange}
-                className="border rounded-md px-10 py-2 w-full"
-              />
-              {formik.errors.username && (
-                <p className="text-red-500 text-sm">{formik.errors.username}</p>
+      </div>
+
+      <div className="w-full md:w-1/2 bg-white p-6 md:p-12 rounded-lg md:rounded-l-none md:rounded-r-lg shadow-xl">
+        <div className="max-w-md mx-auto">
+          <div className="md:hidden flex items-center gap-2 mb-6 justify-center">
+            <LogIn size={32} className="text-[#0045AC]" />
+            <h1 className="text-3xl font-bold text-[#0045AC]">reddit</h1>
+          </div>
+          
+          <h2 className="text-2xl font-bold text-center mb-8">
+            {isLogin ? "Log in to Reddit" : "Sign up for Reddit"}
+          </h2>
+
+          <button
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 px-6 py-3 rounded-full mb-6 hover:bg-gray-50 transition-colors duration-200"
+            onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}
+          >
+            <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAA4CAMAAABuU5ChAAAA+VBMVEX////pQjU0qFNChfT6uwU0f/O4zvs6gfSJr/j6twDoOisjePPoNSXpPjDrWU/oLRr+9vZ7pff/vAAUoUAkpEn0ran619b82pT7wgD+68j947H/+e7//PafvPm/0vuBw5Df7+P63tz3xcPxl5HnJQ7qUEXxj4n4z83zoJzqSz/vgXrucWrsY1r1tbHrSBPoOjbvcSr0kx74rRH80XntZC3xhSPmGRr86+r4sk/936EJcfPS3/yowvnbwVKjsTjx9f5urEjkuBu9tC+ErkJyvoRRpj2az6hWs23j6/0emX2z2btAiuI8k8AyqkE5nZU1pGxCiOxVmtHJ5M+PSt3WAAACGElEQVRIieWSa3fSQBCGk20CJRcW2AWKxgJtqCmieNdatV5SUtFq5f//GJeE7CXJJOT4TZ+PO+c58+7MaNr/SWd60mecTDs1pMFp28dODPZnZw/369TXseXqHNfCblDdte84krTDwUFFwnMnJyXm+bSsmZ/vlcb1+6A2x5C1xYeyPgIyJlhtYDjzjOYyZA3oFighLYxni8UMY6dCG/jy9KzTQfI8DXSnTNN0kcl1lNE9dlxYC8TnnEVmAJ02qHlPllyb58vgmQ2Np0tYgzGMo2ex6IKRihi1mPhcZyYuO8McL4yYl0vrrI6mJZpx9Or1mzqa10rFt8p7o5ArXh+lXutC8d6ZBdiXvH6PeyPFsw8KMBu8fsG9+3t473l9yD1vD+/BX3v1cgqv3lzE/8A9NCUK5sn33vugeN1DQTcVTbG/9M56H+lEAzg2d54t7iW5657xCdEx5PF+B9Lj9oO9z4hBgIZX6YyaXfmZaV9QQkU781h+Hra+7jQaFv6Or8RW3r1rhErES641D9XKigox8jJaQxyAfZOpIQm6kiuT6BvfujqVuEpkkY43u+d1RBBF35v55aVJidKSEBRFiJAk/+0PM3NjgjFFMLc/WVYzlzImLBPprzvzrlBjHUmZSH8DmqatS0QSZtcjTxUBWSlZw1bckhaYlISTcm1rIqKolJJxtRWnXUVscTFsjWFFwoy7WTM2+zX69/gDaLcy7SET9nsAAAAASUVORK5CYII="
+              alt="Google"
+              className="w-5 h-5"
+            />
+            Continue with Google
+          </button>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-4 text-sm text-gray-500 bg-white">or</span>
+            </div>
+          </div>
+
+          <form onSubmit={formik.handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-1">
+                <div className="relative">
+                  <User className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    value={formik.values.username}
+                    onChange={formik.handleChange}
+                    className="w-full px-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  />
+                </div>
+                {formik.errors.username && (
+                  <p className="text-red-500 text-sm pl-4">{formik.errors.username}</p>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  className="w-full px-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+              {formik.errors.email && (
+                <p className="text-red-500 text-sm pl-4">{formik.errors.email}</p>
               )}
             </div>
-          )}
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 text-gray-500" size={20} />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              className="border rounded-md px-10 py-2 w-full"
-            />
-            {formik.errors.email && (
-              <p className="text-red-500 text-sm">{formik.errors.email}</p>
+
+            <div className="space-y-1">
+              <div className="relative">
+                <Lock className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  className="w-full px-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+              {formik.errors.password && (
+                <p className="text-red-500 text-sm pl-4">{formik.errors.password}</p>
+              )}
+            </div>
+
+            {isLogin && (
+              <Link
+                to="/forgot-password"
+                className="block text-right text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200"
+              >
+                Forgot password?
+              </Link>
             )}
-          </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 text-gray-500" size={20} />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              className="border rounded-md px-10 py-2 w-full"
-            />
-            {formik.errors.password && (
-              <p className="text-red-500 text-sm">{formik.errors.password}</p>
-            )}
-          </div>
-          <Link
-            to="/forgot-password"
-            className="text-blue-600 text-sm hover:underline block text-right"
-          >
-            Forgot password?
-          </Link>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          >
-            {isLogin ? "Login" : "Sign Up"}
-          </button>
-        </form>
-        <p className="text-sm text-center mt-4">
-          {isLogin ? "New to Reddit?" : "Already have an account?"}{" "}
-          <span
-            className="text-blue-600 cursor-pointer hover:underline"
-            onClick={() => setIsLogin(!isLogin)}
-          >
-            {isLogin ? "Sign up" : "Log in"}
-          </span>
-        </p>
+
+            <button
+              type="submit"
+              className="w-full bg-[#0045AC] text-white px-6 py-3 rounded-full font-medium hover:bg-[#003D96] transition-colors duration-200 mt-6"
+            >
+              {isLogin ? "Log In" : "Sign Up"}
+            </button>
+          </form>
+
+          <p className="text-sm text-center mt-6 text-gray-600">
+            {isLogin ? "New to Reddit?" : "Already have an account?"}{" "}
+            <button
+              className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+              onClick={() => setIsLogin(!isLogin)}
+            >
+              {isLogin ? "Sign Up" : "Log In"}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

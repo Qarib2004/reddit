@@ -6,7 +6,10 @@ import {
   deletePost,
   likePost,
   dislikePost,
-  searchPosts
+  searchPosts,
+  reportPost,
+  hidePost,
+  showFewerPosts
 } from "../controllers/postController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -39,6 +42,9 @@ router.delete("/:id", authMiddleware, deletePost);
 router.post("/:id/upvotes", authMiddleware, likePost); 
 router.post("/:id/downvotes", authMiddleware, dislikePost); 
 
+router.put("/report/:postId", authMiddleware, reportPost);
+router.put("/hide/:postId", authMiddleware, hidePost);
+router.put("/show-fewer/:postId", authMiddleware, showFewerPosts);
 
 router.post(
   "/:postId/comments",

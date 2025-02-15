@@ -3,7 +3,7 @@ import { Post ,Comment,ModeratorStats,ModeratorChatMessage,ModeratorHistoryRecor
 
 export const moderatorApi = createApi({
   reducerPath: "moderatorApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api/moderator" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api/moderator", credentials: "include" }),
   endpoints: (builder) => ({
     getReportedPosts: builder.query<Post[], void>({
       query: () => "/reported-posts",

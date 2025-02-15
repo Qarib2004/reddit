@@ -2,7 +2,7 @@ import Post from "../models/Post.js";
 import { validationResult } from "express-validator";
 import mongoose from "mongoose";
 import cloudinary from "../utils/cloudinary.js";
-
+import User  from "../models/User.js"
 export const createPost = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -220,3 +220,83 @@ export const dislikePost = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+
+
+export const reportPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    if (!post.reports.includes(userId)) {
+      post.reports.push(userId);
+      await post.save();
+      return res.status(200).json({ message: "Post reported successfully" });
+    } else {
+      return res.status(400).json({ message: "You have already reported this post" });
+    }
+  } catch (error) {
+    console.error("Error reporting post:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const hidePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.hiddenPosts.includes(postId)) {
+      user.hiddenPosts.push(postId);
+      await user.save();
+      return res.status(200).json({ message: "Post hidden successfully" });
+    } else {
+      return res.status(400).json({ message: "Post is already hidden" });
+    }
+  } catch (error) {
+    console.error("Error hiding post:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export const showFewerPosts = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id; 
+
+    if (!postId) {
+      return res.status(400).json({ message: "Post ID is required" });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (!post.showFewerByUsers) {
+      post.showFewerByUsers = [];
+    }
+
+    if (!post.showFewerByUsers.includes(userId)) {
+      post.showFewerByUsers.push(userId);
+      await post.save();
+      return res.json({ message: "Post marked for fewer visibility", post });
+    }
+
+    res.json({ message: "User has already marked this post", post });
+  } catch (error) {
+    console.error("Error in showFewerPosts:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+

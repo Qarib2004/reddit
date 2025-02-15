@@ -89,7 +89,11 @@ const UserSchema = new mongoose.Schema(
     type: String,
     enum: ["pending", "approved", "rejected", "none"],
     default: "none",
-  }
+  },
+  hiddenPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+
+  lessLikedCommunities: [{ type: mongoose.Schema.Types.ObjectId, ref: "Community" }],
+  
   },
   { timestamps: true }
 );

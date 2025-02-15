@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useGetUserQuery, useSavePostMutation, useUpdateUserMutation } from "../redux/apiSlice";
 import Loader from "../assets/loader-ui/Loader";
+import PostOptionsModal from "./PostOptionModal";
 
 const PostItem = ({ post }: { post: any }) => {
   const [likePost] = useLikePostMutation();
@@ -31,6 +32,7 @@ const PostItem = ({ post }: { post: any }) => {
   const { data: comments } = useGetCommentsQuery(post._id);
   const { data: user ,refetch} = useGetUserQuery();
   const [savePost] = useSavePostMutation();
+  const [showOptions, setShowOptions] = useState(false);
   if (!user) return null;
 
   const isSaved = user.savedPosts?.includes(post._id);
@@ -250,9 +252,12 @@ const PostItem = ({ post }: { post: any }) => {
               )}
             </div>
 
-            <button className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md">
-              <MoreHorizontal size={18} />
-            </button>
+            <div className="relative">
+              <button   onClick={() => setShowOptions(!showOptions)} className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md">
+                <MoreHorizontal size={18} />
+              </button>
+              {showOptions && <PostOptionsModal postId={post._id} closeModal={() => setShowOptions(false)} />}
+            </div >
             <button onClick={handleSavePost} className="text-gray-500 hover:text-blue-500 flex items-center space-x-1 px-2 py-1 rounded-md">
   <Bookmark size={18} className={isSaved ? "text-blue-500" : "text-gray-400"} />
   <span className="text-xs">{isSaved ? "Saved" : "Save"}</span>
@@ -260,7 +265,9 @@ const PostItem = ({ post }: { post: any }) => {
           </div>
         </div>
       </div>
+      <hr className="mt-2 border-gray-300"/>
     </div>
+    
   );
 };
 

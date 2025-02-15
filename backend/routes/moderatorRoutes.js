@@ -1,7 +1,7 @@
 import express from "express";
 import { getReportedPosts, takeActionOnPost, getReportedComments, takeActionOnComment, getModeratorStats, getModeratorHistory, undoModeratorAction, getModeratorChat, sendMessage, getUsersWithWarnings, issueWarning } from "../controllers/moderatorController.js";
 import moderatorMiddleware from "../middlewares/moderatorMiddleware.js";
-
+import protect from "../utils/protect.js";
 const router = express.Router();
 
 router.get("/reported-posts", moderatorMiddleware, getReportedPosts);
@@ -25,5 +25,7 @@ router.post("/chat/send", moderatorMiddleware, sendMessage);
 router.get("/warnings", moderatorMiddleware, getUsersWithWarnings);
 
 router.put("/warnings/:userId", moderatorMiddleware, issueWarning);
+
+
 
 export default router;

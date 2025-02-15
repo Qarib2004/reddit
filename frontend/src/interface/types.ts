@@ -36,6 +36,19 @@ export interface Post {
   downvotes: string[]; 
   
   comments: Comment[]; 
+  reports?: {
+    userId: string; 
+    reason: string; 
+    timestamp: string;
+  }[];
+
+  hiddenByUsers?: string[]; 
+
+  showFewerByUsers?: string[]; 
+  reportedByUsers?: string[]; 
+
+  isDeleted?: boolean;
+  tags?: string[]; 
  
 }
 
@@ -90,6 +103,9 @@ export interface Comment {
     fontSize?: number;
     showTrending?: boolean;
     moderatorRequests?: "pending" | "approved" | "rejected" | "none"; 
+    moderatedCommunities?: string[];
+    reportCount?: number;
+    hiddenCommunities?: string[];
   }
   
 
@@ -127,6 +143,8 @@ export interface Comment {
     deletedComments: number;
     handledReports: number;
     dismissedReports: number; 
+    warningsIssued: number; 
+    postRestores: number;
   }
   
   
@@ -139,6 +157,8 @@ export interface Comment {
     targetType: "user" | "post" | "comment";
     reason: string;
     timestamp: string;
+    restoredPostId?: string; 
+  warnedUserId?: string; 
   }
   
   
@@ -150,6 +170,8 @@ export interface Comment {
     senderUsername: string;
     message: string; 
     timestamp: string;
+    messageType?: "text" | "image" | "warning";
+    isSystemMessage?: boolean; 
   }
   
 
@@ -162,6 +184,7 @@ export interface Comment {
       issuedBy: string;
       timestamp: string;
     }[];
+    warningCount?: number;
   }
   
   

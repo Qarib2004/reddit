@@ -3,6 +3,7 @@ import { User } from "../interface/types";
 
 interface AuthState {
   user: User | null;
+  
 }
 
 const initialState: AuthState = {

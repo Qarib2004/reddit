@@ -67,6 +67,26 @@ export const postsApi = createApi({
         method: "POST",
       }),
     }),
+    reportPost: builder.mutation<{ message: string }, string>({
+      query: (postId) => ({
+        url: `posts/report/${postId}`,
+        method: "PUT",
+      }),
+    }),
+
+    hidePost: builder.mutation<{ message: string }, string>({
+      query: (postId) => ({
+        url: `posts/hide/${postId}`,
+        method: "PUT",
+      }),
+    }),
+
+    showFewerPosts: builder.mutation<{ message: string }, string>({
+      query: (postId) => ({
+        url: `posts/show-fewer/${postId}`,
+        method: "PUT",
+      }),
+    }),
   }),
 });
 
@@ -79,4 +99,7 @@ export const {
   useDeletePostMutation,
   useLikePostMutation,
   useDislikePostMutation,
+  useReportPostMutation,
+  useHidePostMutation,
+  useShowFewerPostsMutation,
 } = postsApi;

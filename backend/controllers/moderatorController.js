@@ -7,10 +7,19 @@ import { validationResult } from "express-validator";
 
 export const getReportedPosts = async (req, res) => {
   try {
-    const reportedPosts = await Post.find({ reported: true }).populate("author", "username");
+
+    const reportedPosts = await Post.find({ reports: { $exists: true, $ne: [] } })
+      .populate("author", "username")
+      .populate("community", "name")
+      .populate("reports.userId", "username");
+
+
+   
+
     res.json(reportedPosts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching reported posts", error });
+    console.error("Error fetching reported posts:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

@@ -41,6 +41,14 @@ const PostSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    reports: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        reason: String,
+        timestamp: { type: Date, default: Date.now },
+      },
+    ],
+    showFewerByUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
