@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery} from "../redux/searchSlice";
+import { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery, useSearchPostByTagQuery} from "../redux/searchSlice";
 import { ArrowBigUp, ArrowBigDown, MessageSquare, Users, FileText, User as UserIcon, Loader2 } from "lucide-react";
 import { Post, Community, Comment, User } from "../interface/types";
 
@@ -12,9 +12,11 @@ const SearchPage: React.FC = () => {
   const { data: communities = [], isLoading: loadingCommunities } = useSearchCommunitiesQuery(query);
   const { data: comments = [], isLoading: loadingComments } = useSearchCommentsQuery(query);
   const { data: users = [], isLoading: loadingUsers } = useSearchUsersQuery(query);
+  const { data: taggedPosts = [], isLoading: loadingPostsByTag } = useSearchPostByTagQuery(query);
 
 
-  const [activeTab, setActiveTab] = useState<"posts" | "communities" | "comments" | "users">("posts");
+
+  const [activeTab, setActiveTab] = useState<"posts" | "communities" | "comments" | "users" | "tags">("posts");
 
   useEffect(() => {
     setActiveTab("posts");
@@ -149,8 +151,7 @@ const SearchPage: React.FC = () => {
                   <div className="flex items-center mt-3 space-x-4 text-sm text-gray-500 dark:text-gray-400">
                     <button className="flex items-center space-x-1">
                       <ArrowBigUp className="w-4 h-4" />
-                      <span>{comment.upvotes.length - comment.downvotes.length}
-</span>
+                      <span>{comment.upvotes.length - comment.downvotes.length}</span>
                       <ArrowBigDown className="w-4 h-4" />
                     </button>
                     <button className="flex items-center space-x-1">
@@ -194,6 +195,30 @@ const SearchPage: React.FC = () => {
               ))
             ) : (
               <NoResults type="users" />
+            )}
+          </div>
+        )}
+
+{activeTab === "tags" && (
+          <div className="space-y-4">
+            {loadingPostsByTag ? <LoadingSpinner /> : taggedPosts.length ? (
+              taggedPosts.map((post: Post) => (
+                <div key={post._id} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow">
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{post.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-300">{post.content}</p>
+                    <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      Tags: {post.tags?.map(tag => (
+                        <span key={tag} className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs mr-2">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <NoResults type="tagged posts" />
             )}
           </div>
         )}
