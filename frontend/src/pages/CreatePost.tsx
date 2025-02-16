@@ -7,10 +7,9 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { stripHtml } from "../utils/cutTagHtml";
 import { clodudinaryLink } from "../utils/cloudinaryLink";
+import { ImageIcon, Link2Icon, TypeIcon, Hash, X } from "lucide-react";
 
 const CreatePost = () => {
-
- 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [postType, setPostType] = useState("text");
@@ -19,7 +18,21 @@ const CreatePost = () => {
   const [uploading, setUploading] = useState(false);
   const [createPost, { isLoading }] = useCreatePostMutation();
   const { data: communities = [] } = useGetCommunitiesQuery();
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const navigate = useNavigate();
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && tagInput.trim() !== "") {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+      e.preventDefault();
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
 
   const handleFileUpload = async () => {
     if (!file) return null;
@@ -27,7 +40,7 @@ const CreatePost = () => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset",  "cloudinary-animals-app");
+    formData.append("upload_preset", "cloudinary-animals-app");
 
     try {
       const res = await fetch(clodudinaryLink, {
@@ -63,7 +76,8 @@ const CreatePost = () => {
       community,
       postType,
       content: postType === "text" ? stripHtml(content.trim()) : "",
-      mediaUrl, 
+      mediaUrl,
+      tags,
     };
 
     try {
@@ -75,104 +89,169 @@ const CreatePost = () => {
     }
   };
 
- 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-4">Create Post</h2>
-
-      
-      <div className="mb-4">
-        <select
-          value={community}
-          onChange={(e) => setCommunity(e.target.value)}
-          className="w-full border rounded-md px-4 py-2"
-        >
-          <option value="">Select a community</option>
-          {communities.map((c: { _id: string; name: string }) => (
-            <option key={c._id} value={c._id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      
-      <div className="flex border-b mb-4">
-        {["text", "image", "link"].map((type) => (
-          <button
-            key={type}
-            onClick={() => setPostType(type)}
-            className={`px-4 py-2 ${
-              postType === type ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"
-            }`}
-          >
-            {type === "text" ? "Text" : type === "image" ? "Images & Video" : "Link"}
-          </button>
-        ))}
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-       
-        <input
-          type="text"
-          placeholder="Title*"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="border rounded-md px-4 py-2 w-full"
-        />
-
-        
-        {postType === "text" && (
-          <div>
-            <ReactQuill
-              value={content}
-              onChange={setContent}
-              placeholder="Write something amazing..."
-              className="h-40"
-            />
+    <div className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Create a post</h2>
           </div>
-        )}
 
-       
-        {postType === "image" && (
-          <div className="border-dashed border-2 border-gray-300 p-4 rounded-md">
-            <label className="block text-center text-gray-500">
-              Drag and Drop or upload media
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="hidden"
-              />
-            </label>
-            {uploading && <p className="text-blue-500 text-center">Uploading...</p>}
+          <div className="p-4">
+            <div className="mb-6">
+              <select
+                value={community}
+                onChange={(e) => setCommunity(e.target.value)}
+                className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Choose a community</option>
+                {communities.map((c: { _id: string; name: string }) => (
+                  <option key={c._id} value={c._id}>
+                    r/{c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex border-b border-gray-200 mb-4">
+              <button
+                onClick={() => setPostType("text")}
+                className={`flex items-center px-6 py-3 ${
+                  postType === "text"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <TypeIcon className="w-5 h-5 mr-2" />
+                <span className="text-sm font-medium">Post</span>
+              </button>
+              <button
+                onClick={() => setPostType("image")}
+                className={`flex items-center px-6 py-3 ${
+                  postType === "image"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <ImageIcon className="w-5 h-5 mr-2" />
+                <span className="text-sm font-medium">Images & Video</span>
+              </button>
+              <button
+                onClick={() => setPostType("link")}
+                className={`flex items-center px-6 py-3 ${
+                  postType === "link"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <Link2Icon className="w-5 h-5 mr-2" />
+                <span className="text-sm font-medium">Link</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+
+              {postType === "text" && (
+                <div className="relative">
+                  <ReactQuill
+                    value={content}
+                    onChange={setContent}
+                    placeholder="Text (optional)"
+                    className="h-48 mb-12 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              )}
+
+              {postType === "image" && (
+                <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                  <label className="cursor-pointer block">
+                    <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-500">
+                      Drag and drop images or
+                      <span className="text-blue-500 ml-1">upload</span>
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </label>
+                  {uploading && (
+                    <p className="text-sm text-blue-500 mt-2">Uploading...</p>
+                  )}
+                </div>
+              )}
+
+              {postType === "link" && (
+                <input
+                  type="url"
+                  placeholder="URL"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  onChange={(e) => setContent(e.target.value)}
+                />
+              )}
+
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Hash className="w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Add tags..."
+                    className="flex-1 border-b border-gray-300 px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleAddTag}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    >
+                      #{tag}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="ml-1 hover:text-red-500"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-full"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading || uploading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading || uploading ? "Posting..." : "Post"}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-       
-        {postType === "link" && (
-          <input
-            type="url"
-            placeholder="Link URL*"
-            className="border rounded-md px-4 py-2 w-full"
-            onChange={(e) => setContent(e.target.value)}
-          />
-        )}
-
-       
-        <div className="flex justify-end space-x-2">
-          <button type="button" className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md">
-            Save Draft
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
-            disabled={isLoading || uploading}
-          >
-            {isLoading || uploading ? "Posting..." : "Post"}
-          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

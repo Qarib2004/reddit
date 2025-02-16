@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery } from "../redux/searchSlice";
+import { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery} from "../redux/searchSlice";
 import { ArrowBigUp, ArrowBigDown, MessageSquare, Users, FileText, User as UserIcon, Loader2 } from "lucide-react";
 import { Post, Community, Comment, User } from "../interface/types";
 
@@ -12,6 +12,7 @@ const SearchPage: React.FC = () => {
   const { data: communities = [], isLoading: loadingCommunities } = useSearchCommunitiesQuery(query);
   const { data: comments = [], isLoading: loadingComments } = useSearchCommentsQuery(query);
   const { data: users = [], isLoading: loadingUsers } = useSearchUsersQuery(query);
+
 
   const [activeTab, setActiveTab] = useState<"posts" | "communities" | "comments" | "users">("posts");
 

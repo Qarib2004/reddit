@@ -49,6 +49,7 @@ const PostSchema = new mongoose.Schema(
       },
     ],
     showFewerByUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    tags: [{ type: String, lowercase: true, trim: true }]
   },
   { timestamps: true }
 );

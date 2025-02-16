@@ -16,7 +16,10 @@ export const searchApi = createApi({
     searchUsers: builder.query({
       query: (query) => `users?q=${query}`,
     }),
+    searchPostByTag: builder.query({
+      query: (tag) => `posts/tags/${encodeURIComponent(tag)}`
+    })    
   }),
 });
 
-export const { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery } = searchApi;
+export const { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery,useSearchPostByTagQuery } = searchApi;

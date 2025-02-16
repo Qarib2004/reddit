@@ -9,7 +9,7 @@ export const createPost = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { title, content, community, postType, mediaUrl } = req.body;
+  const { title, content, community, postType, mediaUrl,tags } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(community)) {
     return res.status(400).json({ message: "Invalid community ID" });
@@ -34,6 +34,7 @@ export const createPost = async (req, res) => {
       author: req.user.id,
       content: postType === "text" ? content || "" : "",
       mediaUrl: uploadedMediaUrl,
+      tags: tags ? tags.map(tag => tag.toLowerCase().trim()) : []
     });
 
     await newPost.save();

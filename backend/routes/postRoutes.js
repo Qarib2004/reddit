@@ -15,6 +15,7 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
 import upload from "../middlewares/uploadMiddleware.js"
 import  {createComment,getCommentsByPost,deleteComment}  from "../controllers/commentController.js"
+import { searchPostsByTag } from "../controllers/searchController.js";
 
 const router = express.Router();
 
@@ -37,6 +38,8 @@ router.post(
 router.get("/", getPosts);
 router.get("/search/:query", searchPosts);
 router.get("/:id", getPost);
+router.get("/tags/:tag", searchPostsByTag);
+
 router.delete("/:id", authMiddleware, deletePost);
 
 router.post("/:id/upvotes", authMiddleware, likePost); 

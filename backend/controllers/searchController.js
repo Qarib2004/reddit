@@ -69,3 +69,18 @@ export const searchUsers = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+export const searchPostsByTag = async (req, res) => {
+  try {
+    const { tag } = req.params;
+    const posts = await Post.find({ tags: tag.toLowerCase() })
+      .populate("author", "username")
+      .populate("community", "name");
+
+    res.json(posts);
+  } catch (error) {
+    console.error("Error searching posts by tag:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
