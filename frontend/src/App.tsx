@@ -35,6 +35,7 @@ import ModeratorWarnings from "./pages/moderator/ModeratorWarning";
 import ModeratorStats from "./pages/moderator/ModeratorStats";
 import ModeratorHistory from "./pages/moderator/ModeraotHistoty";
 import ModeratorChat from "./pages/moderator/ModeratorChat";
+import SearchPage from "./pages/SearchPage";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -58,6 +59,8 @@ const App = () => {
           <Route path="verify-email" element={<VerifyEmail />} />
           <Route path="admin" element={<AdminPanel />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="/search" element={<SearchPage />} />
+
         </Route>
 
         <Route path="/" element={<DashboardLayout />}>

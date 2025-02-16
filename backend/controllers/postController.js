@@ -147,7 +147,6 @@ export const deletePost = async (req, res) => {
 
 export const likePost = async (req, res) => {
   try {
-    console.log("Received request to like a post");
 
     const { id } = req.params;
     const userId = req.user.id;
@@ -157,26 +156,33 @@ export const likePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
+    const author = await User.findById(post.author);
+    if (!author) return res.status(404).json({ message: "Author not found" });
+
     const hasLiked = post.upvotes.includes(userId);
     const hasDisliked = post.downvotes.includes(userId);
 
     if (hasLiked) {
       post.upvotes = post.upvotes.filter((uid) => uid.toString() !== userId);
+      author.karma -= 1;
     } else {
       post.upvotes.push(userId);
+      author.karma += 1
       if (hasDisliked) {
         post.downvotes = post.downvotes.filter(
           (uid) => uid.toString() !== userId
         );
+        author.karma += 1;
       }
     }
 
     await post.save();
-
+    await author.save();
     res.status(200).json({
       message: "Like updated",
       upvotes: post.upvotes,
       downvotes: post.downvotes,
+      karma: author.karma,
     });
   } catch (error) {
     console.error("Error liking post:", error);
@@ -194,6 +200,9 @@ export const dislikePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
+    const author = await User.findById(post.author);
+    if (!author) return res.status(404).json({ message: "Author not found" });
+
     const hasLiked = post.upvotes.includes(userId);
     const hasDisliked = post.downvotes.includes(userId);
 
@@ -201,19 +210,24 @@ export const dislikePost = async (req, res) => {
       post.downvotes = post.downvotes.filter(
         (uid) => uid.toString() !== userId
       );
+      author.karma += 1;
     } else {
       post.downvotes.push(userId);
+      author.karma -= 1;
       if (hasLiked) {
         post.upvotes = post.upvotes.filter((uid) => uid.toString() !== userId);
+        author.karma -= 1;
       }
     }
 
     await post.save();
-
+    await author.save();
     res.status(200).json({
       message: "Dislike updated",
       upvotes: post.upvotes,
       downvotes: post.downvotes,
+      karma: author.karma,
+
     });
   } catch (error) {
     console.error("Error disliking post:", error);

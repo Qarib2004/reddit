@@ -50,7 +50,7 @@ export const postsApi = createApi({
       }),
     }),
     likePost: builder.mutation<
-      { message: string; upvotes: string[]; downvotes: string[] },
+      { message: string; upvotes: string[]; downvotes: string[];karma:number },
       string
     >({
       query: (id) => ({
@@ -59,7 +59,7 @@ export const postsApi = createApi({
       }),
     }),
     dislikePost: builder.mutation<
-      { message: string; downvotes: string[]; upvotes: string[] },
+      { message: string; downvotes: string[]; upvotes: string[];karma:number },
       string
     >({
       query: (id) => ({

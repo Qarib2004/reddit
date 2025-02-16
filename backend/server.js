@@ -23,6 +23,9 @@ import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
 import moderatorRoutes from "./routes/moderatorRoutes.js";
+// import aiRoutes from "./routes/aiRoutes.js";
+import searchRoutes  from "./routes/searchRoutes.js"
+
 
 
 import Message from "./models/Message.js";
@@ -171,6 +174,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/admin",adminRoutes)
 app.use("/api/moderator", moderatorRoutes);
+// app.use("/api/ai", aiRoutes);
+app.use("/api/search", searchRoutes);
 
 
 const PORT = process.env.PORT || 5000;

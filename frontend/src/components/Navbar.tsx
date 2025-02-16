@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useGetUserQuery, useLogoutMutation } from "../redux/apiSlice";
 import { useGetNotificationsQuery } from "../redux/notificationsSlice";
 import { useEffect, useState } from "react";
@@ -19,6 +19,17 @@ const Navbar = () => {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [showFriendRequests, setShowFriendRequests] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
 
   useEffect(() => {
     if (notifications) {
@@ -75,14 +86,17 @@ const Navbar = () => {
 
           <div className="hidden md:block flex-1 max-w-2xl mx-6">
             <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search size={20} className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search Reddit"
-                className="w-full bg-gray-100 rounded-full pl-10 pr-4 py-2 text-sm border border-gray-200 focus:outline-none focus:ring focus:ring-blue-300"
-              />
+              <form onSubmit={handleSearch} className="relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                  <Search type="submit" size={20} className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search Reddit"
+                  className="w-full bg-gray-100 rounded-full pl-10 pr-4 py-2 text-sm border border-gray-200 focus:outline-none focus:ring focus:ring-blue-300"
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </form>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import Comment from "../models/Comment.js";
 import { validationResult } from "express-validator";
 import Post from "../models/Post.js";
+import User from "../models/User.js";
 
 
   export const createComment = async (req, res) => {
@@ -78,21 +79,27 @@ export const likeComment = async (req, res) => {
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
+    const author = await User.findById(comment.author);
+    if (!author) return res.status(404).json({ message: "Author not found" });
 
     const hasLiked = comment.upvotes.includes(userId);
     const hasDisliked = comment.downvotes.includes(userId);
 
     if (hasLiked) {
       comment.upvotes = comment.upvotes.filter((uid) => uid.toString() !== userId);
+      author.karma -= 1;
     } else {
       comment.upvotes.push(userId);
+      author.karma += 1;
       if (hasDisliked) {
         comment.downvotes = comment.downvotes.filter((uid) => uid.toString() !== userId);
+        author.karma += 1;
       }
     }
 
     await comment.save();
-    res.status(200).json({ message: "Like updated", upvotes: comment.upvotes, downvotes: comment.downvotes });
+    await author.save();
+    res.status(200).json({ message: "Like updated", upvotes: comment.upvotes, downvotes: comment.downvotes, karma: author.karma});
   } catch (error) {
     console.error("Error liking comment:", error);
     res.status(500).json({ message: "Server error", error });
@@ -110,20 +117,27 @@ export const dislikeComment = async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
+    const author = await User.findById(comment.author);
+    if (!author) return res.status(404).json({ message: "Author not found" });
+
     const hasLiked = comment.upvotes.includes(userId);
     const hasDisliked = comment.downvotes.includes(userId);
 
     if (hasDisliked) {
       comment.downvotes = comment.downvotes.filter((uid) => uid.toString() !== userId);
+      author.karma += 1;
     } else {
       comment.downvotes.push(userId);
+      author.karma -= 1;
       if (hasLiked) {
         comment.upvotes = comment.upvotes.filter((uid) => uid.toString() !== userId);
+        author.karma -= 1;
       }
     }
 
     await comment.save();
-    res.status(200).json({ message: "Dislike updated", upvotes: comment.upvotes, downvotes: comment.downvotes });
+    await author.save();
+    res.status(200).json({ message: "Dislike updated", upvotes: comment.upvotes, downvotes: comment.downvotes,karma:author.karma });
   } catch (error) {
     console.error("Error disliking comment:", error);
     res.status(500).json({ message: "Server error", error });

@@ -21,14 +21,14 @@ export const commentsApi = createApi({
       }),
     }),
 
-    likeComment: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[] }, string>({
+    likeComment: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[];karma:number }, string>({
       query: (id) => ({
         url: `/comments/${id}/upvotes`,
         method: "POST",
       }),
     }),
 
-    dislikeComment: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[] }, string>({
+    dislikeComment: builder.mutation<{ message: string; upvotes: string[]; downvotes: string[];karma:number }, string>({
       query: (id) => ({
         url: `/comments/${id}/downvotes`,
         method: "POST",

@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
-import { Plus, Home, Compass, Bookmark, User, Settings, Users, Menu, X } from "lucide-react";
+import { Plus, Home, Compass, Bookmark, User, Settings, Users, Menu, X, ChevronDown, ChevronUp } from "lucide-react";
 import { useGetCommunitiesQuery } from "../redux/communitiesSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import { useState, useEffect } from "react";
@@ -10,7 +10,7 @@ const Sidebar = () => {
   const { data: user, isLoading: userLoading } = useGetUserQuery();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
+  const [showCommunities, setShowCommunities] = useState(true); 
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -20,17 +20,25 @@ const Sidebar = () => {
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
+  const toggleCommunities = () => {
+    setShowCommunities(!showCommunities);
+  };
+
+  const userCommunities = user
+    ? communities.filter((community) => user.subscriptions.includes(community._id))
+    : [];
+
   const sidebarContent = (
-    <div className="w-64 h-full bg-white shadow-lg p-4 ">
+    <div className="w-64 h-full bg-white  p-4">
       <div className="flex justify-between items-center md:hidden mb-4">
         <h2 className="font-bold">Menu</h2>
         <button onClick={toggleSidebar} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -70,52 +78,47 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-6 space-y-4 border-t pt-4">
-        <h3 className="text-sm font-bold text-gray-500 uppercase">Communities</h3>
-        <Link
-          to="/create-community"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100"
-          onClick={() => isMobile && setIsOpen(false)}
-        >
-          <Plus size={20} />
-          Create Community
-        </Link>
-        {isLoading ? (
-          <p className="text-sm text-gray-600">Loading...</p>
-        ) : (
-          <ul>
-            {communities.map((community) => (
-              <li key={community._id}>
-                <Link
-                  to={`/community/${community._id}`}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100"
-                  onClick={() => isMobile && setIsOpen(false)}
-                >
-                  <Users size={20} />
-                  {community.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold text-gray-500 uppercase">Communities</h3>
+          <button onClick={toggleCommunities} className="text-gray-600 hover:text-gray-800">
+            {showCommunities ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+        </div>
+
+        {showCommunities && (
+          <>
+            <Link
+              to="/create-community"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100"
+              onClick={() => isMobile && setIsOpen(false)}
+            >
+              <Plus size={20} />
+              Create Community
+            </Link>
+
+            {isLoading ? (
+              <p className="text-sm text-gray-600">Loading...</p>
+            ) : userCommunities.length > 0 ? (
+              <ul>
+                {userCommunities.map((community) => (
+                  <li key={community._id}>
+                    <Link
+                      to={`/community/${community._id}`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100"
+                      onClick={() => isMobile && setIsOpen(false)}
+                    >
+                      <Users size={20} />
+                      {community.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-600">You are not in any community.</p>
+            )}
+          </>
         )}
       </div>
-
-      {location.pathname.includes("community") && (
-        <div className="mt-6 space-y-4 border-t pt-4">
-          <h3 className="text-sm font-bold text-gray-500 uppercase">About this Community</h3>
-          <p className="text-sm text-gray-600">
-            This is a sample subreddit with some description here.
-          </p>
-          <p className="text-sm text-gray-600">Subscribers: 10,000</p>
-          <p className="text-sm text-gray-600">Online: 300</p>
-          <Link
-            to="/rules"
-            className="block text-blue-500 text-sm hover:underline"
-            onClick={() => isMobile && setIsOpen(false)}
-          >
-            View Rules
-          </Link>
-        </div>
-      )}
 
       <div className="mt-6 space-y-4 border-t pt-4">
         {userLoading ? (
@@ -178,10 +181,7 @@ const Sidebar = () => {
       </div>
 
       {isOpen && isMobile && (
-        <div
-          className="fixed inset-0  bg-opacity-50 z-30 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 bg-opacity-50 z-30 md:hidden" onClick={() => setIsOpen(false)} />
       )}
     </>
   );
