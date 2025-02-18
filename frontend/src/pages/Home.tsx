@@ -10,10 +10,11 @@ import Loader from "../assets/loader-ui/Loader";
 const Home = () => {
   const [sort, setSort] = useState("hot");
   const [search, setSearch] = useState("");
-  const { data: posts, isLoading, error } = useGetPostsQuery({ sort, search });
+  const { data: posts, isLoading, error} = useGetPostsQuery({ sort, search });
   const { data: user } = useGetUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
+ 
 
   useEffect(() => {
     const hasSeenModal = localStorage.getItem("hasSeenTopicModal");

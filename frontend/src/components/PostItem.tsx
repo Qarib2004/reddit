@@ -1,12 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   useLikePostMutation,
   useDislikePostMutation,
 } from "../redux/postsSlice";
+import { useGetCommentsQuery } from "../redux/commentsSlice";
 import {
-  useGetCommentsQuery,
-} from "../redux/commentsSlice";
-import { useJoinCommunityMutation, useLeaveCommunityMutation } from "../redux/communitiesSlice";
+  useGetCommunityByIdQuery,
+  useJoinCommunityMutation,
+  useLeaveCommunityMutation,
+  useRejectJoinRequestMutation,
+  useRequestToJoinCommunityMutation,
+} from "../redux/communitiesSlice";
 import { useState, useEffect } from "react";
 import {
   ArrowBigUp,
@@ -18,11 +22,16 @@ import {
   Twitter,
   Facebook,
   Send,
-  Bookmark
+  Bookmark,
 } from "lucide-react";
-import { useGetUserQuery, useSavePostMutation, useUpdateUserMutation } from "../redux/apiSlice";
+import {
+  useGetUserQuery,
+  useSavePostMutation,
+  useUpdateUserMutation,
+} from "../redux/apiSlice";
 import Loader from "../assets/loader-ui/Loader";
 import PostOptionsModal from "./PostOptionModal";
+import { useGetAllCommunitiesQuery, useGetAllPostsQuery } from "../redux/adminSlice";
 
 const PostItem = ({ post }: { post: any }) => {
   const [likePost] = useLikePostMutation();
@@ -30,9 +39,24 @@ const PostItem = ({ post }: { post: any }) => {
   const [joinCommunity] = useJoinCommunityMutation();
   const [leaveCommunity] = useLeaveCommunityMutation();
   const { data: comments } = useGetCommentsQuery(post._id);
-  const { data: user ,refetch} = useGetUserQuery();
+  const { data: user, refetch } = useGetUserQuery();
   const [savePost] = useSavePostMutation();
   const [showOptions, setShowOptions] = useState(false);
+  const [requestToJoinCommunity] = useRequestToJoinCommunityMutation();
+  const { id } = useParams<{ id: string }>();
+  const communityId = id ?? "";
+  const {
+    data: community,
+    isLoading: communityLoading,
+    refetch: refetchCommunity,
+  } = useGetCommunityByIdQuery(communityId, { skip: !communityId });
+
+  const { data: posts, refetch: refetchPost } = useGetAllPostsQuery();
+  const result = useGetAllCommunitiesQuery();
+console.log(result);
+
+  
+
   if (!user) return null;
 
   const isSaved = user.savedPosts?.includes(post._id);
@@ -40,7 +64,7 @@ const PostItem = ({ post }: { post: any }) => {
   const handleSavePost = async () => {
     try {
       await savePost(post._id).unwrap();
-      refetch(); 
+      refetch();
     } catch (error) {
       console.error("Error saving post:", error);
     }
@@ -59,48 +83,65 @@ const PostItem = ({ post }: { post: any }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isJoined, setIsJoined] = useState<boolean>(false);
   const [isSubcscribed, setIsSubscribed] = useState<boolean>(false);
-  
+  const [requestPending, setRequestPending] = useState(false);
+
   const [updateUser] = useUpdateUserMutation();
 
   if (!post) {
     return <Loader />;
-
   }
 
-  if(!post.community) {
+  if (!post.community) {
     return <Loader />;
-
   }
 
-  const isSubscribed = user?.subscriptions?.includes(post.community._id);
-
-
-  
 
   useEffect(() => {
-    if (userId && post.community) {
-      setIsSubscribed(user?.subscriptions?.includes(post.community._id) || false);
-      setIsLiked(Array.isArray(post.upvotes) && post.upvotes.includes(userId));
-      setIsDisliked(Array.isArray(post.downvotes) && post.downvotes.includes(userId));
+    if (!user || !post.community) return;
+
+    setIsSubscribed(user.subscriptions?.includes(post.community._id ?? ""));
+
+    setRequestPending(
+      Array.isArray(post.community.joinRequests) &&
+        post.community.joinRequests.includes(user._id)
+    );
+
+    if (Array.isArray(post.community.members)) {
+      setIsJoined(post.community.members.includes(user._id));
     
-      
     }
-  }, [post.upvotes, post.downvotes, userId, user]);
+  }, [post.community, user]);
+
   const handleToggleSubscription = async () => {
+    if (!post.community || !post.community._id) return;
+
     try {
-      if (isSubscribed) {
-        await leaveCommunity(post.community._id).unwrap();
+      if (isJoined) {
+        const response = await leaveCommunity(post.community._id).unwrap();
+
         setIsSubscribed(false);
+        setRequestPending(false);
+        setIsJoined(false);
+        await refetchCommunity()
+        await refetchPost()
       } else {
-        await joinCommunity(post.community._id).unwrap();
-        setIsSubscribed(true);
+        if (post.community.type === "Private") {
+          const response = await requestToJoinCommunity(
+            post.community._id
+          ).unwrap();
+          setRequestPending(true);
+        } else {
+          await joinCommunity(post.community._id).unwrap();
+          setIsSubscribed(true);
+          setIsJoined(true);
+        }
       }
-      refetch();
+      await refetchCommunity()
+      await refetch();
     } catch (error) {
       console.error("Error toggling subscription:", error);
     }
   };
-  
 
   const handleLike = async () => {
     try {
@@ -130,8 +171,6 @@ const PostItem = ({ post }: { post: any }) => {
     }
   };
 
- 
-
   const postUrl = `${window.location.origin}/post/${post._id}`;
 
   const copyToClipboard = () => {
@@ -142,12 +181,13 @@ const PostItem = ({ post }: { post: any }) => {
   return (
     <div className="bg-white hover:border hover:border-gray-300 rounded-md mb-3">
       <div className="flex">
-       
         <div className="bg-gray-50 w-10 flex flex-col items-center py-2 rounded-l-md">
           <button
             onClick={handleLike}
             className={`p-1 rounded ${
-              isLiked ? "text-orange-500" : "text-gray-400 hover:text-orange-500"
+              isLiked
+                ? "text-orange-500"
+                : "text-gray-400 hover:text-orange-500"
             }`}
           >
             <ArrowBigUp size={20} />
@@ -167,7 +207,6 @@ const PostItem = ({ post }: { post: any }) => {
           </button>
         </div>
 
-        
         <div className="flex-1 p-2">
           <div className="flex justify-between items-center text-xs text-gray-500 mb-2">
             <div className="flex items-center">
@@ -183,16 +222,19 @@ const PostItem = ({ post }: { post: any }) => {
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             </div>
 
-
-            <button 
-              onClick={handleToggleSubscription} 
+            <button
+              onClick={handleToggleSubscription}
               className={`px-3 py-1 rounded-md font-medium cursor-pointer ${
-                isSubscribed ? "bg-gray-300 text-black" : "bg-blue-500 text-white"
+                isJoined
+                  ? "bg-gray-300 text-black"
+                  : requestPending
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-blue-500 text-white"
               }`}
+              disabled={requestPending}
             >
-              {isSubscribed ? "Leave" : "Join"}
+              {isJoined ? "Leave" : requestPending ? "Request Pending" : "Join"}
             </button>
-      
           </div>
 
           <Link to={`/post/${post._id}`} className="hover:underline">
@@ -211,7 +253,6 @@ const PostItem = ({ post }: { post: any }) => {
             <p className="text-gray-800 text-sm">{post.content}</p>
           )}
 
-         
           <div className="flex items-center space-x-4 mt-3">
             <Link
               to={`/post/${post._id}`}
@@ -221,7 +262,6 @@ const PostItem = ({ post }: { post: any }) => {
               <span className="text-xs">{comments?.length || 0} Comments</span>
             </Link>
 
-           
             <div className="relative">
               <button
                 onClick={() => setShowShareMenu(!showShareMenu)}
@@ -239,13 +279,22 @@ const PostItem = ({ post }: { post: any }) => {
                   >
                     <Copy size={16} className="mr-2" /> Copy Link
                   </button>
-                  <a href={`https://twitter.com/intent/tweet?url=${postUrl}`} className="flex items-center text-sm py-1 hover:bg-gray-100 px-2">
+                  <a
+                    href={`https://twitter.com/intent/tweet?url=${postUrl}`}
+                    className="flex items-center text-sm py-1 hover:bg-gray-100 px-2"
+                  >
                     <Twitter size={16} className="mr-2" /> Twitter
                   </a>
-                  <a href={`https://www.facebook.com/sharer/sharer.php?u=${postUrl}`} className="flex items-center text-sm py-1 hover:bg-gray-100 px-2">
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${postUrl}`}
+                    className="flex items-center text-sm py-1 hover:bg-gray-100 px-2"
+                  >
                     <Facebook size={16} className="mr-2" /> Facebook
                   </a>
-                  <a href={`https://t.me/share/url?url=${postUrl}`} className="flex items-center text-sm py-1 hover:bg-gray-100 px-2">
+                  <a
+                    href={`https://t.me/share/url?url=${postUrl}`}
+                    className="flex items-center text-sm py-1 hover:bg-gray-100 px-2"
+                  >
                     <Send size={16} className="mr-2" /> Telegram
                   </a>
                 </div>
@@ -253,21 +302,34 @@ const PostItem = ({ post }: { post: any }) => {
             </div>
 
             <div className="relative">
-              <button   onClick={() => setShowOptions(!showOptions)} className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md">
+              <button
+                onClick={() => setShowOptions(!showOptions)}
+                className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md"
+              >
                 <MoreHorizontal size={18} />
               </button>
-              {showOptions && <PostOptionsModal postId={post._id} closeModal={() => setShowOptions(false)} />}
-            </div >
-            <button onClick={handleSavePost} className="text-gray-500 hover:text-blue-500 flex items-center space-x-1 px-2 py-1 rounded-md">
-  <Bookmark size={18} className={isSaved ? "text-blue-500" : "text-gray-400"} />
-  <span className="text-xs">{isSaved ? "Saved" : "Save"}</span>
-</button>
+              {showOptions && (
+                <PostOptionsModal
+                  postId={post._id}
+                  closeModal={() => setShowOptions(false)}
+                />
+              )}
+            </div>
+            <button
+              onClick={handleSavePost}
+              className="text-gray-500 hover:text-blue-500 flex items-center space-x-1 px-2 py-1 rounded-md"
+            >
+              <Bookmark
+                size={18}
+                className={isSaved ? "text-blue-500" : "text-gray-400"}
+              />
+              <span className="text-xs">{isSaved ? "Saved" : "Save"}</span>
+            </button>
           </div>
         </div>
       </div>
-      <hr className="mt-2 border-gray-300"/>
+      <hr className="mt-2 border-gray-300" />
     </div>
-    
   );
 };
 

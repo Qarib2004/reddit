@@ -57,12 +57,20 @@ const Community = () => {
 
   const [requestPending, setRequestPending] = useState(false);
 
+ ;
   useEffect(() => {
-    if (user && community) {
-      setIsJoined(community.members.includes(user._id));
-      setRequestPending(joinRequests.some((req) => req._id === user._id)); // ✅ Теперь это всегда актуально
+    if (!community || !user) return;
+  
+    
+  
+    if (Array.isArray(community.members) && typeof community.members[0] === "string") {
+      setIsJoined(community.members.includes(user._id)); 
+    } else if (Array.isArray(community.members) && typeof community.members[0] === "object") {
+      setIsJoined(community.members.some((member) => member._id === user._id)); 
     }
-  }, [user, community, joinRequests]);
+  }, [user, community]);
+  
+  
 
   useEffect(() => {
     if (requestsButtonRef.current && showRequests) {
@@ -73,57 +81,55 @@ const Community = () => {
       });
     }
   }, [showRequests]);
-
   const handleToggleSubscription = async () => {
+    if (!user || !communityId) return;
+  
     try {
-      if (!user?._id) return; // ✅ Проверяем, есть ли user, чтобы избежать ошибок
-
       await refetchUser();
-
+  
       if (isJoined) {
         await leaveCommunity(communityId).unwrap();
-        setIsJoined(false);
+        setIsJoined(false); 
       } else {
         if (community?.type === "Private") {
           await requestToJoinCommunity(communityId).unwrap();
-
-          await refetchJoinRequests();
           setRequestPending(true);
         } else {
           await joinCommunity(communityId).unwrap();
-          setIsJoined(true);
+          setIsJoined(true); 
         }
       }
-
+  
       await refetchUser();
       await refetchCommunity();
     } catch (error: any) {
-      if (error.status === 400 && error.data?.message === "Already a member") {
-        setIsJoined(true);
-        await refetchUser();
-      }
+      console.error("Error joining/leaving community:", error);
     }
   };
+  
 
   const handleApproveRequest = async (_id: string) => {
     if (!_id) {
       console.error("Error: userId is undefined");
       return;
     }
-
+  
     try {
-      await approveJoinRequest({ communityId, _id }).unwrap();
+      const response = await approveJoinRequest({ communityId, _id }).unwrap();
+      
       if (_id === user?._id) {
         setIsJoined(true);
         setRequestPending(false);
       }
-      refetchCommunity();
+  
+      
+      refetchCommunity(); 
       refetchJoinRequests();
     } catch (error) {
       console.error("Error approving request:", error);
     }
   };
-
+  
   const handleRejectRequest = async (_id: string) => {
     if (!_id) {
       console.error("Error: userId is undefined");
@@ -191,7 +197,7 @@ const Community = () => {
                       ? "bg-gray-400 text-white cursor-not-allowed"
                       : "bg-[#1e3a8a] text-white hover:bg-[#142962] border-2 border-white"
                   }`}
-                  disabled={requestPending} // Отключаем кнопку при "Request Pending"
+                  disabled={requestPending} 
                 >
                   {isJoined ? (
                     <span className="flex items-center gap-2">

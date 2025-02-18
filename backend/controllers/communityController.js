@@ -73,10 +73,13 @@ export const getCommunity = async (req, res) => {
   try {
     const community = await Community.findById(req.params.id)
       .populate("creator", "username")
-      .populate("members", "username");
+      .populate("members", "_id username")
+      .populate("joinRequests", "_id username");;
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
     }
+    console.log("Full Community Object from DB:", community);
+    console.log("Community Type:", community.type);
     res.json(community);
   } catch (error) {
     res.status(500).json(error.message);
@@ -125,7 +128,8 @@ export const joinCommunity = async (req, res) => {
     res.status(200).json({ 
       message: "Joined community successfully", 
       community: community._id,
-      subscriptions: user.subscriptions
+      subscriptions: user.subscriptions,
+      members: community.members,
     });
 
   } catch (error) {
@@ -182,9 +186,8 @@ export const leaveCommunity = async (req, res) => {
 
 export const requestToJoinCommunity = async (req, res) => {
   try {
-    const { id } = req.params; 
-    const userId = req.user?.id; 
-
+    const { id } = req.params;
+    const userId = req.user?.id;
 
     if (!id) {
       return res.status(400).json({ message: "Community ID is required" });
@@ -199,15 +202,18 @@ export const requestToJoinCommunity = async (req, res) => {
       return res.status(400).json({ message: "This community is not private" });
     }
 
+    if (community.members.includes(userId)) {
+      return res.status(400).json({ message: "You are already a member" });
+    }
+
     if (community.joinRequests?.includes(userId)) {
       return res.status(400).json({ message: "Request already sent" });
     }
 
-    community.joinRequests = community.joinRequests || [];
     community.joinRequests.push(userId);
     await community.save();
 
-    res.status(200).json({ message: "Join request sent" });
+    res.status(200).json({ message: "Join request sent", joinRequests: community.joinRequests });
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).json({ message: "Server error", error });
@@ -241,7 +247,7 @@ export const approveJoinRequest = async (req, res) => {
     const { communityId, userId } = req.params;
     const ownerId = req.user.id;
 
-    const community = await Community.findById(communityId);
+    const community = await Community.findById(communityId).populate("members", "_id username");
     if (!community) return res.status(404).json({ message: "Community not found" });
 
     if (community.creator.toString() !== ownerId) {
@@ -256,11 +262,15 @@ export const approveJoinRequest = async (req, res) => {
     community.joinRequests = community.joinRequests.filter(id => id.toString() !== userId);
     await community.save();
 
-    res.status(200).json({ message: "User added to the community." });
+    res.status(200).json({ 
+      message: "User added to the community.", 
+      members: community.members 
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 export const rejectJoinRequest = async (req, res) => {
   try {

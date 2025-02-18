@@ -22,6 +22,11 @@ export interface Post {
     description: string;
     createdAt: string;
     membersCount: number;
+    type: "Public" | "Restricted" | "Private" | "Mature (18+)";
+    creator: string; 
+    members: string[]; 
+    joinRequests: JoinRequest[]; 
+
   }; 
 
   author: {

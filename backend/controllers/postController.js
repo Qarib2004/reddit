@@ -118,15 +118,22 @@ export const getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate("author", "username")
-      .populate("community", "name");
+      .populate({
+        path: "community",
+        select: "_id name description type members joinRequests", 
+      });
+
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
+
+    
     res.json(post);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 export const deletePost = async (req, res) => {
   try {
