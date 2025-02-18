@@ -73,14 +73,25 @@ export interface Comment {
   }[];
 }
   
-  export interface Community {
-    _id: string;
-    name: string;
-    description: string;
-    createdAt: string;
-    membersCount: number;
-  }
-  
+export interface Community {
+  _id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  membersCount: number;
+  type: "Public" | "Restricted" | "Private" | "Mature (18+)";
+  creator: string; 
+  members: string[]; 
+  joinRequests: JoinRequest[]; 
+}
+
+export interface JoinRequest {
+  _id: string;
+  username: string;
+  avatar?: string;
+  requestedAt: string;
+}
+
   
   export interface User {
     _id: string;

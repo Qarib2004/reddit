@@ -32,6 +32,27 @@ export const communitiesApi = createApi({
         method: "POST",
       }),
     }),
+    requestToJoinCommunity: builder.mutation<{ message: string }, string>({
+      query: (id) => ({
+        url: `/communities/${id}/requests`,
+        method: "POST",
+      }),
+    }),
+    getJoinRequests: builder.query<{ _id: string; username: string }[], string>({
+      query: (communityId) => `/communities/${communityId}/requests`,
+    }),
+    approveJoinRequest: builder.mutation<{ message: string }, { communityId: string; _id: string }>({
+      query: ({ communityId, _id }) => ({
+        url: `/communities/${communityId}/approve/${_id}`,
+        method: "POST",
+      }),
+    }),
+    rejectJoinRequest: builder.mutation<{ message: string }, { communityId: string; _id: string }>({
+      query: ({ communityId, _id }) => ({
+        url: `/communities/${communityId}/reject/${_id}`,
+        method: "POST",
+      }),
+    }),
     
   }),
 });
@@ -41,5 +62,9 @@ export const {
   useGetCommunityByIdQuery,
   useCreateCommunityMutation,
   useJoinCommunityMutation,
-  useLeaveCommunityMutation
+  useLeaveCommunityMutation,
+  useRequestToJoinCommunityMutation,
+  useGetJoinRequestsQuery,
+  useApproveJoinRequestMutation,
+  useRejectJoinRequestMutation,
 } = communitiesApi;

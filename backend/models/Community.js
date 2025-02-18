@@ -18,12 +18,30 @@ const CommunitySchema = new mongoose.Schema(
       required: true,
       default: "Public",
     },
+    isPrivate: {
+      type: Boolean,
+      default: function () {
+        return this.type === "Private";
+      },
+    },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    moderators: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    joinRequests: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -47,6 +65,20 @@ const CommunitySchema = new mongoose.Schema(
         ref: "Topic",
       },
     ],
+    rules: [
+      {
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+      },
+    ],
+    avatar: {
+      type: String,
+      default: "https://default-community-avatar.com/avatar.png",
+    },
+    banner: {
+      type: String,
+      default: "https://default-community-banner.com/banner.png",
+    },
     createdAt: {
       type: Date,
       default: Date.now,

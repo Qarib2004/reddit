@@ -178,3 +178,107 @@ export const leaveCommunity = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+export const requestToJoinCommunity = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const userId = req.user?.id; 
+
+
+    if (!id) {
+      return res.status(400).json({ message: "Community ID is required" });
+    }
+
+    const community = await Community.findById(id);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    if (community.type !== "Private") {
+      return res.status(400).json({ message: "This community is not private" });
+    }
+
+    if (community.joinRequests?.includes(userId)) {
+      return res.status(400).json({ message: "Request already sent" });
+    }
+
+    community.joinRequests = community.joinRequests || [];
+    community.joinRequests.push(userId);
+    await community.save();
+
+    res.status(200).json({ message: "Join request sent" });
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+  
+
+
+export const getJoinRequests = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+    const userId = req.user.id;
+
+    const community = await Community.findById(communityId).populate("joinRequests", "username email");
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    if (community.creator.toString() !== userId) {
+      return res.status(403).json({ message: "Only the creator can view requests." });
+    }
+
+    res.status(200).json(community.joinRequests);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const approveJoinRequest = async (req, res) => {
+  try {
+    const { communityId, userId } = req.params;
+    const ownerId = req.user.id;
+
+    const community = await Community.findById(communityId);
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    if (community.creator.toString() !== ownerId) {
+      return res.status(403).json({ message: "Only the creator can approve requests." });
+    }
+
+    if (!community.joinRequests.includes(userId)) {
+      return res.status(400).json({ message: "No request from this user." });
+    }
+
+    community.members.push(userId);
+    community.joinRequests = community.joinRequests.filter(id => id.toString() !== userId);
+    await community.save();
+
+    res.status(200).json({ message: "User added to the community." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const rejectJoinRequest = async (req, res) => {
+  try {
+    const { communityId, userId } = req.params;
+    const ownerId = req.user.id;
+
+    const community = await Community.findById(communityId);
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    if (community.creator.toString() !== ownerId) {
+      return res.status(403).json({ message: "Only the creator can reject requests." });
+    }
+
+    community.joinRequests = community.joinRequests.filter(id => id.toString() !== userId);
+    await community.save();
+
+    res.status(200).json({ message: "Join request rejected." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
