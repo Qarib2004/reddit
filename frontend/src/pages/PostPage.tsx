@@ -1,31 +1,41 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetPostByIdQuery } from "../redux/postsSlice";
-import { useGetCommentsQuery, useAddCommentMutation } from "../redux/commentsSlice";
+import {
+  useGetCommentsQuery,
+  useAddCommentMutation,
+} from "../redux/commentsSlice";
 import CommentList from "../components/CommentList";
 import PostItem from "../components/PostItem";
 import Loader from "../assets/loader-ui/Loader";
+import { useGetUserQuery } from "../redux/apiSlice";
+import { Link } from "react-router-dom";
+import { Settings } from "lucide-react";
 
 const PostPage = () => {
   const { id } = useParams();
-  const { data: post, isLoading: isPostLoading } = useGetPostByIdQuery(id || "");
-  const { data: comments, isLoading: isCommentsLoading, refetch } = useGetCommentsQuery(id || "");
+  const { data: post, isLoading: isPostLoading } = useGetPostByIdQuery(
+    id || ""
+  );
+  const {
+    data: comments,
+    isLoading: isCommentsLoading,
+    refetch,
+  } = useGetCommentsQuery(id || "");
   const [addComment, { isLoading: isAddingComment }] = useAddCommentMutation();
   const [commentContent, setCommentContent] = useState("");
+  const { data: user } = useGetUserQuery();
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!commentContent.trim()) return;
 
     try {
-     
       await addComment({ postId: id || "", content: commentContent }).unwrap();
-     
 
-      setCommentContent(""); 
-      refetch(); 
-     
+      setCommentContent("");
+      refetch();
     } catch (error) {
       console.error("Error when adding a comment:", error);
     }
@@ -33,15 +43,18 @@ const PostPage = () => {
 
   if (isPostLoading) {
     return <Loader />;
-
   }
 
   if (!post) {
     return (
       <div className="max-w-4xl mx-auto p-4">
         <div className="bg-white rounded-lg shadow p-4">
-          <h1 className="text-xl font-semibold text-gray-900">Post not found</h1>
-          <p className="text-gray-600 mt-2">The post you're looking for doesn't exist or has been removed.</p>
+          <h1 className="text-xl font-semibold text-gray-900">
+            Post not found
+          </h1>
+          <p className="text-gray-600 mt-2">
+            The post you're looking for doesn't exist or has been removed.
+          </p>
         </div>
       </div>
     );
@@ -49,13 +62,20 @@ const PostPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-4">
-      <div className="max-w-4xl mx-auto px-4 ">
-       
-        <PostItem post={post}/>
+      {user?._id === post.author?._id && (
+        <Link
+          to={`/post/${post._id}/edit`}
+          className="px-4 py-2  text-black rounded-md flex items-center gap-2 hover:bg-gray-200 transition w-1/8"
+        >
+          <Settings size={18} />
+          Settings
+        </Link>
+      )}
 
-       
+      <div className="max-w-4xl mx-auto px-4 ">
+        <PostItem post={post} />
+
         <div className="bg-white rounded-lg shadow">
-         
           <div className="p-4 border-b">
             <form onSubmit={handleAddComment}>
               <textarea
@@ -76,7 +96,6 @@ const PostPage = () => {
             </form>
           </div>
 
-         
           <div className="p-4">
             {isCommentsLoading ? (
               <div className="animate-pulse space-y-4">

@@ -1,5 +1,5 @@
 import express from 'express';
-import { approveJoinRequest, createCommunity, getCommunities, getCommunity, getJoinRequests, joinCommunity, leaveCommunity, rejectJoinRequest, requestToJoinCommunity } from '../controllers/communityController.js';
+import { approveJoinRequest, createCommunity, getCommunities, getCommunity, getJoinRequests, joinCommunity, leaveCommunity, rejectJoinRequest, requestToJoinCommunity, updateCommunity } from '../controllers/communityController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
 
@@ -26,6 +26,7 @@ router.get('/:id', getCommunity);
 router.post('/:id/join', authMiddleware, joinCommunity);
 router.post("/:id/leave", authMiddleware, leaveCommunity);
 router.post("/:id/requests", authMiddleware, requestToJoinCommunity);
+router.put("/:id", authMiddleware, updateCommunity);
 router.get("/:communityId/requests", authMiddleware, getJoinRequests);
 router.post("/:communityId/approve/:userId", authMiddleware, approveJoinRequest);
 router.post("/:communityId/reject/:userId", authMiddleware, rejectJoinRequest);

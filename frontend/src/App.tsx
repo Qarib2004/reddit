@@ -36,6 +36,8 @@ import ModeratorStats from "./pages/moderator/ModeratorStats";
 import ModeratorHistory from "./pages/moderator/ModeraotHistoty";
 import ModeratorChat from "./pages/moderator/ModeratorChat";
 import SearchPage from "./pages/SearchPage";
+import SettingsPost from "./pages/SettingsPost";
+import CommunitySettings from "./pages/CommunitySettings";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -72,6 +74,8 @@ const App = () => {
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/profile/:id" element={<UserDetails />} />
+          <Route path="/post/:id/edit" element={<SettingsPost />} />
+          <Route path="/community/:id/communitySettings" element={<CommunitySettings />} />
         </Route>
 
     

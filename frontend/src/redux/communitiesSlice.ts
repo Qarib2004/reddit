@@ -6,12 +6,14 @@ export const communitiesApi = createApi({
     baseUrl: "http://localhost:5000/api",
     credentials: "include",
   }),
+  tagTypes: ["Community"],
   endpoints: (builder) => ({
     getCommunities: builder.query<Community[], void>({
       query: () => "/communities",
     }),
     getCommunityById: builder.query<Community, string>({
       query: (_id) => `/communities/${_id}`,
+      providesTags: (result, error, id) => [{ type: "Community", id }],
     }),
     createCommunity: builder.mutation<Community, { name: string; description: string }>({
       query: (communityData) => ({
@@ -53,7 +55,17 @@ export const communitiesApi = createApi({
         method: "POST",
       }),
     }),
-    
+    updateCommunity: builder.mutation<
+    Community,
+    { id: string; name: string; description: string; type: string }
+  >({
+    query: ({ id, ...data }) => ({
+      url: `/communities/${id}`,
+      method: "PUT",
+      body: data,
+    }),
+    invalidatesTags: (result, error, { id }) => [{ type: "Community", id }], 
+  }),
   }),
 });
 
@@ -67,4 +79,5 @@ export const {
   useGetJoinRequestsQuery,
   useApproveJoinRequestMutation,
   useRejectJoinRequestMutation,
+  useUpdateCommunityMutation
 } = communitiesApi;

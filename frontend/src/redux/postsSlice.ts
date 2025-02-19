@@ -6,6 +6,7 @@ export const postsApi = createApi({
     baseUrl: "http://localhost:5000/api",
     credentials: "include",
   }),
+  tagTypes: ["Post"],
   endpoints: (builder) => ({
     getPosts: builder.query<
       Post[],
@@ -13,9 +14,11 @@ export const postsApi = createApi({
     >({
       query: ({ sort = "hot", search = "", community = "" }) =>
         `/posts?sort=${sort}&search=${search}&community=${community}`,
+      providesTags: ["Post"],
     }),
     getPostById: builder.query<Post, string>({
       query: (id) => `/posts/${id}`,
+      providesTags: (result, error, id) => [{ type: "Post", id }],
     }),
     searchPosts: builder.query<Post[], string>({
       query: (query) => `/posts/search/${query}`,
@@ -33,16 +36,18 @@ export const postsApi = createApi({
         },
       }),
     }),
-    updatePost: builder.mutation<
-      Post,
-      { id: string; title: string; content: string }
-    >({
-      query: ({ id, ...postData }) => ({
-        url: `/posts/${id}`,
-        method: "PUT",
-        body: postData,
-      }),
-    }),
+    updatePost: builder.mutation<Post, { id: string; title: string; content: string; postType: string }>(
+      {
+        query: ({ id, ...patch }) => ({
+          url: `/posts/${id}`,
+          method: "PATCH",
+          body: patch, 
+        }),
+        invalidatesTags: (result, error, { id }) => [{ type: "Post", id }],
+      }
+      
+    ),
+    
     deletePost: builder.mutation<{ message: string }, string>({
       query: (id) => ({
         url: `/posts/${id}`,

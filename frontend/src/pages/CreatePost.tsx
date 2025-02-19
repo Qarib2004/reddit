@@ -8,6 +8,7 @@ import "react-quill/dist/quill.snow.css";
 import { stripHtml } from "../utils/cutTagHtml";
 import { clodudinaryLink } from "../utils/cloudinaryLink";
 import { ImageIcon, Link2Icon, TypeIcon, Hash, X } from "lucide-react";
+import { useGetUserQuery } from "../redux/apiSlice";
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -21,6 +22,11 @@ const CreatePost = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const navigate = useNavigate();
+  const { data: user } = useGetUserQuery();
+  const userCommunities = communities.filter(c => 
+    typeof c.creator === "object" && c.creator?._id === user?._id
+  );
+  
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && tagInput.trim() !== "") {
@@ -98,20 +104,21 @@ const CreatePost = () => {
           </div>
 
           <div className="p-4">
-            <div className="mb-6">
-              <select
-                value={community}
-                onChange={(e) => setCommunity(e.target.value)}
-                className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Choose a community</option>
-                {communities.map((c: { _id: string; name: string }) => (
-                  <option key={c._id} value={c._id}>
-                    r/{c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="mb-6">
+  <select
+    value={community}
+    onChange={(e) => setCommunity(e.target.value)}
+    className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+  >
+    <option value="">Choose a community</option>
+    {userCommunities.map((c) => (
+      <option key={c._id} value={c._id}>
+        r/{c.name}
+      </option>
+    ))}
+  </select>
+</div>
+
 
             <div className="flex border-b border-gray-200 mb-4">
               <button

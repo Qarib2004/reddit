@@ -322,3 +322,35 @@ export const showFewerPosts = async (req, res) => {
   }
 };
 
+
+
+export const updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, postType } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Post ID is required" });
+    }
+
+   
+
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (title) post.title = title;
+    if (content) post.content = content;
+    if (postType) post.postType = postType;
+
+    const updatedPost = await post.save();
+
+
+    res.json({ message: "Post updated successfully", post: updatedPost });
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).json({ message: "Server error while updating post" });
+  }
+};

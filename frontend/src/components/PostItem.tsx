@@ -181,6 +181,7 @@ console.log(result);
   return (
     <div className="bg-white hover:border hover:border-gray-300 rounded-md mb-3">
       <div className="flex">
+        
         <div className="bg-gray-50 w-10 flex flex-col items-center py-2 rounded-l-md">
           <button
             onClick={handleLike}

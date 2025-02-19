@@ -85,7 +85,7 @@ export interface Community {
   createdAt: string;
   membersCount: number;
   type: "Public" | "Restricted" | "Private" | "Mature (18+)";
-  creator: string; 
+  creator: string | { _id: string; username: string };
   members: string[]; 
   joinRequests: JoinRequest[]; 
 }

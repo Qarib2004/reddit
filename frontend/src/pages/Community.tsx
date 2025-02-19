@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   useGetCommunityByIdQuery,
   useJoinCommunityMutation,
@@ -20,6 +20,7 @@ import {
   X,
   Calendar,
   Info,
+  Settings,
 } from "lucide-react";
 import PostItem from "../components/PostItem";
 import Loader from "../assets/loader-ui/Loader";
@@ -32,6 +33,7 @@ const Community = () => {
     top: 0,
     right: 0,
   });
+  const navigate = useNavigate();
 
   const {
     data: community,
@@ -57,20 +59,21 @@ const Community = () => {
 
   const [requestPending, setRequestPending] = useState(false);
 
- ;
   useEffect(() => {
     if (!community || !user) return;
-  
-    
-  
-    if (Array.isArray(community.members) && typeof community.members[0] === "string") {
-      setIsJoined(community.members.includes(user._id)); 
-    } else if (Array.isArray(community.members) && typeof community.members[0] === "object") {
-      setIsJoined(community.members.some((member) => member._id === user._id)); 
+
+    if (
+      Array.isArray(community.members) &&
+      typeof community.members[0] === "string"
+    ) {
+      setIsJoined(community.members.includes(user._id));
+    } else if (
+      Array.isArray(community.members) &&
+      typeof community.members[0] === "object"
+    ) {
+      setIsJoined(community.members.some((member) => member._id === user._id));
     }
   }, [user, community]);
-  
-  
 
   useEffect(() => {
     if (requestsButtonRef.current && showRequests) {
@@ -83,53 +86,51 @@ const Community = () => {
   }, [showRequests]);
   const handleToggleSubscription = async () => {
     if (!user || !communityId) return;
-  
+
     try {
       await refetchUser();
-  
+
       if (isJoined) {
         await leaveCommunity(communityId).unwrap();
-        setIsJoined(false); 
+        setIsJoined(false);
       } else {
         if (community?.type === "Private") {
           await requestToJoinCommunity(communityId).unwrap();
           setRequestPending(true);
         } else {
           await joinCommunity(communityId).unwrap();
-          setIsJoined(true); 
+          setIsJoined(true);
         }
       }
-  
+
       await refetchUser();
       await refetchCommunity();
     } catch (error: any) {
       console.error("Error joining/leaving community:", error);
     }
   };
-  
 
   const handleApproveRequest = async (_id: string) => {
     if (!_id) {
       console.error("Error: userId is undefined");
       return;
     }
-  
+
     try {
       const response = await approveJoinRequest({ communityId, _id }).unwrap();
-      
+
       if (_id === user?._id) {
         setIsJoined(true);
         setRequestPending(false);
       }
-  
-      
-      refetchCommunity(); 
+
+      refetchCommunity();
       refetchJoinRequests();
     } catch (error) {
       console.error("Error approving request:", error);
     }
   };
-  
+
   const handleRejectRequest = async (_id: string) => {
     if (!_id) {
       console.error("Error: userId is undefined");
@@ -188,28 +189,52 @@ const Community = () => {
                     <span className="font-medium">{joinRequests.length}</span>
                   </button>
                 )}
-                <button
-                  onClick={handleToggleSubscription}
-                  className={`px-6 py-2 font-medium rounded-full transition shadow-lg ${
-                    isJoined
-                      ? "bg-white/90 text-[#1e3a8a] hover:bg-white"
-                      : requestPending
-                      ? "bg-gray-400 text-white cursor-not-allowed"
-                      : "bg-[#1e3a8a] text-white hover:bg-[#142962] border-2 border-white"
-                  }`}
-                  disabled={requestPending} 
-                >
-                  {isJoined ? (
-                    <span className="flex items-center gap-2">
-                      <LogOut size={18} />
-                      Leave
-                    </span>
-                  ) : requestPending ? (
-                    "Request Pending"
-                  ) : (
-                    "Join Community"
+
+                {!communityLoading &&
+                  community &&
+                  user &&
+                  (typeof community.creator === "string"
+                    ? community.creator === user._id
+                    : community.creator?._id === user._id) && (
+                    <button
+                      onClick={() =>
+                        navigate(`/community/${communityId}/communitySettings`)
+                      }
+                      className="px-4 py-2 bg-gray-800 text-white rounded-md flex items-center gap-2 hover:bg-gray-700 transition"
+                    >
+                      <Settings size={18} />
+                      Settings
+                    </button>
                   )}
-                </button>
+
+                {community?.creator &&
+                  user?._id !==
+                    (typeof community.creator === "object"
+                      ? community.creator._id
+                      : community.creator) && (
+                    <button
+                      onClick={handleToggleSubscription}
+                      className={`px-6 py-2 font-medium rounded-full transition shadow-lg ${
+                        isJoined
+                          ? "bg-white/90 text-[#1e3a8a] hover:bg-white"
+                          : requestPending
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-[#1e3a8a] text-white hover:bg-[#142962] border-2 border-white"
+                      }`}
+                      disabled={requestPending}
+                    >
+                      {isJoined ? (
+                        <span className="flex items-center gap-2">
+                          <LogOut size={18} />
+                          Leave
+                        </span>
+                      ) : requestPending ? (
+                        "Request Pending"
+                      ) : (
+                        "Join Community"
+                      )}
+                    </button>
+                  )}
               </div>
             </div>
           </div>

@@ -58,7 +58,7 @@ export const createCommunity = async (req, res) => {
 export const getCommunities = async (req, res) => {
   try {
     const communities = await Community.find()
-      .populate("creator", "username")
+      .populate("creator", "_id username")
       .populate("categories", "title icon") 
       .populate("topics", "name");
 
@@ -290,5 +290,34 @@ export const rejectJoinRequest = async (req, res) => {
     res.status(200).json({ message: "Join request rejected." });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+
+
+
+
+export const updateCommunity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, type } = req.body;
+
+    const community = await Community.findById(id);
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    if (community.creator.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You are not the owner of this community" });
+    }
+
+    community.name = name;
+    community.description = description;
+    community.type = type;
+    await community.save();
+
+    res.status(200).json(community);
+  } catch (error) {
+    console.error("Error updating community:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
