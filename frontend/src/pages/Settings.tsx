@@ -1,9 +1,33 @@
-import { useEffect, useState } from "react";
-import { useGetUserQuery, useUpdateUserMutation, useUpdatePersonalizationMutation, useGetUserSubscriptionsQuery, useDeleteAccountMutation, useRequestModeratorMutation } from "../redux/apiSlice";
+import { useEffect, useRef, useState } from "react";
+import {
+  useGetUserQuery,
+  useUpdateUserMutation,
+  useUpdatePersonalizationMutation,
+  useGetUserSubscriptionsQuery,
+  useDeleteAccountMutation,
+  useRequestModeratorMutation,
+  useRegisterFaceIdMutation,
+} from "../redux/apiSlice";
 import { toast } from "react-toastify";
-import { Moon, Sun, Save, KeyRound, User, Mail, Phone, Globe, Clock, FileText, Trash2, Eye, Settings as SettingsIcon } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Save,
+  KeyRound,
+  User,
+  Mail,
+  Phone,
+  Globe,
+  Clock,
+  FileText,
+  Trash2,
+  Eye,
+  Settings as SettingsIcon,
+  Smile,
+} from "lucide-react";
 import { useLeaveCommunityMutation } from "../redux/communitiesSlice";
 import ChangePassword from "./ChangePassword";
+import * as faceapi from "face-api.js";
 
 const Settings = () => {
   const { data: user, isLoading } = useGetUserQuery();
@@ -12,43 +36,187 @@ const Settings = () => {
   const [updatePersonalization] = useUpdatePersonalizationMutation();
   const [unsubscribe] = useLeaveCommunityMutation();
   const [deleteAccount] = useDeleteAccountMutation();
+  const [requestModerator] = useRequestModeratorMutation();
+  const [registerFaceId] = useRegisterFaceIdMutation();
+
   const [darkMode, setDarkMode] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [faceData, setFaceData] = useState<number[] | null>(null);
 
-  const [requestModerator] = useRequestModeratorMutation();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-const handleRequestModerator = async () => {
-  try {
-    await requestModerator().unwrap();
-    toast.success("Request sent to admin!");
-  } catch (error) {
-    toast.error("Failed to send request");
-  }
-};
-
-
-
-  const [formData, setFormData] = useState({
-    username: user?.username || "",
-    email: user?.email || "",
-    phoneNumber: user?.phoneNumber || "",
-    bio: user?.bio || "",
-    country: user?.country || "",
-    timezone: user?.timezone || "",
-    theme: user?.theme || "light",
-    fontSize: user?.fontSize || 16,
-    showTrending: user?.showTrending || true,
+  const [formData, setFormData] = useState<{
+    username: string;
+    email: string;
+    phoneNumber: string;
+    bio: string;
+    country: string;
+    timezone: string;
+    theme: string;
+    fontSize: number;
+    showTrending: boolean;
+    faceId?: number[];
+  }>({
+    username: "",
+    email: "",
+    phoneNumber: "",
+    bio: "",
+    country: "",
+    timezone: "",
+    theme: "light",
+    fontSize: 16,
+    showTrending: true,
+    faceId: undefined,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        bio: user.bio || "",
+        country: user.country || "",
+        timezone: user.timezone || "",
+        theme: user.theme || "light",
+        fontSize: user.fontSize || 16,
+        showTrending:
+          user.showTrending !== undefined ? user.showTrending : true,
+        faceId: user.faceId,
+      });
+      setDarkMode(user.theme === "dark");
+    }
+  }, [user]);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(
+          "/models/tiny_face_detector"
+        );
+        await faceapi.nets.faceLandmark68Net.loadFromUri(
+          "/models/face_landmark_68"
+        );
+        await faceapi.nets.faceRecognitionNet.loadFromUri(
+          "/models/face_recognition"
+        );
+        toast.success("Face recognition models loaded successfully!");
+      } catch (error) {
+        toast.error("Failed to load face recognition models.");
+        console.error("Model loading error:", error);
+      }
+    };
+    loadModels();
+  }, []);
+
+  useEffect(() => {
+    navigator.mediaDevices
+      .enumerateDevices()
+      .then((devices) => {
+        const hasCamera = devices.some(
+          (device) => device.kind === "videoinput"
+        );
+        if (!hasCamera) toast.error("Camera not found");
+      })
+      .catch((error) => {
+        toast.error("Failed to check camera availability");
+      });
+  }, []);
+
+  useEffect(() => {
+    if (formData.theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [formData.theme]);
+
+  const startCamera = async () => {
+    if (!videoRef.current) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+    } catch (error) {
+      toast.error("Error accessing camera.");
+    }
+  };
+
+  const stopCamera = () => {
+    const stream = videoRef.current?.srcObject as MediaStream;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+
+  const handleRegisterFaceId = async () => {
+    setLoading(true);
+    await startCamera();
+
+    const video = videoRef.current;
+    if (!video) {
+      toast.error("Camera not found.");
+      setLoading(false);
+      return;
+    }
+
+    video.onloadedmetadata = async () => {
+      setTimeout(async () => {
+        try {
+          const detections = await faceapi
+            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+          if (!detections) {
+            toast.error("Face not detected, please try again.");
+            setLoading(false);
+            stopCamera();
+            return;
+          }
+
+          const faceDescriptor = Array.from(detections.descriptor);
+          setFaceData(faceDescriptor);
+
+          try {
+            await registerFaceId({ faceId: faceDescriptor }).unwrap();
+            toast.success("Face ID successfully registered!");
+          } catch (error) {
+            toast.error("Error registering Face ID.");
+          }
+        } catch (error) {
+          toast.error("Face detection error.");
+        } finally {
+          setLoading(false);
+          stopCamera();
+        }
+      }, 3000);
+    };
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const value =
+      e.target.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.name === "fontSize"
+        ? Number(e.target.value)
+        : e.target.value;
+
     setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateUser(formData).unwrap();
+      const updateData = { ...formData };
+      if (faceData) updateData.faceId = faceData;
+
+      await updateUser(updateData).unwrap();
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       toast.error(error.data?.message || "Failed to update profile");
@@ -67,13 +235,6 @@ const handleRequestModerator = async () => {
       toast.error("Failed to update personalization settings");
     }
   };
-  useEffect(() => {
-    if (formData.theme === "dark") {
-        document.documentElement.classList.add("dark");
-    } else {
-        document.documentElement.classList.remove("dark");
-    }
-}, [formData.theme]);
 
   const handleUnsubscribe = async (id: string) => {
     try {
@@ -85,13 +246,26 @@ const handleRequestModerator = async () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone."
+      )
+    ) {
       try {
         await deleteAccount().unwrap();
         toast.success("Account deleted successfully");
       } catch (error) {
         toast.error("Failed to delete account");
       }
+    }
+  };
+
+  const handleRequestModerator = async () => {
+    try {
+      await requestModerator().unwrap();
+      toast.success("Request sent to admin!");
+    } catch (error) {
+      toast.error("Failed to send request");
     }
   };
 
@@ -104,9 +278,17 @@ const handleRequestModerator = async () => {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? "dark bg-[#1a1a1b] text-gray-200" : "bg-[#dae0e6]"}`}>
+    <div
+      className={`min-h-screen ${
+        darkMode ? "dark bg-[#1a1a1b] text-gray-200" : "bg-[#dae0e6]"
+      }`}
+    >
       <div className="max-w-4xl mx-auto p-4">
-        <div className={`rounded-lg ${darkMode ? "bg-[#272729]" : "bg-white"} shadow-lg`}>
+        <div
+          className={`rounded-lg ${
+            darkMode ? "bg-[#272729]" : "bg-white"
+          } shadow-lg`}
+        >
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center">
               <h2 className="flex items-center gap-2 text-2xl font-bold">
@@ -114,11 +296,23 @@ const handleRequestModerator = async () => {
                 User Settings
               </h2>
               <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 rounded-full ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}
+                onClick={() => {
+                  setDarkMode(!darkMode);
+                  setFormData({
+                    ...formData,
+                    theme: !darkMode ? "dark" : "light",
+                  });
+                }}
+                className={`p-2 rounded-full ${
+                  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
                 aria-label="Toggle theme"
               >
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                {darkMode ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -257,7 +451,10 @@ const handleRequestModerator = async () => {
                   <select
                     name="theme"
                     value={formData.theme}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setDarkMode(e.target.value === "dark");
+                    }}
                     className={`w-full px-3 py-2 rounded-md border ${
                       darkMode
                         ? "bg-[#1a1a1b] border-gray-700 focus:border-[#ff4500]"
@@ -315,23 +512,76 @@ const handleRequestModerator = async () => {
             <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <h3 className="text-xl font-semibold">Subscriptions</h3>
               <div className="space-y-4">
-                {subscriptions?.map((community) => (
-                  <div
-                    key={community._id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"
-                    }`}
-                  >
-                    <span className="font-medium">{community.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleUnsubscribe(community._id)}
-                      className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                {subscriptions?.length ? (
+                  subscriptions.map((community) => (
+                    <div
+                      key={community._id}
+                      className={`flex items-center justify-between p-3 rounded-lg ${
+                        darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"
+                      }`}
                     >
-                      Unsubscribe
-                    </button>
-                  </div>
-                ))}
+                      <span className="font-medium">{community.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleUnsubscribe(community._id)}
+                        className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                      >
+                        Unsubscribe
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">
+                    You have no subscriptions yet.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl font-semibold">Face ID Registration</h3>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Register your face for faster login. Make sure you're in a
+                  well-lit environment.
+                </p>
+
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  className={`${
+                    loading ? "block" : "hidden"
+                  } w-full max-w-md mx-auto rounded-lg border ${
+                    darkMode ? "border-gray-700" : "border-gray-300"
+                  }`}
+                ></video>
+
+                <button
+                  type="button"
+                  onClick={handleRegisterFaceId}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 border border-gray-300 px-6 py-3 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Smile className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  {loading ? "Scanning face..." : "Register Face ID"}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl font-semibold">Community Roles</h3>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Request special privileges to moderate communities.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRequestModerator}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                >
+                  Request Moderator Role
+                </button>
               </div>
             </div>
 
@@ -340,9 +590,14 @@ const handleRequestModerator = async () => {
                 <Trash2 className="w-5 h-5" />
                 Danger Zone
               </h3>
-              <div className={`p-4 rounded-lg ${darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"} border border-red-200 dark:border-red-900`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"
+                } border border-red-200 dark:border-red-900`}
+              >
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Once you delete your account, there is no going back. Please be certain.
+                  Once you delete your account, there is no going back. Please
+                  be certain.
                 </p>
                 <button
                   type="button"
@@ -363,7 +618,6 @@ const handleRequestModerator = async () => {
                 <span>Save Changes</span>
               </button>
 
-
               <button
                 type="button"
                 onClick={() => setShowChangePassword(!showChangePassword)}
@@ -379,23 +633,17 @@ const handleRequestModerator = async () => {
             </div>
           </form>
 
-          <div className="">
-            <div className={`p-4 rounded-lg ${darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"}`}>
-              <button onClick={handleRequestModerator} className="bg-blue-500 text-white p-2 rounded-md">
-                Request Moderator Role
-              </button>
-            </div>
-          </div>
-
           {showChangePassword && (
             <div className="px-6 pb-6">
-              <div className={`p-4 rounded-lg ${darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"}`}>
+              <div
+                className={`p-4 rounded-lg ${
+                  darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"
+                }`}
+              >
                 <ChangePassword />
               </div>
             </div>
-            
           )}
-          
         </div>
       </div>
     </div>

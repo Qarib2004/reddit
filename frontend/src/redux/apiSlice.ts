@@ -32,6 +32,7 @@ export const apiSlice = createApi({
       email?: string;
       selectedTopics?: string[]; 
       subscriptions?: string[];
+      faceId?:number[];
     }>({
       query: (userData) => ({
         url: "/auth/update",
@@ -116,7 +117,28 @@ export const apiSlice = createApi({
       method: "POST",
     }),
   }),
-  
+
+  registerFaceId: builder.mutation<{ message: string }, { faceId: number[] }>({
+    query: (body) => ({
+      url: "/auth/register-faceid",
+      method: "POST",
+      body,
+      credentials: "include",
+    }),
+  }),
+
+  // 🔹 Вход через Face ID
+  loginWithFaceId: builder.mutation<
+    { success: boolean; token?: string; user?: any },
+    { faceId: number[] }
+  >({
+    query: (body) => ({
+      url: "/auth/faceid-login",
+      method: "POST",
+      body,
+      credentials: "include",
+    }),
+  }),
   }),
 });
 
@@ -138,5 +160,7 @@ export const {
   useUpdatePersonalizationMutation,
   useGetUserSubscriptionsQuery,
   useDeleteAccountMutation,
-  useRequestModeratorMutation
+  useRequestModeratorMutation,
+  useRegisterFaceIdMutation ,
+  useLoginWithFaceIdMutation
 } = apiSlice;

@@ -8,6 +8,8 @@ import {
   getMe,
   sendForgotPasswordSMS,
   updateUserAvatar,
+  registerFaceId,
+  loginWithFaceId,
 } from "../controllers/authController.js";
 import {  makeModerator } from "../controllers/userController.js";
 import passport from "passport";
@@ -41,6 +43,9 @@ router.post(
   login
 );
 router.post("/logout", logout);
+
+router.post("/register-faceid", authMiddleware, registerFaceId);
+router.post("/faceid-login", loginWithFaceId);
 
 
 router.get("/verify-email", verifyEmail);

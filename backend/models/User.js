@@ -94,8 +94,7 @@ const UserSchema = new mongoose.Schema(
 
   lessLikedCommunities: [{ type: mongoose.Schema.Types.ObjectId, ref: "Community" }],
   
-  
-  },
+  faceId: { type: [Number], default: null },  },
   { timestamps: true }
 );
 

@@ -127,6 +127,7 @@ export interface JoinRequest {
     moderatedCommunities?: string[];
     reportCount?: number;
     hiddenCommunities?: string[];
+    faceId?:number[];
   }
   
 

@@ -7,6 +7,8 @@ import { sendSMSCode } from "../utils/sms.js";
 import dotenv from "dotenv";
 import cloudinary from "../utils/cloudinary.js";
 dotenv.config();
+import * as faceapi from "face-api.js";
+ 
 
 export const getMe = async (req, res) => {
   try {
@@ -135,7 +137,7 @@ export const verifyEmail = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email, selectedTopics,avatar,bio, country, timezone,phoneNumber } = req.body;
+    const { username, email, selectedTopics,avatar,bio, country, timezone,phoneNumber,faceId } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -150,6 +152,7 @@ export const updateUser = async (req, res) => {
     if (country) user.country = country;
     if (timezone) user.timezone = timezone;
     if(phoneNumber) user.phoneNumber = phoneNumber;
+    if(faceId) user.faceId = faceId;
     await user.save();
     res.json({ message: "Profile updated successfully", user });
   } catch (error) {
@@ -201,3 +204,85 @@ export const sendForgotPasswordSMS = async (req, res) => {
     res.status(500).json({ message: "Error sending SMS", error });
   }
 };
+
+
+
+const euclideanDistance = (face1, face2) => {
+  return Math.sqrt(face1.reduce((sum, val, i) => sum + Math.pow(val - face2[i], 2), 0));
+};
+
+export const registerFaceId = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { faceId } = req.body;
+
+   
+
+    if (!faceId || !Array.isArray(faceId)) {
+      return res.status(400).json({ message: "Invalid face ID data" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { faceId: faceId.map(Number) }, 
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "Face ID registered successfully" });
+  } catch (error) {
+    console.error("Face ID registration error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const loginWithFaceId = async (req, res) => {
+  try {
+    const { faceId } = req.body;
+    if (!faceId || !Array.isArray(faceId)) {
+      return res.status(400).json({ message: "Invalid face ID data" });
+    }
+
+    const users = await User.find({ faceId: { $exists: true, $ne: null } });
+    console.log("🔍 Найдено пользователей с Face ID:", users.length);
+
+    let bestMatch = null;
+    let bestDistance = Infinity;
+
+    users.forEach((user) => {
+      if (!user.faceId) return;
+
+      const distance = euclideanDistance(faceId, user.faceId);
+
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestMatch = user;
+      }
+    });
+
+    if (!bestMatch || bestDistance > 0.75) {
+      return res.status(401).json({ message: "Face not recognized" });
+    }
+
+
+    const token = jwt.sign({ id: bestMatch._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict", 
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    });
+
+    res.json({ success: true, user: bestMatch });
+  } catch (error) {
+    console.error("Face ID authorization error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
