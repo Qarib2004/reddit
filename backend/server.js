@@ -24,7 +24,12 @@ import messageRoutes from "./routes/messageRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
 import moderatorRoutes from "./routes/moderatorRoutes.js";
 // import aiRoutes from "./routes/aiRoutes.js";
-import searchRoutes  from "./routes/searchRoutes.js"
+import searchRoutes  from "./routes/searchRoutes.js";
+import paypalRoutes from "./routes/paypal.js";
+import donationRoutes from "./routes/donation.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+
+
 
 
 
@@ -176,6 +181,12 @@ app.use("/api/admin",adminRoutes)
 app.use("/api/moderator", moderatorRoutes);
 // app.use("/api/ai", aiRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/paypal", paypalRoutes);
+app.use("/api/donation", donationRoutes);
+app.use("/api/payment", paymentRoutes);
+
+
+
 
 
 const PORT = process.env.PORT || 5000;

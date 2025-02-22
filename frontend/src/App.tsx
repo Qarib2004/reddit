@@ -38,6 +38,7 @@ import ModeratorChat from "./pages/moderator/ModeratorChat";
 import SearchPage from "./pages/SearchPage";
 import SettingsPost from "./pages/SettingsPost";
 import CommunitySettings from "./pages/CommunitySettings";
+import Subscribed from "./pages/Subscribed";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -76,6 +77,7 @@ const App = () => {
           <Route path="/profile/:id" element={<UserDetails />} />
           <Route path="/post/:id/edit" element={<SettingsPost />} />
           <Route path="/community/:id/communitySettings" element={<CommunitySettings />} />
+          <Route path="/subscribed" element={<Subscribed />} />
         </Route>
 
     

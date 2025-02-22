@@ -3,6 +3,10 @@ import { validationResult } from "express-validator";
 import mongoose from "mongoose";
 import cloudinary from "../utils/cloudinary.js";
 import User  from "../models/User.js"
+import Community from "../models/Community.js";
+
+
+
 export const createPost = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -352,5 +356,29 @@ export const updatePost = async (req, res) => {
   } catch (error) {
     console.error("Error updating post:", error);
     res.status(500).json({ message: "Server error while updating post" });
+  }
+};
+
+
+export const getSubscribedPosts = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate("subscriptions");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+
+    const subscribedCommunities = user.subscriptions.map(sub => sub._id);
+    
+    const posts = await Post.find({ community: { $in: subscribedCommunities } })
+      .populate("author", "username")
+      .populate("community", "name");
+
+
+    res.json(posts);
+  } catch (error) {
+    console.error("Error fetching subscribed posts:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

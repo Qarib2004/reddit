@@ -10,7 +10,7 @@ import {
   useRequestToJoinCommunityMutation,
 } from "../redux/communitiesSlice";
 import { useGetPostsQuery } from "../redux/postsSlice";
-import { useGetUserQuery } from "../redux/apiSlice";
+import { useGetUserQuery, useUpdateUserMutation } from "../redux/apiSlice";
 import {
   Users,
   Loader2,
@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import PostItem from "../components/PostItem";
 import Loader from "../assets/loader-ui/Loader";
+import { useGetSubscribedPostsQuery } from "../redux/postsSlice"; 
+
 
 const Community = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,24 +58,27 @@ const Community = () => {
   const [rejectJoinRequest] = useRejectJoinRequestMutation();
   const [isJoined, setIsJoined] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
+  const [updateUser] = useUpdateUserMutation();
+  const { refetch: refetchSubscribedPosts } = useGetSubscribedPostsQuery();
+
 
   const [requestPending, setRequestPending] = useState(false);
 
   useEffect(() => {
     if (!community || !user) return;
 
-    if (
-      Array.isArray(community.members) &&
-      typeof community.members[0] === "string"
-    ) {
-      setIsJoined(community.members.includes(user._id));
-    } else if (
-      Array.isArray(community.members) &&
-      typeof community.members[0] === "object"
-    ) {
-      setIsJoined(community.members.some((member) => member._id === user._id));
-    }
+    const isMember = community.members.some(member => {
+      if (typeof member === 'string') {
+        return member === user._id;
+      }
+      return member._id === user._id;
+    });
+  
+    setIsJoined(isMember);
   }, [user, community]);
+  useEffect(() => {
+    console.log("Posts received in Subscribed.tsx:", posts);
+  }, [posts]);
 
   useEffect(() => {
     if (requestsButtonRef.current && showRequests) {
@@ -84,12 +89,14 @@ const Community = () => {
       });
     }
   }, [showRequests]);
+
   const handleToggleSubscription = async () => {
     if (!user || !communityId) return;
-
+  
+  
     try {
-      await refetchUser();
-
+      await refetchUser(); 
+  
       if (isJoined) {
         await leaveCommunity(communityId).unwrap();
         setIsJoined(false);
@@ -102,13 +109,14 @@ const Community = () => {
           setIsJoined(true);
         }
       }
-
+  
       await refetchUser();
       await refetchCommunity();
-    } catch (error: any) {
-      console.error("Error joining/leaving community:", error);
+    } catch (error) {
+      console.error("Error in subscription:", error);
     }
   };
+  
 
   const handleApproveRequest = async (_id: string) => {
     if (!_id) {
@@ -166,9 +174,14 @@ const Community = () => {
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-end pb-6">
               <div className="flex items-center space-x-6">
-                <div className="bg-white rounded-full p-6 shadow-lg transform hover:scale-105 transition-transform">
-                  <Users className="w-12 h-12 text-[#1e3a8a]" />
-                </div>
+              <div className="bg-white rounded-full p-6 shadow-lg transform hover:scale-105 transition-transform">
+  {community.avatar ? (
+    <img src={community.avatar} alt="User Avatar" className="w-12 h-12 rounded-full object-cover" />
+  ) : (
+    <Users className="w-12 h-12 text-[#1e3a8a]" />
+  )}
+</div>
+
                 <div className="text-white">
                   <h1 className="text-4xl font-bold mb-2">
                     r/{community.name}

@@ -73,7 +73,7 @@ const CommunitySchema = new mongoose.Schema(
     ],
     avatar: {
       type: String,
-      default: "https://default-community-avatar.com/avatar.png",
+      default: "https://whop.com/blog/content/images/2024/08/Discord-vs-Reddit-for-Building-a-Community.webp",
     },
     banner: {
       type: String,

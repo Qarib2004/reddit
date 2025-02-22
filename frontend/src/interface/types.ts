@@ -76,6 +76,7 @@ export interface Comment {
     reason: string; 
     timestamp: string;
   }[];
+  karma: number;
 }
   
 export interface Community {
@@ -86,8 +87,10 @@ export interface Community {
   membersCount: number;
   type: "Public" | "Restricted" | "Private" | "Mature (18+)";
   creator: string | { _id: string; username: string };
-  members: string[]; 
+  members: (string | { _id: string; username: string })[];
   joinRequests: JoinRequest[]; 
+  avatar:string;
+  banner:string
 }
 
 export interface JoinRequest {
@@ -128,6 +131,7 @@ export interface JoinRequest {
     reportCount?: number;
     hiddenCommunities?: string[];
     faceId?:number[];
+    coins?:number
   }
   
 

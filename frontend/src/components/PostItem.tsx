@@ -51,9 +51,10 @@ const PostItem = ({ post }: { post: any }) => {
     refetch: refetchCommunity,
   } = useGetCommunityByIdQuery(communityId, { skip: !communityId });
 
+  
+
   const { data: posts, refetch: refetchPost } = useGetAllPostsQuery();
-  const result = useGetAllCommunitiesQuery();
-console.log(result);
+  
 
   
 
@@ -92,7 +93,7 @@ console.log(result);
   }
 
   if (!post.community) {
-    return <Loader />;
+    return "";
   }
 
 

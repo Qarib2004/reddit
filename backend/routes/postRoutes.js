@@ -10,7 +10,8 @@ import {
   reportPost,
   hidePost,
   showFewerPosts,
-  updatePost
+  updatePost,
+  getSubscribedPosts
 } from "../controllers/postController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -40,6 +41,8 @@ router.get("/", getPosts);
 router.get("/search/:query", searchPosts);
 router.get("/:id", getPost);
 router.get("/tags/:tag", searchPostsByTag);
+ 
+
 
 router.delete("/:id", authMiddleware, deletePost);
 
@@ -59,6 +62,7 @@ router.post(
   ],
   createComment
 );
+
 
 router.get("/:postId/comments", getCommentsByPost);
 

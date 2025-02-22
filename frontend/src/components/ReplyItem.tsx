@@ -19,10 +19,8 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
   const [likeReply] = useLikeReplyMutation();
   const [dislikeReply] = useDislikeReplyMutation();
   const [replyToComment] = useReplyToCommentMutation();
-  const { data: user, refetch } = useGetUserQuery(); 
+  const { data: user } = useGetUserQuery();
 
-  const [likes, setLikes] = useState(reply.upvotes?.length || 0);
-  const [dislikes, setDislikes] = useState(reply.downvotes?.length || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
@@ -37,12 +35,9 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
 
   const handleLike = async () => {
     try {
-      const response = await likeReply(reply._id).unwrap();
-      setLikes(response.upvotes.length);
-      setDislikes(response.downvotes.length);
+      await likeReply(reply._id).unwrap();
       setIsLiked(true);
       setIsDisliked(false);
-      refetch();
     } catch (error) {
       console.error("Error liking reply:", error);
     }
@@ -50,12 +45,9 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
 
   const handleDislike = async () => {
     try {
-      const response = await dislikeReply(reply._id).unwrap();
-      setLikes(response.upvotes.length);
-      setDislikes(response.downvotes.length);
+      await dislikeReply(reply._id).unwrap();
       setIsLiked(false);
       setIsDisliked(true);
-      refetch();
     } catch (error) {
       console.error("Error disliking reply:", error);
     }
@@ -68,7 +60,7 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
 
   const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyContent.trim()) return;
+    if (!replyContent.trim() || !user) return;
 
     try {
       await replyToComment({
@@ -79,7 +71,6 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
 
       setIsReplying(false);
       setReplyContent("");
-      refetch(); 
     } catch (error) {
       console.error("Error replying to reply:", error);
     }
@@ -88,7 +79,6 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
   return (
     <div className="group pl-6 border-l border-gray-200">
       <div className="flex gap-2">
-        
         <div className="flex flex-col items-center">
           <button
             onClick={handleLike}
@@ -100,7 +90,7 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
             <ArrowBigUp size={16} />
           </button>
           <span className="text-xs font-medium text-gray-900 my-1">
-            {likes - dislikes}
+            {(reply.upvotes?.length || 0) - (reply.downvotes?.length || 0)}
           </span>
           <button
             onClick={handleDislike}
@@ -113,9 +103,7 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
           </button>
         </div>
 
-        
         <div className="flex-1 min-w-0">
-         
           <div className="flex items-center gap-1 text-xs">
             <span className="font-medium text-gray-900 hover:underline cursor-pointer">
               u/{reply.author?.username || "anonymous"}
@@ -126,12 +114,10 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
             </span>
           </div>
 
-         
           <div className="mt-1 text-sm text-gray-900 whitespace-pre-wrap break-words">
             {reply.content}
           </div>
 
-          
           <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={handleReplyToggle}
@@ -153,7 +139,6 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
             </button>
           </div>
 
-        
           {isReplying && (
             <form onSubmit={handleSubmitReply} className="mt-3">
               <textarea
@@ -183,7 +168,6 @@ const ReplyItem = ({ reply }: { reply: Comment }) => {
         </div>
       </div>
 
-     
       {reply.replies && reply.replies.length > 0 && (
         <div className="mt-2">
           {reply.replies.map((nestedReply: Comment) => (

@@ -127,7 +127,6 @@ export const apiSlice = createApi({
     }),
   }),
 
-  // 🔹 Вход через Face ID
   loginWithFaceId: builder.mutation<
     { success: boolean; token?: string; user?: any },
     { faceId: number[] }
@@ -139,7 +138,22 @@ export const apiSlice = createApi({
       credentials: "include",
     }),
   }),
+  sendDonation: builder.mutation({
+    query: ({ recipientId, amount }) => ({
+      url: "/donation/send",
+      method: "POST",
+      body: { recipientId, amount },
+    }),
   }),
+  createPayment: builder.mutation({
+    query: ({ amount }) => ({
+      url: "/payment/create",
+      method: "POST",
+      body: { amount },
+    }),
+  }),
+  }),
+  
 });
 
 export const { 
@@ -162,5 +176,7 @@ export const {
   useDeleteAccountMutation,
   useRequestModeratorMutation,
   useRegisterFaceIdMutation ,
-  useLoginWithFaceIdMutation
+  useLoginWithFaceIdMutation,
+  useSendDonationMutation,
+  useCreatePaymentMutation
 } = apiSlice;

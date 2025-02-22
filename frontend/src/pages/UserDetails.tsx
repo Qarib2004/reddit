@@ -156,6 +156,7 @@ const UserDetails = () => {
                   Create Post
                 </Link>
               </div>
+              
             </div>
           </div>
         </div>

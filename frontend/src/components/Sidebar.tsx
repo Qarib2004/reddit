@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
-import { Plus, Home, Compass, Bookmark, User, Settings, Users, Menu, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Home, Compass, Bookmark, User, Settings, Users, Menu, X, ChevronDown, ChevronUp,WalletCards } from "lucide-react";
 import { useGetCommunitiesQuery } from "../redux/communitiesSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import { useState, useEffect } from "react";
@@ -65,6 +65,15 @@ const Sidebar = () => {
         >
           <Plus size={20} />
           Create Post
+        </Link>
+
+        <Link
+          to="/subscribed"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100"
+          onClick={() => isMobile && setIsOpen(false)}
+        >
+         <WalletCards size={20}/>
+          Subscribed
         </Link>
 
         <Link

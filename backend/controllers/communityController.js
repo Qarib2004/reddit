@@ -3,6 +3,9 @@ import User from "../models/User.js";
 import Category from "../models/Category.js";
 import Topic from "../models/Topic.js";
 import { validationResult } from "express-validator";
+import dotenv from "dotenv";
+dotenv.config()
+import cloudinary from "../utils/cloudinary.js";
 
 
 
@@ -22,7 +25,6 @@ export const createCommunity = async (req, res) => {
       return res.status(400).json({ message: "Such a community already exists" });
     }
 
-    console.log("Validating categories...");
     const validCategories = categories.length
       ? await Category.find({ _id: { $in: categories } })
       : [];
@@ -301,23 +303,108 @@ export const rejectJoinRequest = async (req, res) => {
 export const updateCommunity = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, type } = req.body;
+    const { name, description, type, avatar, banner } = req.body;
 
     const community = await Community.findById(id);
-    if (!community) return res.status(404).json({ message: "Community not found" });
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
 
     if (community.creator.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You are not the owner of this community" });
+      return res.status(403).json({ message: "You are not allowed to update this community" });
     }
 
     community.name = name;
     community.description = description;
     community.type = type;
-    await community.save();
+    if (avatar) community.avatar = avatar;
+    if (banner) community.banner = banner;
 
+    await community.save();
     res.status(200).json(community);
   } catch (error) {
     console.error("Error updating community:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+
+
+export const deleteCommunity = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const community = await Community.findById(id);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    await Community.deleteOne({ _id: id });
+
+    await User.updateMany(
+      { subscriptions: id },
+      { $pull: { subscriptions: id } }
+    );
+
+    res.status(200).json({ message: "Community deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting community:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export const uploadCommunityImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const community = await Community.findById(id);
+
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    if (!req.files || (!req.files.avatar && !req.files.banner)) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const uploadedFiles = {};
+
+    if (req.files.avatar) {
+      const avatarResult = await cloudinary.uploader.upload_stream(
+        { folder: "community_avatars" },
+        async (error, result) => {
+          if (error) {
+            console.error("Avatar upload error:", error);
+            return res.status(500).json({ message: "Cloudinary upload failed", error });
+          }
+          uploadedFiles.avatar = result.secure_url;
+          community.avatar = result.secure_url;
+          await community.save();
+          res.json({ message: "Avatar updated", avatar: community.avatar });
+        }
+      );
+      avatarResult.end(req.files.avatar[0].buffer);
+    }
+
+    if (req.files.banner) {
+      const bannerResult = await cloudinary.uploader.upload_stream(
+        { folder: "community_banners" },
+        async (error, result) => {
+          if (error) {
+            console.error("Banner upload error:", error);
+            return res.status(500).json({ message: "Cloudinary upload failed", error });
+          }
+          uploadedFiles.banner = result.secure_url;
+          community.banner = result.secure_url;
+          await community.save();
+          res.json({ message: "Banner updated", banner: community.banner });
+        }
+      );
+      bannerResult.end(req.files.banner[0].buffer);
+    }
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 };

@@ -57,7 +57,7 @@ export const communitiesApi = createApi({
     }),
     updateCommunity: builder.mutation<
     Community,
-    { id: string; name: string; description: string; type: string }
+    { id: string; name: string; description: string; type: string ,avatar?: string; banner?: string}
   >({
     query: ({ id, ...data }) => ({
       url: `/communities/${id}`,
@@ -66,6 +66,24 @@ export const communitiesApi = createApi({
     }),
     invalidatesTags: (result, error, { id }) => [{ type: "Community", id }], 
   }),
+
+  deleteCommunity: builder.mutation<{ message: string }, string>({
+    query: (id) => ({
+      url: `communities/${id}`,
+      method: "DELETE",
+    }),
+    invalidatesTags: ["Community"],
+  }),
+
+  uploadImage: builder.mutation({
+    query: ({ id, formData }) => ({
+      url: `/communities/${id}/upload`,
+      method: "POST",
+      body: formData,
+    }),
+  }),
+  
+  
   }),
 });
 
@@ -79,5 +97,7 @@ export const {
   useGetJoinRequestsQuery,
   useApproveJoinRequestMutation,
   useRejectJoinRequestMutation,
-  useUpdateCommunityMutation
+  useUpdateCommunityMutation,
+  useDeleteCommunityMutation,
+  useUploadImageMutation,
 } = communitiesApi;
