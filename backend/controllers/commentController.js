@@ -51,23 +51,6 @@ import User from "../models/User.js";
   };
   
 
-export const deleteComment = async (req, res) => {
-  try {
-    const comment = await Comment.findById(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
-
-    if (comment.author.toString() !== req.user.id) {
-      return res.status(403).json({ message: "No access" });
-    }
-
-    await comment.deleteOne();
-    res.json({ message: "Comment deleted" });
-  } catch (error) {
-    res.status(500).json({ message: " Server error", error });
-  }
-};
 
 
 export const likeComment = async (req, res) => {
@@ -288,5 +271,79 @@ export const reportComment = async (req, res) => {
   } catch (error) {
     console.error("Error in reportComment:", error);
     res.status(500).json({ message: "Internal Server Error", error });
+  }
+};
+
+
+export const updateComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+    const userId = req.user.id;
+
+    if (!content.trim()) {
+      return res.status(400).json({ message: "Comment content cannot be empty" });
+    }
+
+    const comment = await Comment.findById(id).populate("author", "_id");
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    if (comment.author._id.toString() !== userId) {
+      return res.status(403).json({ message: "You are not the owner of this comment" });
+    }
+
+    comment.content = content;
+    await comment.save();
+
+    res.status(200).json({ message: "Comment updated successfully", comment });
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const userId = req.user.id; 
+
+    const comment = await Comment.findById(id).populate("author", "_id").populate("post", "_id author");
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const isAuthor = comment.author._id.toString() === userId;
+    const isPostOwner = comment.post.author.toString() === userId;
+
+    if (!isAuthor && !isPostOwner) {
+      return res.status(403).json({ message: "You do not have permission to delete this comment" });
+    }
+
+    await Comment.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const getCommentById = async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.id).populate("author", "username avatar");
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    res.status(200).json(comment);
+  } catch (error) {
+    console.error("Error fetching comment:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 };

@@ -8,7 +8,9 @@ import {
   replyToComment,
   likeReply,
   dislikeReply,
-  reportComment
+  reportComment,
+  updateComment,
+  getCommentById
 } from "../controllers/commentController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
@@ -31,10 +33,11 @@ router.post(
   replyToComment
 );
 
-
-router.get("/post/:postId", getCommentsByPost);
-
+router.put("/:id", authMiddleware, updateComment);
 router.delete("/:id", authMiddleware, deleteComment);
+router.get("/post/:postId", getCommentsByPost);
+router.get("/:id", getCommentById);
+
 
 router.post("/:id/upvotes", authMiddleware, likeComment);
 

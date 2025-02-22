@@ -47,7 +47,6 @@ export const commentsApi = createApi({
       async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
         try {
           const { data: updatedVotes } = await queryFulfilled;
-          // Найти все активные запросы getComments
           const requests = commentsApi.util.selectInvalidatedBy(getState(), [{ type: 'Comments' }]);
           
           requests.forEach(({ originalArgs: postId }) => {
@@ -257,6 +256,35 @@ export const commentsApi = createApi({
         body: { reason },
       }),
     }),
+
+    updateComment: builder.mutation({
+      query: ({ id, content }) => ({
+        url: `/comments/${id}`,
+        method: "PUT",
+        body: { content },
+      }),
+      async onQueryStarted({ id, content }, { dispatch, queryFulfilled }) {
+        try {
+          const { data: updatedComment } = await queryFulfilled;
+
+          dispatch(
+            commentsApi.util.updateQueryData("getCommentById", id, (draft) => {
+              draft.content = updatedComment.comment.content;
+            })
+          );
+        } catch (error) {
+          console.error("Comment update error:", error);
+        }
+      },
+      invalidatesTags: (result, error, { id }) => [{ type: "Comments", id }],
+    }),
+    getCommentById: builder.query({
+      query: (commentId) => `/comments/${commentId}`,
+      providesTags: (result, error, id) =>
+        result ? [{ type: "Comments", id }] : [],
+          }),
+ 
+    
   }),
 });
 
@@ -269,5 +297,7 @@ export const {
   useReplyToCommentMutation,
   useLikeReplyMutation,
   useDislikeReplyMutation,
-  useReportCommentMutation
+  useReportCommentMutation,
+  useUpdateCommentMutation,
+  useGetCommentByIdQuery
 } = commentsApi;

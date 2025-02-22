@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useParams } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Auth from "./components/Auth";
@@ -39,6 +39,9 @@ import SearchPage from "./pages/SearchPage";
 import SettingsPost from "./pages/SettingsPost";
 import CommunitySettings from "./pages/CommunitySettings";
 import Subscribed from "./pages/Subscribed";
+import CommentSettings from "./pages/CommentSettings";
+import { useGetCommentByIdQuery } from "./redux/commentsSlice";
+
 
 const App = () => {
   const dispatch = useDispatch();
@@ -78,7 +81,8 @@ const App = () => {
           <Route path="/post/:id/edit" element={<SettingsPost />} />
           <Route path="/community/:id/communitySettings" element={<CommunitySettings />} />
           <Route path="/subscribed" element={<Subscribed />} />
-        </Route>
+          <Route path="/comment/:id/edit" element={<CommentWrapper />} />
+          </Route>
 
     
 
@@ -113,6 +117,16 @@ const App = () => {
       </Routes>
     </>
   );
+};
+
+const CommentWrapper = () => {
+  const { id } = useParams<{ id: string }>();
+  const { data: comment, isLoading } = useGetCommentByIdQuery(id!);
+
+  if (isLoading) return <p>Loading comment...</p>;
+  if (!comment) return <p>Comment not found</p>;
+
+  return <CommentSettings comment={comment} />;
 };
 
 export default App;

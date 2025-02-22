@@ -4,6 +4,7 @@ import {
   useDislikeCommentMutation,
   useReplyToCommentMutation,
   useReportCommentMutation,
+  useDeleteCommentMutation,
 } from "../redux/commentsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import {
@@ -14,11 +15,16 @@ import {
   Share2,
   MoreHorizontal,
   Flag,
+  Trash2,
+  Settings
 } from "lucide-react";
 import ReplyItem from "./ReplyItem";
 import UserModal from "./UserModal";
 import { Comment } from "../interface/types";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css"; 
+import { useNavigate } from "react-router-dom";
 
 const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -26,7 +32,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const userInfoRef = useRef<HTMLDivElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
-
+  const navigate = useNavigate()
   const [likeComment] = useLikeCommentMutation();
   const [dislikeComment] = useDislikeCommentMutation();
   const [replyToComment] = useReplyToCommentMutation();
@@ -42,6 +48,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [showReportModal, setShowReportModal] = useState(false);
+  const [deleteComment] = useDeleteCommentMutation();
 
   useEffect(() => {
     if (user) {
@@ -149,6 +156,30 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
     }
   };
 
+  const handleDeleteComment = async () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteComment(comment._id).unwrap();
+          toast.success("Post deleted successfully!");
+          refetch();
+        
+        } catch (error: any) {
+          toast.error(error.data?.message || "Failed to delete post");
+        }
+      }
+    });
+  };
+
   return (
     <div className="group relative">
       <div className="flex gap-3">
@@ -235,6 +266,26 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             <button className="p-1 hover:bg-gray-100 rounded-md">
               <MoreHorizontal size={14} />
             </button>
+
+            {user && comment.author._id === user._id && (
+              <button
+                onClick={() => navigate(`/comment/${comment._id}/edit`)}
+                className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
+              >
+<Settings size={14} className="text-gray-600" />
+                Edit
+              </button>
+            )}
+
+            {user && (comment.author._id === user._id || comment.post === user._id) && (
+              <button
+                onClick={handleDeleteComment}
+                className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
+              >
+                <Trash2 size={14} className="text-gray-600" />
+                Delete
+              </button>
+            )}
 
             <button
               onClick={() => setShowReportModal(true)}
