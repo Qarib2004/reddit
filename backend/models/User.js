@@ -1,4 +1,18 @@
 import mongoose from "mongoose";
+import Award from "./Award.js";
+
+const WalletTransactionSchema = new mongoose.Schema(
+  {
+    amount: { type: Number, required: true },
+    transactionId: { type: String, required: true },
+    status: { type: String, enum: ["pending", "completed", "failed"], default: "pending" },
+  },
+  { timestamps: true }
+);
+export const UserAwardSchema = new mongoose.Schema({
+  award: { type: mongoose.Schema.Types.ObjectId, ref: "Award", required: true }, 
+  receivedAt: { type: Date, default: Date.now }, 
+});
 
 const UserSchema = new mongoose.Schema(
   {
@@ -95,8 +109,10 @@ const UserSchema = new mongoose.Schema(
   lessLikedCommunities: [{ type: mongoose.Schema.Types.ObjectId, ref: "Community" }],
   
   faceId: { type: [Number], default: null },
-  coins: { type: Number, default: 0 },
-  banUntil: { type: Date, default: null }
+  banUntil: { type: Date, default: null },
+  wallet: { type: Number, default: 500 }, 
+  walletTransactions: { type: [WalletTransactionSchema], default: [] },
+  awards: { type: [UserAwardSchema], default: [] },
 },
   { timestamps: true }
 );

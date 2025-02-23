@@ -6,6 +6,8 @@ import SelectTopicModal from "../components/SelectTopicModal";
 import PostItem from "../components/PostItem";
 import { Rocket, Flame, Clock, TrendingUp, Award, Search } from "lucide-react";
 import Loader from "../assets/loader-ui/Loader";
+import { Helmet } from "react-helmet-async";
+
 
 const Home = () => {
   const [sort, setSort] = useState("hot");
@@ -14,6 +16,7 @@ const Home = () => {
   const { data: user } = useGetUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
+
  
 
   useEffect(() => {
@@ -53,6 +56,10 @@ const Home = () => {
 
   return (
     <>
+ <Helmet>
+        <title>Home</title>
+      </Helmet>
+
       {user && (
         <SelectTopicModal
           isOpen={isModalOpen}

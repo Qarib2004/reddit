@@ -9,6 +9,8 @@ import { stripHtml } from "../utils/cutTagHtml";
 import { clodudinaryLink } from "../utils/cloudinaryLink";
 import { ImageIcon, Link2Icon, TypeIcon, Hash, X } from "lucide-react";
 import { useGetUserQuery } from "../redux/apiSlice";
+import { Helmet } from "react-helmet-async";
+
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -96,6 +98,10 @@ const CreatePost = () => {
   };
 
   return (
+     <>
+     <Helmet>
+        <title>Create Post</title>
+      </Helmet>
     <div className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -260,6 +266,7 @@ const CreatePost = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

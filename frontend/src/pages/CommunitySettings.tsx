@@ -11,6 +11,8 @@ import { Trash2, Upload } from "lucide-react";
 import { useUploadImageMutation } from "../redux/communitiesSlice"; 
 import Swal from "sweetalert2"; 
 import "sweetalert2/dist/sweetalert2.min.css"; 
+import { Helmet } from "react-helmet-async";
+
 
 const CommunitySettings = () => {
   const { id } = useParams<{ id: string }>(); 
@@ -104,6 +106,10 @@ const CommunitySettings = () => {
 
 
   return (
+    <>
+    <Helmet>
+        <title>Community Settings</title>
+      </Helmet>
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-xl font-semibold mb-4">Edit Community</h2>
 
@@ -163,6 +169,7 @@ const CommunitySettings = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 

@@ -12,7 +12,7 @@ import * as faceapi from "face-api.js";
 
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).populate("awards.award").select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -137,7 +137,7 @@ export const verifyEmail = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { username, email, selectedTopics,avatar,bio, country, timezone,phoneNumber,faceId } = req.body;
+    const { username, email, selectedTopics,avatar,bio, country, timezone,phoneNumber,faceId,wallet } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -153,6 +153,7 @@ export const updateUser = async (req, res) => {
     if (timezone) user.timezone = timezone;
     if(phoneNumber) user.phoneNumber = phoneNumber;
     if(faceId) user.faceId = faceId;
+    if(wallet) user.wallet = wallet;
     await user.save();
     res.json({ message: "Profile updated successfully", user });
   } catch (error) {

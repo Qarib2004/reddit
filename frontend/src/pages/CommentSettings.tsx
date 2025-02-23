@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useUpdateCommentMutation } from "../redux/commentsSlice";
 import { toast } from "react-toastify";
 import { X, Save } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+
 
 const CommentSettings = ({ comment }: { comment: any }) => {
   const navigate = useNavigate();
@@ -26,6 +28,10 @@ const CommentSettings = ({ comment }: { comment: any }) => {
   };
 
   return (
+    <>
+    <Helmet>
+        <title>Comment Settings</title>
+      </Helmet>
     <div className="min-h-screen bg-[#DAE0E6] py-4 px-2 sm:py-8 sm:px-4">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="border-b border-gray-200 p-4">
@@ -72,6 +78,8 @@ const CommentSettings = ({ comment }: { comment: any }) => {
         </form>
       </div>
     </div>
+
+    </>
   );
 };
 

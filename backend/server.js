@@ -28,6 +28,9 @@ import searchRoutes  from "./routes/searchRoutes.js";
 import paypalRoutes from "./routes/paypal.js";
 import donationRoutes from "./routes/donation.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import awardRoutes from "./routes/awardRoutes.js";
+
+
 
 
 
@@ -183,7 +186,9 @@ app.use("/api/moderator", moderatorRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/paypal", paypalRoutes);
 app.use("/api/donation", donationRoutes);
-app.use("/api/payment", paymentRoutes);
+app.use("/api/awards", awardRoutes);
+app.use("/api/payments", paymentRoutes);
+
 
 
 

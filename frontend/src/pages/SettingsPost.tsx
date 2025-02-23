@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import { stripHtml } from "../utils/cutTagHtml";
 import Swal from "sweetalert2"; 
 import "sweetalert2/dist/sweetalert2.min.css"; 
+import { Helmet } from "react-helmet-async";
+
 
 const SettingsPost = () => {
   const { id } = useParams<{ id?: string }>();
@@ -82,6 +84,10 @@ const SettingsPost = () => {
   if (!post) return <p>Post not found</p>;
 
   return (
+    <>
+    <Helmet>
+        <title>Settings Post</title>
+      </Helmet>
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-md shadow-md mt-6">
       <h2 className="text-2xl font-semibold mb-4">Edit Post</h2>
 
@@ -130,6 +136,7 @@ const SettingsPost = () => {
         </form>
       )}
     </div>
+    </>
   );
 };
 

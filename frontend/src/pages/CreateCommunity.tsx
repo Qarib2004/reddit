@@ -7,6 +7,8 @@ import {
   useGetCommunitiesQuery,
 } from "../redux/communitiesSlice";
 import { Category, Topic } from "../components/CategoryTopics";
+import { Helmet } from "react-helmet-async";
+
 
 const CreateCommunity = () => {
   const [step, setStep] = useState(1);
@@ -53,6 +55,10 @@ const CreateCommunity = () => {
   };
 
   return (
+    <>
+    <Helmet>
+        <title>Create Community</title>
+      </Helmet>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-bold text-center mb-4">
@@ -236,6 +242,7 @@ const CreateCommunity = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

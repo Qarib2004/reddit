@@ -25,6 +25,8 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css"; 
 import { useNavigate } from "react-router-dom";
+import AwardModal from "./AwardModal"; 
+import { useGetAwardsQuery } from "../redux/awardsSlice"; 
 
 const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -38,7 +40,8 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
   const [replyToComment] = useReplyToCommentMutation();
   const { data: user, refetch } = useGetUserQuery();
   const [reportComment] = useReportCommentMutation();
-
+  const { data: awards } = useGetAwardsQuery(undefined);
+  const [isAwardModalOpen, setIsAwardModalOpen] = useState(false);
   const [likes, setLikes] = useState(comment.upvotes?.length || 0);
   const [dislikes, setDislikes] = useState(comment.downvotes?.length || 0);
   const [isLiked, setIsLiked] = useState(false);
@@ -255,10 +258,22 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
               <MessageSquare size={14} />
               <span>Reply</span>
             </button>
-            <button className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
+            <button
+              onClick={() => setIsAwardModalOpen(true)}
+              className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
+            >
               <Award size={14} />
               <span>Award</span>
             </button>
+
+            {awards && (
+            <AwardModal
+              isOpen={isAwardModalOpen}
+              onClose={() => setIsAwardModalOpen(false)}
+              awards={awards}
+              commentId={comment._id}
+            />
+          )}
             <button className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <Share2 size={14} />
               <span>Share</span>

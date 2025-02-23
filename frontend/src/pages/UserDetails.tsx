@@ -21,6 +21,8 @@ import {
 import PostItem from "../components/PostItem";
 import SavedPost from "../components/SavedPost";
 import { clodudinaryLink } from "../utils/cloudinaryLink";
+import { Helmet } from "react-helmet-async";
+
 
 const UserDetails = () => {
   const { data: user, isLoading, refetch } = useGetUserQuery();
@@ -93,6 +95,10 @@ const UserDetails = () => {
   };
 
   return (
+    <>
+    <Helmet>
+        <title>User Details</title>
+      </Helmet>
     <div className="min-h-screen bg-[#DAE0E6]">
       
       <div
@@ -346,6 +352,10 @@ const UserDetails = () => {
                 <Edit className="w-4 h-4 text-gray-400" />
               </button>
 
+              <div className="max-w-5xl mx-auto px-4">
+          
+        </div>
+
               <button className="w-full flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
                 <div className="flex items-center gap-3">
                   <div className="bg-gray-100 p-2 rounded-lg">
@@ -365,6 +375,28 @@ const UserDetails = () => {
             </div>
           </div>
 
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+  <h2 className="font-bold text-sm text-gray-900 mb-4">AWARDS</h2>
+  {user.awards && user.awards.length > 0 ? (
+    <div className="flex flex-wrap gap-3">
+      {user.awards.map((awardData, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg text-sm font-medium"
+        >
+          <span className="text-xl">{awardData.award?.icon || "🏆"}</span> {/* ✅ Отображение иконки */}
+          <span className="text-gray-700">{awardData.award?.name || "Unknown Award"}</span> {/* ✅ Название награды */}
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-gray-600 text-sm">No awards received yet.</p>
+  )}
+</div>
+
+
+
+
           
           <div className="bg-white rounded-lg p-4 shadow-sm">
             <h2 className="font-bold text-sm text-gray-900 mb-4">LINKS</h2>
@@ -376,6 +408,7 @@ const UserDetails = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

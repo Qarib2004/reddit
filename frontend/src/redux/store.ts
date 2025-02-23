@@ -10,6 +10,8 @@ import { adminApi } from "./adminSlice";
 import { moderatorApi } from "./moderatorSlice";
 import authReducer from "./authSlice";
 import { searchApi } from "./searchSlice";
+import { awardsApi } from "./awardsSlice";
+import { walletApi } from "./WalletSlice";
 
 import {friendsApi} from "./friendsSlice"
 export const store = configureStore({
@@ -26,6 +28,10 @@ export const store = configureStore({
     [adminApi.reducerPath]: adminApi.reducer, 
     [moderatorApi.reducerPath]: moderatorApi.reducer, 
     [searchApi.reducerPath]: searchApi.reducer, 
+    [awardsApi.reducerPath]: awardsApi.reducer, 
+    [walletApi.reducerPath]: walletApi.reducer, 
+
+
 
      
   },
@@ -41,7 +47,9 @@ export const store = configureStore({
       .concat(messagesApi.middleware)
       .concat(adminApi.middleware)
       .concat(moderatorApi.middleware)
-      .concat(searchApi.middleware), 
+      .concat(searchApi.middleware)
+      .concat(awardsApi.middleware)
+      .concat(walletApi.middleware), 
 });
 
 export type RootState = ReturnType<typeof store.getState>;

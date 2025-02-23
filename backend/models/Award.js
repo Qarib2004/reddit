@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 
-
 const AwardSchema = new mongoose.Schema({
-    name: String,
-    description: String,
-    price: Number, 
-    image: String,
-  });
+  name: { type: String, required: true, unique: true },
+  price: { type: Number, required: true },
+  icon: { type: String, required: true },
+  description: { type: String }
+});
 
-
-
-  export default  mongoose.model("Award", AwardSchema);
+export default mongoose.model("Award", AwardSchema);

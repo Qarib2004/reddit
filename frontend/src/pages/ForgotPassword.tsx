@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Helmet } from "react-helmet-async";
+
 
 const ForgotPassword = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -35,6 +37,10 @@ const ForgotPassword = () => {
   
 
   return (
+    <>
+    <Helmet>
+        <title>Forgot Password</title>
+      </Helmet>
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
         <h2 className="text-center text-xl font-bold">Forgot Password</h2>
@@ -58,6 +64,7 @@ const ForgotPassword = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

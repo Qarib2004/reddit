@@ -40,6 +40,13 @@ const CommentSchema = new mongoose.Schema(
         timestamp: { type: Date, default: Date.now }
       }
     ]
+    ,
+    awards: [
+      {
+        award: { type: mongoose.Schema.Types.ObjectId, ref: "Award" },
+        from: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { useSearchPostsQuery, useSearchCommunitiesQuery, useSearchCommentsQuery, useSearchUsersQuery, useSearchPostByTagQuery} from "../redux/searchSlice";
 import { ArrowBigUp, ArrowBigDown, MessageSquare, Users, FileText, User as UserIcon, Loader2 } from "lucide-react";
 import { Post, Community, Comment, User } from "../interface/types";
+import { Helmet } from "react-helmet-async";
+
 
 const SearchPage: React.FC = () => {
   const location = useLocation();
@@ -48,6 +50,10 @@ const SearchPage: React.FC = () => {
   );
 
   return (
+    <>
+    <Helmet>
+        <title>Search Page</title>
+      </Helmet>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 py-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
@@ -224,6 +230,7 @@ const SearchPage: React.FC = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

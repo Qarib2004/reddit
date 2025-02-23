@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useRequestPasswordChangeMutation, useChangePasswordMutation } from "../redux/apiSlice";
 import { toast } from "react-toastify";
 import { KeyRound, ArrowLeft } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+
 
 const ChangePassword = () => {
   const [step, setStep] = useState(1);
@@ -33,6 +35,10 @@ const ChangePassword = () => {
   };
 
   return (
+    <>
+    <Helmet>
+        <title>Change Password</title>
+      </Helmet>
     <div className="min-h-screen bg-[#DAE0E6] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 sm:p-8">
         <div className="flex items-center gap-3 mb-6">
@@ -120,6 +126,7 @@ const ChangePassword = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

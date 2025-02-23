@@ -4,6 +4,8 @@ import PostItem from "../components/PostItem";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import SavedPost from "../components/SavedPost";
+import { Helmet } from "react-helmet-async";
+
 
 const Saved = () => {
   const { data: user, isLoading: userLoading } = useGetUserQuery();
@@ -18,6 +20,10 @@ const Saved = () => {
   }
 
   return (
+    <>
+    <Helmet>
+        <title>Saved</title>
+      </Helmet>
     <div className="max-w-3xl mx-auto p-4">
      
       <div className="flex items-center space-x-4 mb-6">
@@ -38,6 +44,7 @@ const Saved = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

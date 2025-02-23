@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useGetUserQuery } from "../redux/apiSlice";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { Helmet } from "react-helmet-async";
+
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -31,9 +33,14 @@ const VerifyEmail = () => {
   }, [token, refetch, navigate]);
 
   return (
+    <>
+    <Helmet>
+        <title>Verify Email</title>
+      </Helmet>
     <div className="flex justify-center items-center min-h-screen">
       <h2>{loading ? "Verifying email..." : "Redirecting..."}</h2>
     </div>
+    </>
   );
 };
 

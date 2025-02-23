@@ -77,6 +77,10 @@ export interface Comment {
     timestamp: string;
   }[];
   karma: number;
+  awards?: {
+    award: string;  
+    from: string;  
+  }[];
 }
   
 export interface Community {
@@ -98,6 +102,19 @@ export interface JoinRequest {
   username: string;
   avatar?: string;
   requestedAt: string;
+}
+
+export interface Award {
+  _id: string;
+  name: string;
+  icon: string;
+  price: number;
+  description: string;
+}
+export interface UserAward {
+  award: Award;
+  receivedAt: string;
+  _id: string;
 }
 
   
@@ -133,8 +150,16 @@ export interface JoinRequest {
     faceId?:number[];
     coins?:number;
     banUntil?: Date | null;
+    wallet: number;
+    walletTransactions: WalletTransaction[]; 
+    awards: UserAward[]; 
     }
-  
+    export interface WalletTransaction {
+      amount: number;
+      transactionId: string;
+      status: "pending" | "completed" | "failed";
+      createdAt: string; 
+  }
 
   export interface Message {
     _id: string;

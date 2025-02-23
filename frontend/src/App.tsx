@@ -41,6 +41,8 @@ import CommunitySettings from "./pages/CommunitySettings";
 import Subscribed from "./pages/Subscribed";
 import CommentSettings from "./pages/CommentSettings";
 import { useGetCommentByIdQuery } from "./redux/commentsSlice";
+import NotFound from "./pages/NotFound";
+import NotAuthorized from "./pages/NotAuthorized";
 
 
 const App = () => {
@@ -86,8 +88,13 @@ const App = () => {
 
     
 
-        {authUser && authUser.role === "admin" && (
-        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin/*" element={
+          authUser?.role === "admin" ? (
+            <AdminLayout />
+          ) : (
+            <NotAuthorized role="admin" />
+          )
+        }>
          <Route index element={<AdminPanel />} />
           <Route path="users" element={<UsersManagement />} />
           <Route path="settings" element={<AdminSettings />} />
@@ -97,23 +104,26 @@ const App = () => {
          <Route path="moderator-requests" element={<AdminModeratorRequests />} />
 
         </Route>
-      )}
+      
+        <Route path="/moderator/*" element={
+          authUser?.role === "moderator" ? (
+            <ModeratorLayout />
+          ) : (
+            <NotAuthorized role="moderator" />
+          )
+        }>
+          <Route path="dashboard" element={<ModeratorDashboard />} />
+          <Route path="reported-posts" element={<ModeratorReportedPosts />} />
+          <Route path="reported-comments" element={<ModeratorReportedComments />} />
+          <Route path="warnings" element={<ModeratorWarnings />} />
+          <Route path="stats" element={<ModeratorStats />} />
+          <Route path="history" element={<ModeratorHistory />} />
+          <Route path="chat" element={<ModeratorChat />} />
+        </Route>
 
-{authUser && authUser.role === "moderator" && (
-  <Route path="/moderator" element={<ModeratorLayout />}>
-    <Route path="dashboard" element={<ModeratorDashboard />} />
-    <Route path="reported-posts" element={<ModeratorReportedPosts />} />
-    <Route path="reported-comments" element={<ModeratorReportedComments />} />
-    <Route path="warnings" element={<ModeratorWarnings />} />
-    <Route path="stats" element={<ModeratorStats />} />
-    <Route path="history" element={<ModeratorHistory />} />
-    <Route path="chat" element={<ModeratorChat />} />
-  </Route>
-)}
 
 
-
-
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

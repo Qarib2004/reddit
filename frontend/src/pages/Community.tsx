@@ -25,6 +25,7 @@ import {
 import PostItem from "../components/PostItem";
 import Loader from "../assets/loader-ui/Loader";
 import { useGetSubscribedPostsQuery } from "../redux/postsSlice"; 
+import { Helmet } from "react-helmet-async";
 
 
 const Community = () => {
@@ -167,6 +168,10 @@ const Community = () => {
   });
 
   return (
+    <>
+    <Helmet>
+        <title>Community</title>
+      </Helmet>
     <div className="min-h-screen bg-[#DAE0E6]">
     <div className="h-80 relative overflow-hidden">
       {community.banner ? (
@@ -377,6 +382,7 @@ const Community = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

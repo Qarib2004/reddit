@@ -11,6 +11,8 @@ import Loader from "../assets/loader-ui/Loader";
 import { useGetUserQuery } from "../redux/apiSlice";
 import { Link } from "react-router-dom";
 import { Settings } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+
 
 const PostPage = () => {
   const { id } = useParams();
@@ -61,6 +63,10 @@ const PostPage = () => {
   }
 
   return (
+    <>
+    <Helmet>
+        <title>Post Page</title>
+      </Helmet>
     <div className="min-h-screen bg-gray-50 py-4">
       {user?._id === post.author?._id && (
         <Link
@@ -120,6 +126,7 @@ const PostPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -2,6 +2,8 @@ import { useGetSubscribedPostsQuery } from "../redux/postsSlice";
 import PostItem from "../components/PostItem";
 import { Loader, Newspaper } from "lucide-react";
 import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
+
 
 const Subscribed = () => {
   const { data: posts, isLoading, error ,refetch} = useGetSubscribedPostsQuery();
@@ -27,6 +29,10 @@ const Subscribed = () => {
   }
 
   return (
+    <>
+    <Helmet>
+        <title>Subscribed</title>
+      </Helmet>
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
@@ -53,6 +59,7 @@ const Subscribed = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
