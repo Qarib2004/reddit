@@ -131,8 +131,9 @@ export interface JoinRequest {
     reportCount?: number;
     hiddenCommunities?: string[];
     faceId?:number[];
-    coins?:number
-  }
+    coins?:number;
+    banUntil?: Date | null;
+    }
   
 
   export interface Message {

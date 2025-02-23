@@ -1,6 +1,6 @@
 import express from 'express';
 import { approveJoinRequest, createCommunity, deleteCommunity, getCommunities, getCommunity, getJoinRequests, joinCommunity, leaveCommunity, rejectJoinRequest, requestToJoinCommunity, updateCommunity, uploadCommunityImage } from '../controllers/communityController.js';
-import authMiddleware from '../middlewares/authMiddleware.js';
+import authMiddleware, { checkBanStatus } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
 import upload from '../middlewares/uploadMiddleware.js';
 import upload1 from '../middlewares/uploadMiddleware1.js';
@@ -33,7 +33,7 @@ router.post(
   uploadCommunityImage
 );
 
-router.post('/:id/join', authMiddleware, joinCommunity);
+router.post('/:id/join', authMiddleware, checkBanStatus,joinCommunity);
 router.post("/:id/leave", authMiddleware, leaveCommunity);
 router.post("/:id/requests", authMiddleware, requestToJoinCommunity);
 router.put("/:id", authMiddleware, updateCommunity);

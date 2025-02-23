@@ -96,6 +96,7 @@ const UserSchema = new mongoose.Schema(
   
   faceId: { type: [Number], default: null },
   coins: { type: Number, default: 0 },
+  banUntil: { type: Date, default: null }
 },
   { timestamps: true }
 );

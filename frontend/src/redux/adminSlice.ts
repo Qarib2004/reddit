@@ -7,16 +7,38 @@ export const adminApi = createApi({
         baseUrl: "http://localhost:5000/api/admin",
         credentials: "include" 
     }),
+    tagTypes: ["Users"],
     endpoints: (builder) => ({
         getAllUsers: builder.query<User[], void>({
-            query: () => "/users",
+            query: () => "/users", providesTags: ["Users"],
         }),
-        banUser: builder.mutation<{ message: string }, string>({
-            query: (id) => ({
-                url: `/users/${id}/ban`,
-                method: "PUT",
-            }),
+        banUser: builder.mutation<
+        { message: string; user: User },
+        { id: string; duration: number }
+      >({
+        query: ({ id, duration }) => ({
+          url: `/users/${id}/ban`,
+          method: "PUT",
+          body: { duration },
         }),
+        async onQueryStarted({ id, duration }, { dispatch, queryFulfilled }) {
+          try {
+            const { data } = await queryFulfilled;
+            dispatch(
+              adminApi.util.updateQueryData("getAllUsers", undefined, (draft) => {
+                const user = draft.find((u) => u._id === id);
+                if (user) {
+                  user.banned = duration !== -1;
+                  user.banUntil = duration === -1 ? null : new Date(new Date().setDate(new Date().getDate() + duration));
+                }
+              })
+            );
+          } catch (error) {
+            console.error("Failed to update ban status", error);
+          }
+        },
+        invalidatesTags: ["Users"],
+      }),
         updateUserRole: builder.mutation<{ message: string }, { id: string; role: string }>({
             query: ({ id, role }) => ({
                 url: `/users/${id}/role`,

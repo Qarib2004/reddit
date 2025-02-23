@@ -168,8 +168,18 @@ const Community = () => {
 
   return (
     <div className="min-h-screen bg-[#DAE0E6]">
-      <div className="h-80 bg-[#1e3a8a] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
+    <div className="h-80 relative overflow-hidden">
+      {community.banner ? (
+        <img
+          src={community.banner}
+          alt="Community Banner"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <div className="h-80 bg-[#1e3a8a]" />
+      )}
+  
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
         <div className="absolute bottom-0 left-0 right-0">
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-end pb-6">

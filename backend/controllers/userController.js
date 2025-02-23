@@ -408,3 +408,25 @@ export const updateModeratorRequest = async (req, res) => {
   }
 };
 
+
+
+export const banUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { duration } = req.body; 
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const banUntil = duration ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000) : null;
+
+    user.banned = !user.banned;
+    user.banUntil = user.banned ? banUntil : null;
+    await user.save();
+
+    res.json({ message: `User ${user.banned ? "banned" : "unbanned"} until ${banUntil || "∞"}`, banUntil });
+  } catch (error) {
+    console.error("Error banning user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

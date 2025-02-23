@@ -14,12 +14,31 @@ export const getAllUsers = async (req, res) => {
 
 export const banUser = async (req, res) => {
     try {
-        await User.findByIdAndUpdate(req.params.id, { banned: true });
-        res.json({ message: "The user is banned " });
+      const { id } = req.params;
+      const { duration } = req.body; 
+      const user = await User.findById(id);
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      if (duration === -1) {
+        user.banned = false;
+        user.banUntil = null;
+      } else {
+        user.banned = true;
+        const banDate = new Date();
+        banDate.setDate(banDate.getDate() + duration);
+        user.banUntil = banDate;
+      }
+  
+      await user.save();
+      res.status(200).json({
+        message: duration === -1 ? "User unbanned successfully" : `User banned for ${duration} days`,
+        user,
+      });
     } catch (error) {
-        res.status(500).json({ message: "User blocking error" });
+      console.error("Error banning/unbanning user:", error);
+      res.status(500).json({ message: "Error banning user", error });
     }
-};
+  };
 
 export const updateUserRole = async (req, res) => {
     try {

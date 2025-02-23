@@ -13,7 +13,7 @@ import {
   updatePost,
   getSubscribedPosts
 } from "../controllers/postController.js";
-import authMiddleware from "../middlewares/authMiddleware.js";
+import authMiddleware, { checkBanStatus } from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
 import upload from "../middlewares/uploadMiddleware.js"
 import  {createComment,getCommentsByPost,deleteComment}  from "../controllers/commentController.js"
@@ -23,7 +23,7 @@ const router = express.Router();
 
 router.post(
   "/",
-  authMiddleware,
+  authMiddleware,checkBanStatus,
   upload.single("file"),
   [
     body("title").notEmpty().withMessage("The title is required"),

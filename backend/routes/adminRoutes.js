@@ -2,6 +2,7 @@ import express from "express";
 import { getAllUsers, banUser, updateUserRole, getAllCommunities, deleteCommunity, getAllPosts, deletePost, getAdminStats } from "../controllers/adminController.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import { getModeratorRequests, updateModeratorRequest } from "../controllers/userController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
