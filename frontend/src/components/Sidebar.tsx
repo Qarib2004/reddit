@@ -176,7 +176,7 @@ const Sidebar = () => {
     <>
       <button
         onClick={toggleSidebar}
-        className="fixed top-2 left-[15%] p-2 bg-white rounded-lg shadow-lg md:hidden z-50"
+        className="fixed top-2 left-[15%] p-2    md:hidden z-50"
       >
         <Menu size={24} />
       </button>
