@@ -14,7 +14,6 @@ const transporter = nodemailer.createTransport({
 export const sendVerificationEmail = async (user, emailToken) => {
   const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${emailToken}`;
 
-  console.log("📧 Ссылка для подтверждения:", verificationLink);
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
