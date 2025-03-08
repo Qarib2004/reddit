@@ -200,7 +200,7 @@ const Navbar = () => {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden ">
+        <div className="md:hidden w-full">
           <div className="px-4 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
             <div className="relative mb-4">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">

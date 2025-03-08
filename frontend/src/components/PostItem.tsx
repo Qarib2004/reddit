@@ -32,6 +32,9 @@ import {
 import Loader from "../assets/loader-ui/Loader";
 import PostOptionsModal from "./PostOptionModal";
 import { useGetAllCommunitiesQuery, useGetAllPostsQuery } from "../redux/adminSlice";
+import Swal from "sweetalert2"; 
+import "sweetalert2/dist/sweetalert2.min.css"; 
+
 
 const PostItem = ({ post }: { post: any }) => {
   const [likePost] = useLikePostMutation();
@@ -51,27 +54,10 @@ const PostItem = ({ post }: { post: any }) => {
     refetch: refetchCommunity,
   } = useGetCommunityByIdQuery(communityId, { skip: !communityId });
 
-  
-
   const { data: posts, refetch: refetchPost } = useGetAllPostsQuery();
   
-
+  const isAuthenticated = !!user;
   
-
-  if (!user) return null;
-
-  const isSaved = user.savedPosts?.includes(post._id);
-
-  const handleSavePost = async () => {
-    try {
-      await savePost(post._id).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Error saving post:", error);
-    }
-  };
-  const userId = user?._id;
-
   const initialLikes = Array.isArray(post.upvotes) ? post.upvotes.length : 0;
   const initialDislikes = Array.isArray(post.downvotes)
     ? post.downvotes.length
@@ -92,13 +78,11 @@ const PostItem = ({ post }: { post: any }) => {
     return <Loader />;
   }
 
-  if (!post.community) {
-    return "";
-  }
-
+  const isSaved = isAuthenticated ? user.savedPosts?.includes(post._id) : false;
+  const userId = user?._id;
 
   useEffect(() => {
-    if (!user || !post.community) return;
+    if (!isAuthenticated || !post.community) return;
 
     setIsSubscribed(user.subscriptions?.includes(post.community._id ?? ""));
 
@@ -109,11 +93,20 @@ const PostItem = ({ post }: { post: any }) => {
 
     if (Array.isArray(post.community.members)) {
       setIsJoined(post.community.members.includes(user._id));
-    
     }
-  }, [post.community, user]);
+  }, [post.community, user, isAuthenticated]);
 
   const handleToggleSubscription = async () => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        icon: "warning",
+        title: "Authentication Required",
+        text: "Please log in to join communities",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
     if (!post.community || !post.community._id) return;
 
     try {
@@ -123,8 +116,8 @@ const PostItem = ({ post }: { post: any }) => {
         setIsSubscribed(false);
         setRequestPending(false);
         setIsJoined(false);
-        await refetchCommunity()
-        await refetchPost()
+        await refetchCommunity();
+        await refetchPost();
       } else {
         if (post.community.type === "Private") {
           const response = await requestToJoinCommunity(
@@ -137,14 +130,58 @@ const PostItem = ({ post }: { post: any }) => {
           setIsJoined(true);
         }
       }
-      await refetchCommunity()
+      await refetchCommunity();
       await refetch();
     } catch (error) {
       console.error("Error toggling subscription:", error);
     }
   };
 
+  const handleSavePost = async () => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        icon: "warning",
+        title: "Authentication Required",
+        text: "Please log in to save posts",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+  
+    try {
+      await savePost(post._id).unwrap();
+      refetch();
+  
+      Swal.fire({
+        icon: "success",
+        title: "Post Saved",
+        text: "The post has been successfully saved!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Error saving post:", error);
+  
+      Swal.fire({
+        icon: "error",
+        title: "Save Failed",
+        text: "An error occurred while saving the post. Please try again.",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
   const handleLike = async () => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        icon: "warning",
+        title: "Authentication Required",
+        text: "Please log in to like posts",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
     try {
       const response = await likePost(post._id).unwrap();
       setLikes(response.upvotes.length);
@@ -159,6 +196,16 @@ const PostItem = ({ post }: { post: any }) => {
   };
 
   const handleDislike = async () => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        icon: "warning",
+        title: "Authentication Required",
+        text: "Please log in to dislike posts",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
     try {
       const response = await dislikePost(post._id).unwrap();
       setLikes(response.upvotes.length);
@@ -174,10 +221,19 @@ const PostItem = ({ post }: { post: any }) => {
 
   const postUrl = `${window.location.origin}/post/${post._id}`;
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(postUrl);
-    alert(" Link copied to clipboard!");
-  };
+
+const copyToClipboard = () => {
+  navigator.clipboard.writeText(postUrl);
+
+  Swal.fire({
+    icon: "success",
+    title: "Copied!",
+    text: "Link copied to clipboard!",
+    timer: 2000,
+    showConfirmButton: false,
+  });
+};
+
 
   return (
     <div className="bg-white hover:border hover:border-gray-300 rounded-md mb-3">
@@ -212,31 +268,45 @@ const PostItem = ({ post }: { post: any }) => {
         <div className="flex-1 p-2">
           <div className="flex justify-between items-center text-xs text-gray-500 mb-2">
             <div className="flex items-center">
-              <Link
-                to={`/community/${post.community?._id}`}
-                className="font-bold text-black hover:underline"
-              >
-                r/{post.community?.name || "Unknown"}
-              </Link>
-              <span className="mx-1">•</span>
+              {post.community && (
+                <>
+                  <Link
+                    to={`/community/${post.community._id}`}
+                    className="font-bold text-black hover:underline"
+                  >
+                    r/{post.community.name || "Unknown"}
+                  </Link>
+                  <span className="mx-1">•</span>
+                </>
+              )}
               <span>Posted by u/{post.author?.username || "anonymous"}</span>
               <span className="mx-1">•</span>
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             </div>
 
-            <button
-              onClick={handleToggleSubscription}
-              className={`px-3 py-1 rounded-md font-medium cursor-pointer ${
-                isJoined
-                  ? "bg-gray-300 text-black"
-                  : requestPending
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-blue-500 text-white"
-              }`}
-              disabled={requestPending}
-            >
-              {isJoined ? "Leave" : requestPending ? "Request Pending" : "Join"}
-            </button>
+            {post.community && (
+              <button
+                onClick={handleToggleSubscription}
+                className={`px-3 py-1 rounded-md font-medium cursor-pointer ${
+                  !isAuthenticated
+                    ? "bg-blue-500 text-white"
+                    : isJoined
+                    ? "bg-gray-300 text-black"
+                    : requestPending
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-blue-500 text-white"
+                }`}
+                disabled={!isAuthenticated ? false : requestPending}
+              >
+                {!isAuthenticated 
+                  ? "Join" 
+                  : isJoined 
+                  ? "Leave" 
+                  : requestPending 
+                  ? "Request Pending" 
+                  : "Join"}
+              </button>
+            )}
           </div>
 
           <Link to={`/post/${post._id}`} className="hover:underline">
@@ -303,30 +373,34 @@ const PostItem = ({ post }: { post: any }) => {
               )}
             </div>
 
-            <div className="relative">
-              <button
-                onClick={() => setShowOptions(!showOptions)}
-                className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md"
-              >
-                <MoreHorizontal size={18} />
-              </button>
-              {showOptions && (
-                <PostOptionsModal
-                  postId={post._id}
-                  closeModal={() => setShowOptions(false)}
-                />
-              )}
-            </div>
-            <button
-              onClick={handleSavePost}
-              className="text-gray-500 hover:text-blue-500 flex items-center space-x-1 px-2 py-1 rounded-md"
-            >
-              <Bookmark
-                size={18}
-                className={isSaved ? "text-blue-500" : "text-gray-400"}
-              />
-              <span className="text-xs">{isSaved ? "Saved" : "Save"}</span>
-            </button>
+            {isAuthenticated && (
+              <>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowOptions(!showOptions)}
+                    className="flex items-center text-gray-500 hover:bg-gray-100 px-2 py-1 rounded-md"
+                  >
+                    <MoreHorizontal size={18} />
+                  </button>
+                  {showOptions && (
+                    <PostOptionsModal
+                      postId={post._id}
+                      closeModal={() => setShowOptions(false)}
+                    />
+                  )}
+                </div>
+                <button
+                  onClick={handleSavePost}
+                  className="text-gray-500 hover:text-blue-500 flex items-center space-x-1 px-2 py-1 rounded-md"
+                >
+                  <Bookmark
+                    size={18}
+                    className={isSaved ? "text-blue-500" : "text-gray-400"}
+                  />
+                  <span className="text-xs">{isSaved ? "Saved" : "Save"}</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

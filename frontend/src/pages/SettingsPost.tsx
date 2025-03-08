@@ -23,12 +23,16 @@ const SettingsPost = () => {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const [postType, setPostType] = useState<string>("text");
+  const [mediaUrl, setMediaUrl] = useState<string>("");
+  const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
 
   useEffect(() => {
     if (post) {
       setTitle(post.title || "");
       setContent(post.content || "");
       setPostType(post.postType || "text");
+      setMediaUrl(post.mediaUrl || "");
+      setShowImagePreview(post.postType === "image" && !!post.mediaUrl);
     }
   }, [post]);
 
@@ -45,10 +49,23 @@ const SettingsPost = () => {
       toast.error("Title cannot be empty");
       return;
     }
+    
     const cleanedContent = stripHtml(content.trim());
+    
+    const updateData: any = {
+      id,
+      title,
+      postType
+    };
+    
+    if (postType === "text") {
+      updateData.content = cleanedContent;
+    } else if (postType === "image") {
+      updateData.mediaUrl = mediaUrl;
+    }
 
     try {
-      await updatePost({ id, title, content: cleanedContent, postType }).unwrap();
+      await updatePost(updateData).unwrap();
       toast.success("Post updated successfully!");
       refetch();
       navigate(`/post/${id}`);
@@ -80,6 +97,11 @@ const SettingsPost = () => {
     });
   };
 
+  const handleMediaUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMediaUrl(e.target.value);
+    setShowImagePreview(!!e.target.value);
+  };
+
   if (postLoading) return <p>Loading post...</p>;
   if (!post) return <p>Post not found</p>;
 
@@ -103,11 +125,63 @@ const SettingsPost = () => {
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
 
-          <ReactQuill
-            value={content}
-            onChange={setContent}
-            className="h-48 mb-12 border border-gray-300 rounded-md"
-          />
+          <div className="flex space-x-4 mb-2">
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                value="text"
+                checked={postType === "text"}
+                onChange={() => setPostType("text")}
+                className="form-radio h-4 w-4 text-blue-600"
+              />
+              <span className="ml-2 text-gray-700">Text Post</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                value="image"
+                checked={postType === "image"}
+                onChange={() => setPostType("image")}
+                className="form-radio h-4 w-4 text-blue-600"
+              />
+              <span className="ml-2 text-gray-700">Image Post</span>
+            </label>
+          </div>
+
+          {postType === "text" && (
+            <ReactQuill
+              value={content}
+              onChange={setContent}
+              className="h-48 mb-12 border border-gray-300 rounded-md"
+            />
+          )}
+
+          {postType === "image" && (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Image URL"
+                value={mediaUrl}
+                onChange={handleMediaUrlChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+              
+              {showImagePreview && mediaUrl && (
+                <div className="mt-2">
+                  <p className="text-sm font-medium mb-1">Image Preview:</p>
+                  <img 
+                    src={mediaUrl} 
+                    alt="Preview" 
+                    className="max-h-64 rounded-md border border-gray-300"
+                    onError={() => {
+                      toast.error("Invalid image URL");
+                      setShowImagePreview(false);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex space-x-4">
             <button

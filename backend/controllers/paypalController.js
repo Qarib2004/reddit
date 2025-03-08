@@ -34,7 +34,6 @@ export const createPayment = async (req, res) => {
   });
 };
 
-// Подтверждение платежа
 export const executePayment = async (req, res) => {
   const { paymentId, PayerID, userId, amount } = req.query;
 

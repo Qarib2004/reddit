@@ -12,11 +12,16 @@ import { Helmet } from "react-helmet-async";
 const Home = () => {
   const [sort, setSort] = useState("hot");
   const [search, setSearch] = useState("");
-  const { data: posts, isLoading, error} = useGetPostsQuery({ sort, search });
-  const { data: user } = useGetUserQuery();
+  const { data: posts, error, isLoading } = useGetPostsQuery({
+    sort: "hot",
+    search: "",
+    community: "",
+  });
+    const { data: user } = useGetUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
 
+  
  
 
   useEffect(() => {
@@ -105,9 +110,9 @@ const Home = () => {
             ))}
           </div>
 
-          
-          {Array.isArray(posts) && posts.length > 0 ? (
+          {posts && Array.isArray(posts) && posts.length > 0 ? (
             posts.map((post) => <PostItem key={post._id} post={post} />)
+            
           ) : (
             <div className="text-center text-gray-500 p-8">
               No posts found
