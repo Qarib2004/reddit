@@ -166,7 +166,7 @@ const Community = () => {
     day: "numeric",
     year: "numeric",
   });
-
+  const displayMembersCount = community.membersCount || (community.members ? community.members.length : 0);
   return (
     <>
     <Helmet>
@@ -314,7 +314,7 @@ const Community = () => {
               <div className="flex items-center gap-4 py-4 border-t border-gray-100">
                 <div className="flex-1">
                   <span className="text-2xl font-bold text-[#1e3a8a]">
-                    {community.membersCount || 0}
+                  {displayMembersCount}
                   </span>
                   <p className="text-sm text-gray-500">Members</p>
                 </div>

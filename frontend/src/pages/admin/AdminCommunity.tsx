@@ -3,6 +3,7 @@ import { Pie, Line } from "react-chartjs-2";
 import "chart.js/auto";
 import { useEffect, useState } from "react";
 import { ChartData } from "chart.js";
+import { useGetCommunityByIdQuery } from "../../redux/communitiesSlice";
 
 const AdminCommunity = () => {
   const { data: stats, isLoading } = useGetAdminStatsQuery();
@@ -11,6 +12,9 @@ const AdminCommunity = () => {
 
   const [pieChartData, setPieChartData] = useState<ChartData<"pie"> | null>(null);
   const [lineChartData, setLineChartData] = useState<ChartData<"line"> | null>(null);
+
+ 
+  
 
   useEffect(() => {
     if (stats) {
@@ -38,6 +42,16 @@ const AdminCommunity = () => {
       });
     }
   }, [stats]);
+
+  const getMembersCount = (community:any) => {
+    if (community.membersCount && community.membersCount > 0) {
+      return community.membersCount;
+    }
+        if (community.members && Array.isArray(community.members)) {
+      return community.members.length;
+    }
+        return 0;
+  };
 
   if (isLoading) return <p>Loading community statistics...</p>;
 
@@ -74,7 +88,7 @@ const AdminCommunity = () => {
           {communities?.map((community) => (
             <tr key={community._id} className="text-center">
               <td className="border p-2">{community.name}</td>
-              <td className="border p-2">{community.membersCount}</td> 
+              <td className="border p-2">{getMembersCount(community)}</td> 
               <td className="border p-2">
                 <button
                   className="bg-red-500 text-white px-3 py-1 rounded"

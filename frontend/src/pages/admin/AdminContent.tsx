@@ -37,6 +37,28 @@ const AdminContent = () => {
     }
   }, [stats]);
 
+  const getAuthorName = (post:any) => {
+    if (post.author.username && post.author) {
+      return post.author.username;
+    }
+    
+   
+    
+    if (post.authorName) {
+      return post.authorname;
+    }
+
+    if (typeof post.author === 'string') {
+      return `User ID: ${post.author}`;
+    }
+    
+    if (post.authorId) {
+      return `User ID: ${post.authorId}`;
+    }
+    
+    return "Unknown Author";
+  };
+
   if (isLoading) return <p>Loading content statistics...</p>;
 
   return (
@@ -72,7 +94,7 @@ const AdminContent = () => {
           {posts?.map((post) => (
             <tr key={post._id} className="text-center">
               <td className="border p-2">{post.title}</td>
-              <td className="border p-2">{post.author?.username || "Unknown"}</td>
+              <td className="border p-2">{getAuthorName(post)}</td>
               <td className="border p-2">
                 <button
                   className="bg-red-500 text-white px-3 py-1 rounded"
