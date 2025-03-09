@@ -33,9 +33,10 @@ import * as faceapi from "face-api.js";
 import { Helmet } from "react-helmet-async";
 import { useCreatePaymentMutation } from "../redux/WalletSlice";
 import WalletModal from "../components/WalletModal";
+import Verification from "../components/Payment";
 
 const Settings = () => {
-  const { data: user, isLoading } = useGetUserQuery();
+  const { data: user, isLoading,refetch } = useGetUserQuery();
   const [updateUser] = useUpdateUserMutation();
   const { data: subscriptions } = useGetUserSubscriptionsQuery();
   const [updatePersonalization] = useUpdatePersonalizationMutation();
@@ -43,7 +44,7 @@ const Settings = () => {
   const [deleteAccount] = useDeleteAccountMutation();
   const [requestModerator] = useRequestModeratorMutation();
   const [registerFaceId] = useRegisterFaceIdMutation();
-
+  const [showVerification, setShowVerification] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -278,6 +279,10 @@ const Settings = () => {
     setIsWalletModalOpen(true);
   };
 
+  const toggleVerification = () => {
+    setShowVerification(!showVerification);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -361,7 +366,7 @@ const Settings = () => {
               </span>
             </div>
             <button
-              onClick={handleOpenWalletModal}
+              onClick={toggleVerification}
               className=" text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-blue-600 transition  bg-green-300"
             >
               <PlusCircle className="w-5 h-5" />
@@ -369,11 +374,17 @@ const Settings = () => {
             </button>
           </div>
 
-                  {isWalletModalOpen && (
-                    <WalletModal
-                      isOpen={isWalletModalOpen}
-                      onClose={() => setIsWalletModalOpen(false)}
-                    />
+                 
+          {showVerification && (
+                    <div className="md:col-span-2">
+                      <div
+                        className={`p-4 rounded-lg ${
+                          darkMode ? "bg-[#1a1a1b]" : "bg-gray-50"
+                        }`}
+                      >
+                        <Verification onSuccess={refetch}/>
+                      </div>
+                    </div>
                   )}
 
                   <div className="space-y-2">

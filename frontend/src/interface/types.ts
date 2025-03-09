@@ -1,13 +1,4 @@
-// export interface Post {
-//     _id: string;
-//     title: string;
-//     content: string;
-//     author: string;
-//     createdAt: string;
-//     updatedAt: string;
-//     communityId: string;
-//     likes: number;
-//   }
+
   
 export interface Post {
   _id: string;

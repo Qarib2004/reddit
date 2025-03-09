@@ -23,6 +23,7 @@ import {
   Facebook,
   Send,
   Bookmark,
+  LogOut,
 } from "lucide-react";
 import {
   useGetUserQuery,
@@ -34,20 +35,29 @@ import PostOptionsModal from "./PostOptionModal";
 import { useGetAllCommunitiesQuery, useGetAllPostsQuery } from "../redux/adminSlice";
 import Swal from "sweetalert2"; 
 import "sweetalert2/dist/sweetalert2.min.css"; 
+import { Post } from "../interface/types";
+interface Member {
+  _id: string;
+}
+
+interface JoinRequest {
+  _id: string;
+}
 
 
-const PostItem = ({ post }: { post: any }) => {
+
+const PostItem = ({ post }: { post: Post }) => {
   const [likePost] = useLikePostMutation();
   const [dislikePost] = useDislikePostMutation();
   const [joinCommunity] = useJoinCommunityMutation();
   const [leaveCommunity] = useLeaveCommunityMutation();
   const { data: comments } = useGetCommentsQuery(post._id);
-  const { data: user, refetch } = useGetUserQuery();
+  const { data: user, refetch: refetchUser } = useGetUserQuery();
   const [savePost] = useSavePostMutation();
   const [showOptions, setShowOptions] = useState(false);
   const [requestToJoinCommunity] = useRequestToJoinCommunityMutation();
   const { id } = useParams<{ id: string }>();
-  const communityId = id ?? "";
+  const communityId = post?.community?._id || id || "";
   const {
     data: community,
     isLoading: communityLoading,
@@ -81,61 +91,109 @@ const PostItem = ({ post }: { post: any }) => {
   const isSaved = isAuthenticated ? user.savedPosts?.includes(post._id) : false;
   const userId = user?._id;
 
-  useEffect(() => {
-    if (!isAuthenticated || !post.community) return;
+ 
+useEffect(() => {
+  if (!isAuthenticated || !post.community) return;
 
-    setIsSubscribed(user.subscriptions?.includes(post.community._id ?? ""));
-
-    setRequestPending(
-      Array.isArray(post.community.joinRequests) &&
-        post.community.joinRequests.includes(user._id)
-    );
-
-    if (Array.isArray(post.community.members)) {
-      setIsJoined(post.community.members.includes(user._id));
-    }
-  }, [post.community, user, isAuthenticated]);
-
-  const handleToggleSubscription = async () => {
-    if (!isAuthenticated) {
-      Swal.fire({
-        icon: "warning",
-        title: "Authentication Required",
-        text: "Please log in to join communities",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
-    
-    if (!post.community || !post.community._id) return;
-
-    try {
-      if (isJoined) {
-        const response = await leaveCommunity(post.community._id).unwrap();
-
-        setIsSubscribed(false);
-        setRequestPending(false);
-        setIsJoined(false);
-        await refetchCommunity();
-        await refetchPost();
-      } else {
-        if (post.community.type === "Private") {
-          const response = await requestToJoinCommunity(
-            post.community._id
-          ).unwrap();
-          setRequestPending(true);
-        } else {
-          await joinCommunity(post.community._id).unwrap();
-          setIsSubscribed(true);
-          setIsJoined(true);
+  if (user && post.community) {
+    if (community && community.members) {
+      const isMember = community.members.some((member: string | Member) => {
+        if (typeof member === 'string') {
+          return member === user._id;
         }
-      }
-      await refetchCommunity();
-      await refetch();
-    } catch (error) {
-      console.error("Error toggling subscription:", error);
+        return member._id === user._id;
+      });
+      setIsJoined(!!isMember);
+      setIsSubscribed(user.subscriptions?.includes(post.community._id));
+    } 
+    else {
+      const isMember = post.community.members?.some((member: string | Member) => {
+        if (typeof member === 'string') {
+          return member === user._id;
+        }
+        return member._id === user._id;
+      });
+      setIsJoined(!!isMember);
+      setIsSubscribed(user.subscriptions?.includes(post.community._id));
     }
-  };
+  }
+
+  if (user && post.community && post.community.joinRequests) {
+    const isPending = Array.isArray(post.community.joinRequests) && 
+      post.community.joinRequests.some((request: string | JoinRequest) => {
+        if (typeof request === 'string') {
+          return request === user._id;
+        }
+        return request._id === user._id;
+      });
+    
+    setRequestPending(!!isPending);
+  }
+}, [post.community, user, isAuthenticated, community]);
+
+const handleToggleSubscription = async () => {
+  if (!user || !post.community || !post.community._id) {
+    Swal.fire({
+      icon: "warning",
+      title: "Authentication Required",
+      text: "Please log in to join communities",
+      confirmButtonText: "OK",
+    });
+    return;
+  }
+
+  try {
+    await refetchUser();
+    
+    if (isJoined) {
+      await leaveCommunity(post.community._id).unwrap();
+      setIsJoined(false);
+      setIsSubscribed(false);
+    } else {
+      if (community?.type === "Private") {
+        try {
+          const response = await requestToJoinCommunity(post.community._id).unwrap();
+          setRequestPending(true);
+          
+          Swal.fire({
+            icon: "success",
+            title: "Request Sent",
+            text: "Your request to join this community has been sent.",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        } catch (joinError) {
+          console.error("Error in private community join request:", joinError);
+        }
+      } else {
+        await joinCommunity(post.community._id).unwrap();
+        setIsJoined(true);
+        setIsSubscribed(true);
+        
+        Swal.fire({
+          icon: "success",
+          title: "Joined Community",
+          text: "You have successfully joined the community!",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    }
+
+    await refetchUser();
+    await refetchCommunity();
+    await refetchPost();
+  } catch (error) {
+    console.error("Error in subscription:", error);
+    
+    Swal.fire({
+      icon: "error",
+      title: "Action Failed",
+      text: "There was an error processing your request. Please try again.",
+      confirmButtonText: "OK",
+    });
+  }
+};
 
   const handleSavePost = async () => {
     if (!isAuthenticated) {
@@ -150,7 +208,7 @@ const PostItem = ({ post }: { post: any }) => {
   
     try {
       await savePost(post._id).unwrap();
-      refetch();
+      refetchUser();
   
       Swal.fire({
         icon: "success",
@@ -221,20 +279,34 @@ const PostItem = ({ post }: { post: any }) => {
 
   const postUrl = `${window.location.origin}/post/${post._id}`;
 
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(postUrl);
 
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(postUrl);
+    Swal.fire({
+      icon: "success",
+      title: "Copied!",
+      text: "Link copied to clipboard!",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
 
-  Swal.fire({
-    icon: "success",
-    title: "Copied!",
-    text: "Link copied to clipboard!",
-    timer: 2000,
-    showConfirmButton: false,
-  });
-};
-
-
+  const getJoinButtonClasses = () => {
+    if (!isAuthenticated) {
+      return "bg-blue-500 text-white px-3 py-1 rounded-md font-medium cursor-pointer";
+    }
+    
+    if (isJoined) {
+      return "bg-gray-300 text-black hover:bg-gray-400 px-3 py-1 rounded-md font-medium cursor-pointer transition";
+    }
+    
+    if (requestPending) {
+      return "bg-gray-400 text-white cursor-not-allowed px-3 py-1 rounded-md font-medium";
+    }
+    
+    return "bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded-md font-medium cursor-pointer transition";
+  };
+  const isAuthor = user && post.author && user._id === post.author._id;
   return (
     <div className="bg-white hover:border hover:border-gray-300 rounded-md mb-3">
       <div className="flex">
@@ -284,27 +356,22 @@ const copyToClipboard = () => {
               <span>{new Date(post.createdAt).toLocaleDateString()}</span>
             </div>
 
-            {post.community && (
+            {post.community && !isAuthor && (
               <button
                 onClick={handleToggleSubscription}
-                className={`px-3 py-1 rounded-md font-medium cursor-pointer ${
-                  !isAuthenticated
-                    ? "bg-blue-500 text-white"
-                    : isJoined
-                    ? "bg-gray-300 text-black"
-                    : requestPending
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-blue-500 text-white"
-                }`}
-                disabled={!isAuthenticated ? false : requestPending}
+                className={getJoinButtonClasses()}
+                disabled={requestPending}
               >
-                {!isAuthenticated 
-                  ? "Join" 
-                  : isJoined 
-                  ? "Leave" 
-                  : requestPending 
-                  ? "Request Pending" 
-                  : "Join"}
+                {isJoined ? (
+                  <span className="flex items-center gap-1">
+                    <LogOut size={14} />
+                    Leave
+                  </span>
+                ) : requestPending ? (
+                  "Request"
+                ) : (
+                  "Join"
+                )}
               </button>
             )}
           </div>
@@ -344,7 +411,7 @@ const copyToClipboard = () => {
               </button>
 
               {showShareMenu && (
-                <div className="absolute top-8 left-0 bg-white border shadow-lg rounded-md p-2 w-44">
+                <div className="absolute top-8 left-0 bg-white border shadow-lg rounded-md p-2 w-44 z-20">
                   <button
                     onClick={copyToClipboard}
                     className="flex items-center w-full text-left text-sm py-1 hover:bg-gray-100 px-2"

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 const Sidebar = () => {
   const location = useLocation();
-  const { data: communities = [], isLoading } = useGetCommunitiesQuery();
+  const { data: communities = [], isLoading ,refetch} = useGetCommunitiesQuery();
   const { data: user, isLoading: userLoading } = useGetUserQuery();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -40,8 +40,19 @@ const Sidebar = () => {
   };
 
   const userCommunities = user
-    ? communities.filter((community) => user.subscriptions.includes(community._id))
-    : [];
+  ? communities.filter((community) => {
+      return (
+        (user.subscriptions.includes(community._id) ) ||
+        community.members.includes(user._id)
+      );
+    })
+  : [];
+
+  useEffect(() => {
+    if (user) {
+      refetch();
+    }
+  }, [user, refetch]);
 
   const sidebarContent = (
     <div className="w-full md:w-64 h-full bg-white p-4 overflow-y-auto">

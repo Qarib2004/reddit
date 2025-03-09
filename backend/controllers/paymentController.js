@@ -1,5 +1,7 @@
 import paypal from "paypal-rest-sdk";
 import User from "../models/User.js";
+import { sendPaymentVerificationEmail } from "../utils/emailService.js";
+import Verification from "../models/Verification.js"
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -83,3 +85,83 @@ export const executePayment = async (req, res) => {
 export const cancelPayment = (req, res) => {
   res.status(400).json({ message: "The payment is canceled" });
 };
+export const sendVerificationCode = async (req, res) => {
+
+  const userId = req.user?.id; 
+
+  console.log("Extracted userId:", userId);
+
+  try {
+    if (!userId) {
+      console.error("User ID is missing");
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      console.error("User not found for ID:", userId);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("User found:", user.email);
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); 
+
+    const verification = new Verification({
+      userId: user._id,
+      code,
+      type: "payment",
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), 
+    });
+
+    console.log("Saving verification code:", verification);
+
+    await verification.save();
+    
+   
+
+    await sendPaymentVerificationEmail(user, code);
+
+
+    res.status(200).json({ message: "Verification code sent successfully" });
+  } catch (error) {
+    console.error("Error sending verification code:", error);
+    res.status(500).json({ message: "Failed to send verification code" });
+  }
+};
+
+export const verifyPayment = async (req, res) => {
+  try {
+    const { code, amount } = req.body;
+
+    if (!code || !amount) {
+      return res.status(400).json({ message: 'Code and amount are required' });
+    }
+
+    const verification = await Verification.findOne({ code, used: false });
+
+    if (!verification) {
+      return res.status(404).json({ message: 'Invalid or expired verification code' });
+    }
+
+    
+    verification.used = true;
+    await verification.save();
+
+    const user = await User.findById(verification.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.wallet += parseFloat(amount);
+    await user.save();
+
+    res.status(200).json({ message: 'Payment verified and wallet updated successfully' });
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    res.status(500).json({ message: 'Failed to verify payment' });
+  }
+};
+
+
