@@ -28,40 +28,41 @@ const Subscribed = () => {
     );
   }
 
-
-
+  const subscribedCommunityIds = user?.subscriptions?.map(id => String(id)) || [];
   
-
- 
-  const userMemberCommunities = communities?.filter(community => {
-    const isMember = community.members.includes(String(user?._id));
-    console.log(`Checking community ${community.name}: isMember = ${isMember}`);
-    return isMember;
-  }) || [];
-
-  const userMemberCommunityIds = userMemberCommunities.map(community => String(community._id));
-
-  if (posts && posts.length > 0) {
-    posts.forEach(post => {
-      console.log(`Post ID: ${post._id}, Community ID: ${String(post.community?._id)}`);
-    });
-  }
-
+  const memberCommunityIds = communities
+    ?.filter(community => 
+      community.members?.some(member => 
+        typeof member === 'string' 
+          ? member === String(user?._id)
+          : String(member._id) === String(user?._id)
+      )
+    )
+    .map(community => String(community._id)) || [];
+  
+  const accessibleCommunityIds = [...new Set([...subscribedCommunityIds, ...memberCommunityIds])];
+  
   const filteredPosts = posts?.filter(post => {
-    const communityId = String(post.community?._id);
+    if (!post.community || !post.community._id) return false;
     
-    const isPostInSubscribedCommunity = userMemberCommunityIds.includes(communityId);
-    return isPostInSubscribedCommunity;
+    const communityId = String((post.community._id as any)["$oid"] || post.community._id);
+    
+    const communityObject = communities?.find(c => String(c._id) === communityId);
+    if (!communityObject) return false;
+    
+    if (communityObject.type === "Private") {
+      return accessibleCommunityIds.includes(communityId);
+        } else {
+      return accessibleCommunityIds.includes(communityId);
+    }
   }) || [];
-
-  console.log("Filtered posts:", filteredPosts);
 
   return (
     <>
       <Helmet>
         <title>Subscribed</title>
       </Helmet>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 mt-[50px] sm:mt-0">
         <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
             <Newspaper className="w-6 h-6 text-orange-500" />

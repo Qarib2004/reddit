@@ -89,7 +89,7 @@ const UserSchema = new mongoose.Schema(
     },
     timezone: {
       type: String,
-      default: "UTC",
+      default: "UTC",  
       required:false
 
     },

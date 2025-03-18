@@ -49,13 +49,15 @@ const Sidebar = () => {
   : [];
 
   useEffect(() => {
+    console.log("User data:", user);
+console.log("User subscriptions:", user?.subscriptions);
     if (user) {
       refetch();
     }
   }, [user, refetch]);
 
   const sidebarContent = (
-    <div className="w-full md:w-64 h-full bg-white p-4 overflow-y-auto">
+    <div className="w-full md:w-64 h-full bg-white p-4 overflow-y-auto mt-[50px] sm:mt-0">
       <div className="space-y-2">
         <Link
           to="/"

@@ -129,6 +129,27 @@ useEffect(() => {
     
     setRequestPending(!!isPending);
   }
+  if (user && post) {
+    if (Array.isArray(post.upvotes)) {
+      const hasUpvoted = post.upvotes.some(vote => 
+        typeof vote === 'string' 
+          ? vote === user._id 
+          : vote._id === user._id
+      );
+      setIsLiked(hasUpvoted);
+    }
+    
+    if (Array.isArray(post.downvotes)) {
+      const hasDownvoted = post.downvotes.some(vote => 
+        typeof vote === 'string' 
+          ? vote === user._id 
+      : vote._id === user._id
+      );
+      setIsDisliked(hasDownvoted);
+    }
+  }
+
+
 }, [post.community, user, isAuthenticated, community]);
 
 const handleToggleSubscription = async () => {

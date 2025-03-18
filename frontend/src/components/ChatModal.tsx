@@ -21,7 +21,6 @@ const ChatModal = ({ recipientId, onClose }: { recipientId: string; onClose: () 
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Socket connection logic remains the same
   useEffect(() => {
     if (!recipientId || !currentUser?._id) return;
 

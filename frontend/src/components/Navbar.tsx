@@ -70,7 +70,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md ">
+    <nav className="bg-white shadow-md w-full fixed top-0 left-0 right-0 z-50 md:static md:z-auto">
       <div className=" mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 flex items-center gap-3">
@@ -200,7 +200,7 @@ const Navbar = () => {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden w-full">
+        <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-t border-gray-200 z-50">
           <div className="px-4 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
             <div className="relative mb-4">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">

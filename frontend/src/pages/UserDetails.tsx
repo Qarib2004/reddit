@@ -102,7 +102,7 @@ const UserDetails = () => {
     <div className="min-h-screen bg-[#DAE0E6]">
       
       <div
-        className="relative h-48 bg-cover bg-center"
+        className="relative h-48 bg-cover bg-center mt-[50px] sm:mt-0"
         style={{
           backgroundImage: `url(${
             "https://cdn.wallpapersafari.com/16/35/wPfLC1.jpg"
@@ -384,8 +384,8 @@ const UserDetails = () => {
           key={index}
           className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg text-sm font-medium"
         >
-          <span className="text-xl">{awardData.award?.icon || "🏆"}</span> {/* ✅ Отображение иконки */}
-          <span className="text-gray-700">{awardData.award?.name || "Unknown Award"}</span> {/* ✅ Название награды */}
+          <span className="text-xl">{awardData.award?.icon || "🏆"}</span> 
+          <span className="text-gray-700">{awardData.award?.name || "Unknown Award"}</span> 
         </div>
       ))}
     </div>

@@ -11,10 +11,10 @@ export const awardsApi = createApi({
       query: () => "/",
     }),
     sendAward: builder.mutation({
-      query: ({ awardId, commentId }) => ({
+      query: ({ awardId, commentId, receiverId }) => ({
         url: "/send",
         method: "POST",
-        body: { awardId, commentId },
+        body: { awardId, commentId, receiverId },
       }),
     }),
   }),

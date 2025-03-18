@@ -362,23 +362,31 @@ export const updatePost = async (req, res) => {
 
 export const getSubscribedPosts = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("subscriptions");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-
-    const subscribedCommunities = user.subscriptions.map(sub => sub._id);
+    const userId = req.user.id;
+    const user = await User.findById(userId);
     
-    const posts = await Post.find({ community: { $in: subscribedCommunities } })
-      .populate("author", "username")
-      .populate("community", "name");
-
-
+    const subscribedCommunities = user.subscriptions || [];
+    
+    const memberCommunities = await Community.find({
+      members: userId
+    }).select('_id');
+    
+    const communityIds = [
+      ...subscribedCommunities,
+      ...memberCommunities.map(c => c._id)
+    ];
+    
+    const uniqueCommunityIds = [...new Set(communityIds.map(id => id.toString()))];
+    
+    const posts = await Post.find({
+      community: { $in: uniqueCommunityIds }
+    })
+    .populate('author', 'username avatar')
+    .populate('community', 'name avatar')
+    .sort({ createdAt: -1 });
+    
     res.json(posts);
   } catch (error) {
-    console.error("Error fetching subscribed posts:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error });
   }
 };

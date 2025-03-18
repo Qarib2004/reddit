@@ -4,6 +4,7 @@ import { X, CheckCircle, Coins } from "lucide-react";
 import { useSendAwardMutation } from "../redux/awardsSlice";
 import { useGetUserQuery } from "../redux/apiSlice";
 import { toast } from "react-toastify";
+import { useGetCommentByIdQuery } from "../redux/commentsSlice";
 
 interface Award {
   _id: string;
@@ -18,27 +19,50 @@ interface AwardModalProps {
   onClose: () => void;
   awards: Award[];
   commentId: string;
+  receiverId: string;
 }
 
-const AwardModal: React.FC<AwardModalProps> = ({ isOpen, onClose, awards, commentId }) => {
+const AwardModal: React.FC<AwardModalProps> = ({ isOpen, onClose, awards, commentId, receiverId }) => {
   const [selectedAward, setSelectedAward] = useState<Award | null>(null);
   const [sendAward, { isLoading }] = useSendAwardMutation();
   const { data: user } = useGetUserQuery();
+  const { data: comment } = useGetCommentByIdQuery(commentId); 
+// const receiverId = comment?.userId;
 
-  const handleSendAward = async () => {
-    if (!selectedAward) {
-      toast.error("Please select an award!");
-      return;
-    }
+const handleSendAward = async () => {
 
-    try {
-      await sendAward({ awardId: selectedAward._id, commentId }).unwrap();
-      toast.success(`You sent ${selectedAward.name} successfully!`);
-      onClose();
-    } catch (error: any) {
-      toast.error(error.data?.message || "Failed to send award");
-    }
-  };
+  if (!selectedAward) {
+    console.error("Error: No award selected");
+    toast.error("Please select an award!");
+    return;
+  }
+
+
+  if (!receiverId) {
+    console.error("Error: Receiver ID is missing");
+    toast.error("Receiver not found!");
+    return;
+  }
+
+ 
+  try {
+    console.log("Sending request to sendAward API with data:", {
+      awardId: selectedAward._id,
+      commentId,
+      receiverId,
+    });
+
+    await sendAward({ awardId: selectedAward._id, commentId, receiverId }).unwrap();
+
+    console.log(`Success: Award "${selectedAward.name}" sent to receiver ${receiverId}`);
+    toast.success(`You sent ${selectedAward.name} successfully!`);
+    onClose();
+  } catch (error: any) {
+    console.error("Failed to send award:", error);
+    toast.error(error.data?.message || "Failed to send award");
+  }
+};
+
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 flex items-center justify-center z-50">

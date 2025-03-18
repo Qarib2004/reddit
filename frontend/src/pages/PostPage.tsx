@@ -67,7 +67,7 @@ const PostPage = () => {
     <Helmet>
         <title>Post Page</title>
       </Helmet>
-    <div className="min-h-screen bg-gray-50 py-4">
+    <div className="min-h-screen bg-gray-50 py-4 mt-[50px] sm:mt-0">
       {user?._id === post.author?._id && (
         <Link
           to={`/post/${post._id}/edit`}

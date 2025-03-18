@@ -28,8 +28,8 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   
-  upvotes: string[]; 
-  downvotes: string[]; 
+  upvotes:(string | { _id: string })[];
+  downvotes: (string | { _id: string })[];
   
   comments: Comment[]; 
   reports?: {

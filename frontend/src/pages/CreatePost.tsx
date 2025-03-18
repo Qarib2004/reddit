@@ -102,7 +102,7 @@ const CreatePost = () => {
      <Helmet>
         <title>Create Post</title>
       </Helmet>
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
+    <div className="min-h-screen bg-gray-100 px-4 py-8 mt-[50px] sm:mt-0">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-4 border-b border-gray-200">

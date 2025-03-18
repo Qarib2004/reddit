@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.put("/select-topics", authMiddleware, selectTopics);
 router.post("/save/:postId", authMiddleware, savePost);
-router.post("/send", authMiddleware, sendFriendRequest);
+router.post("/friend-request/:userId", authMiddleware, sendFriendRequest);
 router.post("/:requestId/accept", authMiddleware, acceptFriendRequest);
 router.post("/:requestId/reject", authMiddleware, rejectFriendRequest);
 router.get("/friend-requests", authMiddleware, getFriendRequests)

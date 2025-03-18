@@ -26,7 +26,7 @@ import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css"; 
 import { useNavigate } from "react-router-dom";
 import AwardModal from "./AwardModal"; 
-import { useGetAwardsQuery } from "../redux/awardsSlice"; 
+import { useGetAwardsQuery, useSendAwardMutation } from "../redux/awardsSlice"; 
 
 const CommentItem = ({ comment }: { comment: Comment }) => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -183,6 +183,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
     });
   };
 
+  
   return (
     <div className="group relative">
       <div className="flex gap-3">
@@ -218,10 +219,8 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
             onMouseLeave={handleMouseLeave}
           >
             <img
-              src={
-                comment.author.avatar ||
-                "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"
-              }
+              src="https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"
+              
               alt="avatar"
               className="w-6 h-6 rounded-full"
             />
@@ -272,7 +271,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
               onClose={() => setIsAwardModalOpen(false)}
               awards={awards}
               commentId={comment._id}
-            />
+              receiverId={comment.author._id}            />
           )}
             <button className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <Share2 size={14} />
@@ -282,7 +281,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
               <MoreHorizontal size={14} />
             </button>
 
-            {user && comment.author._id === user._id && (
+            {user && comment.author?. _id === user._id && (
               <button
                 onClick={() => navigate(`/comment/${comment._id}/edit`)}
                 className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
