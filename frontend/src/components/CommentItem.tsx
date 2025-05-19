@@ -121,7 +121,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
       clearTimeout(modalTimeoutRef.current);
     }
     modalTimeoutRef.current = setTimeout(() => {
-      setHoveredUserId(comment.author._id);
+      setHoveredUserId(comment.author?._id);
       setIsUserModalOpen(true);
     }, 300);
   };
@@ -271,7 +271,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
               onClose={() => setIsAwardModalOpen(false)}
               awards={awards}
               commentId={comment._id}
-              receiverId={comment.author._id}            />
+              receiverId={comment.author?._id}            />
           )}
             <button className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md">
               <Share2 size={14} />
@@ -281,7 +281,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
               <MoreHorizontal size={14} />
             </button>
 
-            {user && comment.author?. _id === user._id && (
+            {user && comment.author?._id === user._id && (
               <button
                 onClick={() => navigate(`/comment/${comment._id}/edit`)}
                 className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
@@ -291,7 +291,7 @@ const CommentItem = ({ comment }: { comment: Comment }) => {
               </button>
             )}
 
-            {user && (comment.author._id === user._id || comment.post === user._id) && (
+            {user && comment.author && (comment.author._id === user._id || comment.post === user._id) && (
               <button
                 onClick={handleDeleteComment}
                 className="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-md"
